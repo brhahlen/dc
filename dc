@@ -1,0 +1,29 @@
+#!/bin/bash
+##################################
+######### DESCRIPTION ############
+# This script goes into ~/bin and is used to control my docker-compose (dc) stack
+# There are a few assumptions:
+# - Docker-compose files live in ~/gandalf_docker/<stack_name>/
+# - Environment file is located in ~/gandalf_docker/.env
+# Goals:
+# - You are able to run the script from anywhere
+# - You are able to use tab-completion (provided by dc-completion.bash)
+# Provides the following main functions:
+# - up      - bring up all stacks, an individual stack or a container
+# - down    - brings down all stacks or an individual stack
+# - stop    - stops all stacks, an individual stack, or a container
+# - restart - restart all stacks, a stack, or a container
+# - network - create the macvlan network that is needed
+##################################
+
+# VARIABLES
+export DC_DIR="~/gandalf_docker/"
+export ENV="${DC_DIR}/.env"
+export DC_CMD=`which docker-compose`
+
+# For up function
+# find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -u
+
+# for down function
+# find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -ur
+
