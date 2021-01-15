@@ -54,23 +54,39 @@ function up () {
             echo "cd -"
         done
     else
-        STACK="${DC_DIR}/$1"
-        echo "Bringing up stack(s) $1"
-        echo "cd ${STACK}"
-        echo "${DC_COMMAND} up -d"
-        echo "cd -"
+        for stack in $@;
+        do
+            STACK="${DC_DIR}/$stack"
+            echo "Bringing up stack(s) $stack"
+            echo "cd ${STACK}"
+            echo "${DC_COMMAND} up -d"
+            echo "cd -"
     fi
     }
 
 # DOWN
 function down(){
-    for compose in $(find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -ur);
-    do
-        echo -e "\n$compose:"
-        echo "cd $compose"
-        echo "${DC_COMMAND} down"
-        echo "cd -"
-    done
+    if [ -z "$1" ]; then
+        echo "No argument provided, please use the name of a stack or all"
+    elif [ "$1" == "all" ]; then
+        echo "Bringing down all stacks"
+        for compose in $(find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -ur);
+        do
+            echo -e "\n$compose:"
+            echo "cd $compose"
+            echo "${DC_COMMAND} down"
+            echo "cd -"
+        done
+    else
+        for stack in $@;
+        do
+            STACK="${DC_DIR}/$stack"
+            echo "Bringing down stack(s) $stack"
+            echo "cd ${STACK}"
+            echo "${DC_COMMAND} down"
+            echo "cd -"
+        done
+    fi
     }
 
 # START
@@ -108,22 +124,22 @@ case ${1} in
 
 # ----------- down ------------
     "down")
-        down
+        down ${@:2}
         ;;
 
 # ----------- start ------------
     "start")
-        start
+        start ${@:2}
         ;;
 
 # ----------- stop ------------
     "stop")
-        stop
+        stop ${@:2}
         ;;
 
 # ----------- restart ------------
     "restart")
-        restart
+        restart ${@:2}
         ;;
 
 # ----------- network ------------
