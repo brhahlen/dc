@@ -42,7 +42,7 @@ return 0
 
 # UP
 function up () {
-    if [ -z "$1" ]
+    if [ -z "$1" ]; then
         echo "No argument provided, please use the name of a stack or all"
     elif [ "$1" == "all" ]; then
         echo "Bringing up all stacks"
