@@ -30,7 +30,8 @@ case ${1} in
 function up(){
     UP_LIST=`find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -u`
     echo "Uplist = ${UP_LIST}"
-    for compose in "${UP_LIST[@]}";
+    # for compose in "${UP_LIST[@]}";
+    for compose in $(find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -u);
     do
         echo -e "\n$compose:"
         echo "cd $compose"
