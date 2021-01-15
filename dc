@@ -33,7 +33,7 @@ function up(){
     for compose in "${UP_LIST[@]}"
     do
         echo -e "\n$compose:"
-        echo "cd $DOCKER_DIR/$compose"
+        echo "cd $compose"
         echo "${DC_CMD} up -d"
         echo "cd -"
     done
