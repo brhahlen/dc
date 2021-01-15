@@ -46,10 +46,10 @@ function up () {
         echo "No argument provided, please use the name of a stack or all"
     elif [ "$1" == "all" ]; then
         echo "Bringing up all stacks"
-        for compose in $(find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -u);
+        for stack in $(find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -u);
         do
-            echo -e "\n$compose:"
-            echo "cd $compose"
+            echo -e "\n$stack:"
+            echo "cd $stack"
             echo "${DC_COMMAND} up -d"
             echo "cd -"
         done
@@ -71,10 +71,10 @@ function down(){
         echo "No argument provided, please use the name of a stack or all"
     elif [ "$1" == "all" ]; then
         echo "Bringing down all stacks"
-        for compose in $(find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -ur);
+        for stack in $(find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -ur);
         do
-            echo -e "\n$compose:"
-            echo "cd $compose"
+            echo -e "\n$stack:"
+            echo "cd $stack"
             echo "${DC_COMMAND} down"
             echo "cd -"
         done
