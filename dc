@@ -36,7 +36,7 @@ function up(){
         echo "${DC_CMD} up -d"
         echo "cd -"
     done
-}
+    }
 up
 ;;
 
