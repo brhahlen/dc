@@ -43,7 +43,7 @@ return 0
 
 # UP
 function up(){
-    if (($2 == "all" )); then
+    if (( $2 == "all" )); then
         for compose in $(find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -u);
         do
             echo -e "\n$compose:"
