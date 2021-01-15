@@ -16,63 +16,110 @@
 # - network - create the macvlan network that is needed
 ##################################
 
-# VARIABLES
+###### VARIABLES
 export DC_DIR="/home/download/gandalf_docker/"
 export ENV="${DC_DIR}/.env"
 export DC_CMD=`which docker-compose`
+export DC_COMMAND="${DC_CMD} --env-file ${DC_DIR}/.env"
 
-# Let's start some cases
-case ${1} in
-# ----------- up ------------
-# For up function
-# find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -u
-"up")
+###### FUNCTIONS
+# USAGE
+function show_usage (){
+    printf "Usage: $0 [options [parameters]]\n"
+    printf "\n"
+    printf "Options:\n"
+    printf " up,      Bring up a stack\n"
+    printf " down,    Bring down a stack\n"
+    printf " start,   Start one or more containers\n"
+    printf " stop,    Stop one or more containers\n"
+    printf " restart, Restart one or more containers\n"
+    printf " network, Create the MacVLAN network\n"
+    printf " help, Print help\n"
+
+return 0
+}
+
+# UP
 function up(){
-    UP_LIST=`find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -u`
-    echo "Uplist = ${UP_LIST}"
-    # for compose in "${UP_LIST[@]}";
     for compose in $(find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -u);
     do
         echo -e "\n$compose:"
         echo "cd $compose"
-        echo "${DC_CMD} up -d"
+        echo "${DC_COMMAND} up -d"
         echo "cd -"
     done
     }
-up
-;;
 
-# ----------- down ------------
-# for down function
-# find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -ur
-"down")
+# DOWN
 function down(){
-    echo "down"
+    for compose in $(find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -ur);
+    do
+        echo -e "\n$compose:"
+        echo "cd $compose"
+        echo "${DC_COMMAND} down"
+        echo "cd -"
+    done
     }
-down
-;;
 
-# ----------- stop ------------
-"stop")
+# START
+function start(){
+    echo "Starting the following container(s):"
+    echo "${DC_COMMAND} start "
+    }
+
+# STOP
+# Stop also removes the image
 function stop(){
-    echo "stop"
+    echo "Stopping the following container(s):"
+    echo "${DC_COMMAND} stop "
     }
-stop
-;;
 
-# ----------- restart ------------
-"restart")
+# RESTART
+# Restart is basically a stop and start in sequence
 function restart(){
     echo "restart"
+    stop
+    start
     }
-restart
-;;
 
-# ----------- network ------------
-"network")
+# NETWORK
 function network(){
     echo "network"
     }
-network
-;;
+
+# Let's start some cases
+case ${1} in
+# ----------- up ------------
+    "up")
+        up
+        ;;
+
+# ----------- down ------------
+    "down")
+        down
+        ;;
+
+# ----------- start ------------
+    "start")
+        start
+        ;;
+
+# ----------- stop ------------
+    "stop")
+        stop
+        ;;
+
+# ----------- restart ------------
+    "restart")
+        restart
+        ;;
+
+# ----------- network ------------
+    "network")
+        network
+        ;;
+
+    *)
+        show_usage
+        ;;
 esac
