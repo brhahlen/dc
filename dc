@@ -17,7 +17,7 @@
 ##################################
 
 # VARIABLES
-export DC_DIR="~/gandalf_docker/"
+export DC_DIR="/home/download/gandalf_docker/"
 export ENV="${DC_DIR}/.env"
 export DC_CMD=`which docker-compose`
 
