@@ -21,9 +21,51 @@ export DC_DIR="~/gandalf_docker/"
 export ENV="${DC_DIR}/.env"
 export DC_CMD=`which docker-compose`
 
+# Let's start some cases
+case ${1} in
+# ----------- up ------------
 # For up function
 # find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -u
+"up")
+function up() {
+    UP_LIST=`find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -u`
+    for compose in "${UP_LIST[@]}"
+    do
+        echo -e "\n$compose:"
+        "cd $DOCKER_DIR/$compose"
+        echo "${DC_CMD} up -d"
+        echo "cd -"
+    done
+}
+up
 
+# ----------- down ------------
 # for down function
 # find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -ur
+"down")
+function down() {
+
+}
+down
+
+# ----------- stop ------------
+"stop")
+function stop() {
+
+}
+stop
+
+# ----------- restart ------------
+"restart")
+function restart() {
+
+}
+restart
+
+# ----------- network ------------
+"network")
+function network() {
+
+}
+network
 
