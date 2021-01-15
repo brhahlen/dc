@@ -61,6 +61,7 @@ function up () {
             echo "cd ${STACK}"
             echo "${DC_COMMAND} up -d"
             echo "cd -"
+        done
     fi
     }
 
