@@ -44,7 +44,7 @@ up
 # for down function
 # find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -ur
 "down")
-function down() {
+function down(){
 
 }
 down
@@ -52,7 +52,7 @@ down
 
 # ----------- stop ------------
 "stop")
-function stop() {
+function stop(){
 
 }
 stop
@@ -60,7 +60,7 @@ stop
 
 # ----------- restart ------------
 "restart")
-function restart() {
+function restart(){
 
 }
 restart
@@ -68,7 +68,7 @@ restart
 
 # ----------- network ------------
 "network")
-function network() {
+function network(){
 
 }
 network
