@@ -42,7 +42,9 @@ return 0
 
 # UP
 function up () {
-    if [ "$1" == "all" ]; then
+    if [ -z "$1" ]
+        echo "No argument provided, please use the name of a stack or all"
+    elif [ "$1" == "all" ]; then
         echo "Bringing up all stacks"
         for compose in $(find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -u);
         do
