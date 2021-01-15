@@ -17,7 +17,7 @@
 ##################################
 
 ###### VARIABLES
-export DC_DIR="/home/download/gandalf_docker/"
+export DC_DIR="/home/download/gandalf_docker"
 export ENV="${DC_DIR}/.env"
 export DC_CMD=`which docker-compose`
 export DC_COMMAND="${DC_CMD} --env-file ${DC_DIR}/.env"
@@ -25,16 +25,18 @@ export DC_COMMAND="${DC_CMD} --env-file ${DC_DIR}/.env"
 ###### FUNCTIONS
 # USAGE
 function show_usage (){
+    RED='\033[0;31m'
+    NC='\033[0m' # No Color
     printf "Usage: $0 [options [parameters]]\n"
     printf "\n"
     printf "Options:\n"
-    printf " up,      Bring up a stack\n"
-    printf " down,    Bring down a stack\n"
-    printf " start,   Start one or more containers\n"
-    printf " stop,    Stop one or more containers\n"
-    printf " restart, Restart one or more containers\n"
-    printf " network, Create the MacVLAN network\n"
-    printf " help, Print help\n"
+    printf " ${RED}up${NC}        Bring up a stack\n"
+    printf " ${RED}down${NC}      Bring down a stack\n"
+    printf " ${RED}start${NC}     Start one or more containers\n"
+    printf " ${RED}stop${NC}      Stop one or more containers\n"
+    printf " ${RED}restart${NC}   Restart one or more containers\n"
+    printf " ${RED}network${NC}   Create the MacVLAN network\n"
+    printf " ${RED}help${NC}      Print help\n"
 
 return 0
 }
