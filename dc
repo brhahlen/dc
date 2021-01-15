@@ -43,17 +43,17 @@ return 0
 # UP
 function up () {
     if [ "$1" == "all" ]; then
+        echo "Bringing up all stacks"
         for compose in $(find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -u);
         do
-            echo "Brining up all stacks"
-	    echo -e "\n$compose:"
+            echo -e "\n$compose:"
             echo "cd $compose"
             echo "${DC_COMMAND} up -d"
             echo "cd -"
         done
     else
-        STACK="$1"
-	echo "Bringing up stack $2"
+        STACK="${DC_DIR}/$1"
+        echo "Bringing up stack(s) $1"
         echo "cd ${STACK}"
         echo "${DC_COMMAND} up -d"
         echo "cd -"
