@@ -20,7 +20,7 @@
 export DC_DIR="/home/download/gandalf_docker"
 export ENV="${DC_DIR}/.env"
 export DC_CMD=`which docker-compose`
-export DC_COMMAND="${DC_CMD} --env-file ${DC_DIR}/.env"
+export DC_COMMAND="${DC_CMD} --env-file ${ENV}"
 
 ###### FUNCTIONS
 # USAGE
@@ -43,13 +43,20 @@ return 0
 
 # UP
 function up(){
-    for compose in $(find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -u);
-    do
-        echo -e "\n$compose:"
-        echo "cd $compose"
+    if $2 == "all"; then
+        for compose in $(find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -u);
+        do
+            echo -e "\n$compose:"
+            echo "cd $compose"
+            echo "${DC_COMMAND} up -d"
+            echo "cd -"
+        done
+    else
+        STACK=$2
+        echo "cd ${STACK}"
         echo "${DC_COMMAND} up -d"
         echo "cd -"
-    done
+    fi
     }
 
 # DOWN
