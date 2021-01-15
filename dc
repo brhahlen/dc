@@ -15,7 +15,6 @@
 # - restart - restart all stacks, a stack, or a container
 # - network - create the macvlan network that is needed
 ##################################
-
 ###### VARIABLES
 export DC_DIR="/home/download/gandalf_docker"
 export ENV="${DC_DIR}/.env"
@@ -42,17 +41,19 @@ return 0
 }
 
 # UP
-function up(){
-    if (( $2 == "all" )); then
+function up () {
+    if [ "$1" == "all" ]; then
         for compose in $(find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -u);
         do
-            echo -e "\n$compose:"
+            echo "Brining up all stacks"
+	    echo -e "\n$compose:"
             echo "cd $compose"
             echo "${DC_COMMAND} up -d"
             echo "cd -"
         done
     else
-        STACK=$2
+        STACK="$1"
+	echo "Bringing up stack $2"
         echo "cd ${STACK}"
         echo "${DC_COMMAND} up -d"
         echo "cd -"
@@ -100,7 +101,7 @@ function network(){
 case ${1} in
 # ----------- up ------------
     "up")
-        up
+        up ${@:2}
         ;;
 
 # ----------- down ------------
