@@ -28,9 +28,9 @@ case ${1} in
 # find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -u
 "up")
 function up(){
-    declare -a UP_LIST=`find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -u`
+    UP_LIST=`find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -u`
     echo "Uplist = ${UP_LIST}"
-    for compose in "${UP_LIST[@]}"
+    for compose in "${UP_LIST}"
     do
         echo -e "\n$compose:"
         echo "cd $compose"
