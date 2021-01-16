@@ -120,12 +120,13 @@ function network(){
 # LIST
 function list(){
     echo "Listing Stacks and Services"
-    for stack in $(find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -ur);
+    for stack in $(find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -u);
     do
-        echo -e "\n$stack:"
+        STACK_NAME=$(echo $stack | rev| cut -d / -f 1)
+        echo -e "\n${STACK_NAME} contains services:"
         cd $stack
         ${DC_COMMAND} ps --services
-        
+        cd -
     done
     }
 
