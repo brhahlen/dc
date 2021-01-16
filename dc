@@ -126,7 +126,7 @@ function list(){
         echo "-----------------------------------"
         echo -e "${STACK_NAME} contains services:"
         cd $stack
-        ${DC_COMMAND} ps --services
+        echo "  "${DC_COMMAND} ps --services
         cd - > /dev/null
     done
     }
