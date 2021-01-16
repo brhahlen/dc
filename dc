@@ -35,6 +35,7 @@ function show_usage (){
     printf " ${RED}stop${NC}      Stop one or more containers\n"
     printf " ${RED}restart${NC}   Restart one or more containers\n"
     printf " ${RED}network${NC}   Create the MacVLAN network\n"
+    printf " ${RED}list${NC}      List stacks and services in the stack"
     printf " ${RED}help${NC}      Print help\n"
 
 return 0
@@ -116,7 +117,19 @@ function network(){
     echo "network"
     }
 
-# Let's start some cases
+# NETWORK
+function list(){
+    echo "Listing Stacks and Services"
+    for stack in $(find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -ur);
+    do
+        echo -e "\n$stack:"
+        echo "cd $stack"
+        echo "${DC_COMMAND} ps --services"
+        echo "cd -"
+    done
+    }
+
+###### CASES
 case ${1} in
 # ----------- up ------------
     "up")
@@ -147,6 +160,12 @@ case ${1} in
     "network")
         network
         ;;
+
+# ----------- list ------------
+    "list")
+        list
+        ;;
+
 
     *)
         show_usage
