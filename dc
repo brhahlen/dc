@@ -21,11 +21,13 @@ export ENV="${DC_DIR}/.env"
 export DC_CMD=`which docker-compose`
 export DC_COMMAND="${DC_CMD} --env-file ${ENV}"
 
+# COLORS
+export RED='\033[0;31m'
+export NC='\033[0m' # No Color
+
 ###### FUNCTIONS
 # USAGE
 function show_usage (){
-    RED='\033[0;31m'
-    NC='\033[0m' # No Color
     printf "Usage: $0 [options [parameters]]\n"
     printf "\n"
     printf "Options:\n"
@@ -124,7 +126,7 @@ function list(){
     do
         STACK_NAME=$(echo $stack | rev | cut -d / -f 1 | rev)
         echo "-----------------------------------"
-        echo "${STACK_NAME} contains services:"
+        echo "${RED}${STACK_NAME}${NC} contains services:"
         cd $stack
 	echo -e "\t $(${DC_COMMAND} ps --services)"
         cd - > /dev/null
