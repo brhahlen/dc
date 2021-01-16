@@ -117,15 +117,15 @@ function network(){
     echo "network"
     }
 
-# NETWORK
+# LIST
 function list(){
     echo "Listing Stacks and Services"
     for stack in $(find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -ur);
     do
         echo -e "\n$stack:"
-        echo "cd $stack"
-        echo "${DC_COMMAND} ps --services"
-        echo "cd -"
+        cd $stack
+        ${DC_COMMAND} ps --services
+        
     done
     }
 
