@@ -124,9 +124,9 @@ function list(){
     do
         STACK_NAME=$(echo $stack | rev | cut -d / -f 1 | rev)
         echo "-----------------------------------"
-        echo -e "${STACK_NAME} contains services:"
+        echo "${STACK_NAME} contains services:"
         cd $stack
-        echo "  "${DC_COMMAND} ps --services
+	echo -e "\t $(${DC_COMMAND} ps --services)"
         cd - > /dev/null
     done
     }
