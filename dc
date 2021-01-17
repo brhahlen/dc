@@ -12,7 +12,7 @@
 ##################################
 ###### VARIABLES
 if [[ -z "${DC_DIR}" ]]; then
-    export DC_DIR="/home/${USER}/docker"
+    export DC_DIR="${HOME}/docker"
 else
     export DC_DIR="${DC_DIR}"
 fi
