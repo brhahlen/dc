@@ -26,7 +26,7 @@ Provides the following main functions:
 - network - create the macvlan network that is needed
 - list    - lists all stacks and services in the stack
 
-# Thoughts
+# Thoughts/To Do's
 Can probably put the services of stacks into a variable array, and then loop over that to find to which stack the contatiner belongs. However, the question is, are we going to do that periodically and put that in a global variable? Or is that something we need to do on-demand (which will cause some delays in running the script)?
 
 There's probably more interesting thoughts to take into account, but let's see how far we get with this.
