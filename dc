@@ -11,7 +11,11 @@
 # - list    - lists all stacks and services in the stack
 ##################################
 ###### VARIABLES
-export DC_DIR="/home/download/gandalf_docker"
+if [[ -z "${DC_DIR}" ]]; then
+    export DC_DIR="/home/${USER}/docker"
+else
+    export DC_DIR="${DC_DIR}"
+fi
 export ENV="${DC_DIR}/.env"
 export DC_CMD=`which docker-compose`
 export DC_COMMAND="${DC_CMD} --env-file ${ENV}"
