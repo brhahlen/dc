@@ -53,7 +53,7 @@ function up () {
             echo -e "\n$stack:"
             cd $stack
             ${DC_COMMAND} up -d
-            cd -
+            cd - > /dev/null
         done
     else
         for stack in $@;
@@ -62,7 +62,7 @@ function up () {
             echo "Bringing up stack(s) $stack"
             cd ${STACK}
             ${DC_COMMAND} up -d
-            cd -
+            cd - > /dev/null
         done
     fi
     }
@@ -78,7 +78,7 @@ function down(){
             echo -e "\n$stack:"
             cd $stack
             ${DC_COMMAND} down
-            cd -
+            cd - > /dev/null
         done
     else
         for stack in $@;
@@ -87,7 +87,7 @@ function down(){
             echo "Bringing down stack(s) $stack"
             cd ${STACK}
             ${DC_COMMAND} down
-            cd -
+            cd - > /dev/null
         done
     fi
     }
