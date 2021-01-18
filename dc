@@ -51,18 +51,18 @@ function up () {
         for stack in $(find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -u);
         do
             echo -e "\n$stack:"
-            echo "cd $stack"
-            echo "${DC_COMMAND} up -d"
-            echo "cd -"
+            cd $stack
+            ${DC_COMMAND} up -d
+            cd -
         done
     else
         for stack in $@;
         do
             STACK="${DC_DIR}/$stack"
             echo "Bringing up stack(s) $stack"
-            echo "cd ${STACK}"
-            echo "${DC_COMMAND} up -d"
-            echo "cd -"
+            cd ${STACK}
+            ${DC_COMMAND} up -d
+            cd -
         done
     fi
     }
@@ -76,18 +76,18 @@ function down(){
         for stack in $(find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -ur);
         do
             echo -e "\n$stack:"
-            echo "cd $stack"
-            echo "${DC_COMMAND} down"
-            echo "cd -"
+            cd $stack
+            ${DC_COMMAND} down
+            cd -
         done
     else
         for stack in $@;
         do
             STACK="${DC_DIR}/$stack"
             echo "Bringing down stack(s) $stack"
-            echo "cd ${STACK}"
-            echo "${DC_COMMAND} down"
-            echo "cd -"
+            cd ${STACK}
+            ${DC_COMMAND} down
+            cd -
         done
     fi
     }
