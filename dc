@@ -37,7 +37,7 @@ fi
 # TMP_DIR STACK SERVICES
 function tmp_dir_stack_files(){
     if [ ! -d "${TMP_DIR}" ]; then
-        echo "${TMP_DIR} not found. Creating..."
+        # echo "${TMP_DIR} not found. Creating..."
         mkdir -p ${TMP_DIR}
     fi
 }
@@ -49,14 +49,14 @@ function tmp_stack_files_age(){
     do
         STACK_NAME=$(echo $stack | rev | cut -d / -f 1 | rev)
         if [ -f ${TMP_DIR}/${STACK_NAME} ]; then
-            echo "File exists, checking age"
+            # echo "File exists, checking age"
             if [ "$(find ${TMP_DIR}/${STACK_NAME} -mmin +30)" ]; then
                 echo "File is too old, refreshing"
                 cd $stack
                 ${DC_COMMAND} ps --services -a > ${TMP_DIR}/${STACK_NAME}
             fi
         else
-            echo "File does not exist, creating"
+            # echo "File does not exist, creating"
             cd $stack
             ${DC_COMMAND} ps --services -a > ${TMP_DIR}/${STACK_NAME}
         fi
@@ -139,8 +139,8 @@ function start(){
     do
         if grep -r -q -w ${SERVICE} ${TMP_DIR}; then
             SERVICE_STACK=$(grep -r ${SERVICE} ${TMP_DIR} | rev | cut -d / -f 1 | rev | cut -d : -f 1 )
-            echo "${SERVICE_STACK}"
-            echo "Found ${SERVICE} in ${SERVICE_STACK}"
+            # echo "${SERVICE_STACK}"
+            # echo "Found ${SERVICE} in ${SERVICE_STACK}"
             echo "cd ${DC_DIR}/${SERVICE_STACK}"
             echo "${DC_COMMAND} start ${SERVICE}"
             echo "cd -"
@@ -159,8 +159,8 @@ function stop(){
     do
         if grep -r -q -w ${SERVICE} ${TMP_DIR}; then
             SERVICE_STACK=$(grep -r ${SERVICE} ${TMP_DIR} | rev | cut -d / -f 1 | rev | cut -d : -f 1 )
-            echo "${SERVICE_STACK}"
-            echo "Found ${SERVICE} in ${SERVICE_STACK}"
+            # echo "${SERVICE_STACK}"
+            # echo "Found ${SERVICE} in ${SERVICE_STACK}"
             echo "cd ${DC_DIR}/${SERVICE_STACK}"
             echo "${DC_COMMAND} stop ${SERVICE}"
             echo "${DC_COMMAND} rm -f ${SERVICE}"
