@@ -146,7 +146,8 @@ function start(){
             echo "cd -"
         else
             echo "Service ${SERVICE} was not found in any of the stacks. Does it show up when you run 'dc list'?"
-        done
+        fi
+    done
     }
 
 # STOP
