@@ -127,7 +127,7 @@ function list(){
         echo "-----------------------------------"
         printf "Stack ${RED}${STACK_NAME}${NC} contains services:\n"
         cd $stack
-        ${DC_COMMAND} ps --services
+        ${DC_COMMAND} ps --services -a
         cd - > /dev/null
     done
     }
