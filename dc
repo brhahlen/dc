@@ -174,9 +174,9 @@ function stop(){
 # RESTART
 # Restart is basically a stop and start in sequence
 function restart(){
-    echo "restart"
-    stop
-    start
+    echo "Restarting the following services: $@"
+    stop $@
+    start $@
     }
 
 # NETWORK
