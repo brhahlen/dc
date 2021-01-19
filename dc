@@ -137,7 +137,7 @@ function start(){
     tmp_stack_files_age
     for SERVICE in $@;
     do
-        if grep -q ${SERVICE} ${TMP_DIR}; then
+        if grep -q -w ${SERVICE} ${TMP_DIR/*}; then
             SERVICE_STACK=$(grep ${SERVICE} ${TMP_DIR}/* | rev | cut -d / -f 1 | rev | cut -d : -f 1 )
             echo "${SERVICE_STACK}"
             echo "Found ${SERVICE} in ${SERVICE_STACK}"
