@@ -142,8 +142,8 @@ function start(){
             # echo "${SERVICE_STACK}"
             # echo "Found ${SERVICE} in ${SERVICE_STACK}"
             cd ${DC_DIR}/${SERVICE_STACK}
-            ${DC_COMMAND} start ${SERVICE}
-            cd -
+            ${DC_COMMAND} up -d ${SERVICE}
+            cd - > /dev/null
         else
             echo "ERROR: Service ${SERVICE} was not found in any of the stacks. Does it show up when you run 'dc list'?"
         fi
@@ -164,7 +164,7 @@ function stop(){
             cd ${DC_DIR}/${SERVICE_STACK}
             ${DC_COMMAND} stop ${SERVICE}
             ${DC_COMMAND} rm -f ${SERVICE}
-            cd -
+            cd - > /dev/null
         else
             echo "ERROR: Service ${SERVICE} was not found in any of the stacks. Does it show up when you run 'dc list'?"
         fi
