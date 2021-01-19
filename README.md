@@ -19,10 +19,11 @@ There are a few assumptions:
 
 # Usage
 Provides the following main functions:
-- up      - bring up all stacks, an individual stack or a container
-- down    - brings down all stacks or an individual stack
-- stop    - stops all stacks, an individual stack, or a container
-- restart - restart all stacks, a stack, or a container
+- up      - bring up all stacks, an individual stack, or multiple stacks
+- down    - brings down all stacks, an individual stack, or multiple stacks
+- start   - start one or more services
+- stop    - stop one or more services
+- restart - restart one or more services
 - network - create the macvlan network that is needed
 - list    - lists all stacks and services in the stack
 
