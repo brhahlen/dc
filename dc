@@ -34,12 +34,33 @@ then
 fi
 
 ###### HELPER FUNCTIONS
-# TMP STACK SERVICES
-function tmp_stack_files(){
+# TMP_DIR STACK SERVICES
+function tmp_dir_stack_files(){
     if [ ! -d "${TMP_DIR}" ]; then
         echo "${TMP_DIR} not found. Creating..."
         mkdir -p ${TMP_DIR}
     fi
+}
+
+# TMP_STACK FILES AGE
+function tmp_stack_files_age(){
+    tmp_dir_stack_files
+    for stack in $(find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -u);
+    do
+        STACK_NAME=$(echo $stack | rev | cut -d / -f 1 | rev)
+        if [ -f ${TMP_DIR}/${STACK_NAME} ]; then
+            echo "File exists, checking age"
+            if [ "$(find ${TMP_DIR}/${stack} -mmin +120)" ]; then
+                echo "File is too old, refreshing"
+                cd ${DC_DIR}/$stack
+                ${DC_COMMAND} ps --services -a > ${TMP_DIR}/${STACK_NAME}
+            fi
+        else
+            echo "File does no exist, creating"
+            cd ${DC_DIR}/$stack
+            ${DC_COMMAND} ps --services -a > ${TMP_DIR}/${STACK_NAME}
+        fi
+    done
 }
 
 ###### MAIN FUNCTIONS
@@ -138,7 +159,7 @@ function network(){
 
 # LIST
 function list(){
-    tmp_stack_files
+    tmp_dir_stack_files
     echo "Listing Stacks and Services"
     for stack in $(find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -u);
     do
@@ -188,6 +209,10 @@ case ${1} in
         list
         ;;
 
+# ----------- refresh stack files tmp
+    "refresh")
+        tmp_stack_files_age
+        ;;
 
     *)
         show_usage
