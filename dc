@@ -138,7 +138,7 @@ function start(){
     for SERVICE in $@;
     do
         if grep -r -q -w ${SERVICE} ${TMP_DIR}; then
-            SERVICE_STACK=$(grep ${SERVICE} "${TMP_DIR}/*" | rev | cut -d / -f 1 | rev | cut -d : -f 1 )
+            SERVICE_STACK=$(grep -r ${SERVICE} ${TMP_DIR} | rev | cut -d / -f 1 | rev | cut -d : -f 1 )
             echo "${SERVICE_STACK}"
             echo "Found ${SERVICE} in ${SERVICE_STACK}"
             echo "cd ${DC_DIR}/${SERVICE_STACK}"
