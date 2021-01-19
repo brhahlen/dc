@@ -138,7 +138,7 @@ function start(){
     for SERVICE in $@;
     do
         SERVICE_STACK=$(grep ${SERVICE} ${TMP_DIR}/* | rev | cut -d / -f 1 | rev)
-        echo "SERVICE_STACK"
+        echo "${SERVICE_STACK}"
         echo "Found ${SERVICE} in ${SERVICE_STACK}"
         echo "cd ${DC_DIR}/${SERVICE_STACK}"
         echo "${DC_COMMAND} start ${SERVICE}"
