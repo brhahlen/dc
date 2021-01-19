@@ -212,7 +212,24 @@ function network(){
     echo "Add the route needed"
     echo "ip route add 192.168.2.0/24 dev lan_net_shim"
     echo "Adding permanent settings"
-    
+    echo "[Unit]
+Description=Docker MacVLAN Stuff
+After=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash /home/ben2404/gandalf_scripts/docker_macvlan.sh
+
+[Install]
+WantedBy=multi-user.target" > /etc/systemd/system/docker-macvlan.service
+    echo "ip link add lan_net_shim link enp0s31f6 type macvlan mode bridge
+ip addr add 192.168.2.251/32 dev lan_net_shim
+ip link set lan_net_shim up
+ip route add 192.168.2.0/24 dev lan_net_shim" > ~/bin/docker-macvlan.sh
+    echo "chmod u+x ~/bin/docker-macvlan.sh"
+    echo "Reload systemd unit files"
+    echo "systemctl daemon-reload"
+    echo "systemctl enable docker-macvlan.service"
     }
 
 # LIST
