@@ -19,12 +19,22 @@ fi
 export ENV="${DC_DIR}/.env"
 export DC_CMD=`which docker-compose`
 export DC_COMMAND="${DC_CMD} --env-file ${ENV}"
+export TMP_DIR="/tmp/dc_stack_services"
 
 # COLORS
 export RED='\033[0;31m'
 export NC='\033[0m' # No Color
 
-###### FUNCTIONS
+###### HELPER FUNCTIONS
+# TMP STACK SERVICES
+function tmp_stack_files(){
+    if [ ! -d "${TMP_DIR}" ]; then
+        echo "${TMP_DIR} not found. Creating..."
+        mkdir -p ${TMP_DIR}
+    fi
+}
+
+###### MAIN FUNCTIONS
 # USAGE
 function show_usage (){
     printf "Usage: $0 [options [parameters]]\n"
@@ -120,6 +130,7 @@ function network(){
 
 # LIST
 function list(){
+    tmp_stack_files
     echo "Listing Stacks and Services"
     for stack in $(find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -u);
     do
@@ -127,7 +138,7 @@ function list(){
         echo "-----------------------------------"
         printf "Stack ${RED}${STACK_NAME}${NC} contains services:\n"
         cd $stack
-        ${DC_COMMAND} ps --services -a
+        ${DC_COMMAND} ps --services -a | tee 
         cd - > /dev/null
     done
     }
