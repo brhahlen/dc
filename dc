@@ -56,7 +56,7 @@ function tmp_stack_files_age(){
                 ${DC_COMMAND} ps --services -a > ${TMP_DIR}/${STACK_NAME}
             fi
         else
-            echo "File does no exist, creating"
+            echo "File does not exist, creating"
             cd $stack
             ${DC_COMMAND} ps --services -a > ${TMP_DIR}/${STACK_NAME}
         fi
@@ -133,14 +133,14 @@ function down(){
 
 # START
 function start(){
-    echo "Starting the following container(s):"
+    echo "Starting the following container(s): $@"
     echo "${DC_COMMAND} start "
     }
 
 # STOP
 # Stop also removes the image
 function stop(){
-    echo "Stopping the following container(s):"
+    echo "Stopping the following container(s): $@"
     echo "${DC_COMMAND} stop "
     }
 
