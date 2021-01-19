@@ -50,7 +50,7 @@ function tmp_stack_files_age(){
         STACK_NAME=$(echo $stack | rev | cut -d / -f 1 | rev)
         if [ -f ${TMP_DIR}/${STACK_NAME} ]; then
             echo "File exists, checking age"
-            if [ "$(find ${TMP_DIR}/${STACK_NAME} -mmin +120)" ]; then
+            if [ "$(find ${TMP_DIR}/${STACK_NAME} -mmin +30)" ]; then
                 echo "File is too old, refreshing"
                 cd ${DC_DIR}/$stack
                 ${DC_COMMAND} ps --services -a > ${TMP_DIR}/${STACK_NAME}
