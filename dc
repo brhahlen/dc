@@ -236,11 +236,6 @@ case ${1} in
         list
         ;;
 
-# ----------- refresh stack files tmp
-    "refresh")
-        tmp_stack_files_age
-        ;;
-
     *)
         show_usage
         ;;
