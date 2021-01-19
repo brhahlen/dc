@@ -137,13 +137,16 @@ function start(){
     tmp_stack_files_age
     for SERVICE in $@;
     do
-        SERVICE_STACK=$(grep ${SERVICE} ${TMP_DIR}/* | rev | cut -d / -f 1 | rev | cut -d : -f 1 )
-        echo "${SERVICE_STACK}"
-        echo "Found ${SERVICE} in ${SERVICE_STACK}"
-        echo "cd ${DC_DIR}/${SERVICE_STACK}"
-        echo "${DC_COMMAND} start ${SERVICE}"
-        echo "cd -"
-    done
+        if grep -q ${SERVICE} ${TMP_DIR}; then
+            SERVICE_STACK=$(grep ${SERVICE} ${TMP_DIR}/* | rev | cut -d / -f 1 | rev | cut -d : -f 1 )
+            echo "${SERVICE_STACK}"
+            echo "Found ${SERVICE} in ${SERVICE_STACK}"
+            echo "cd ${DC_DIR}/${SERVICE_STACK}"
+            echo "${DC_COMMAND} start ${SERVICE}"
+            echo "cd -"
+        else
+            echo "Service ${SERVICE} was not found in any of the stacks. Does it show up when you run 'dc list'?"
+        done
     }
 
 # STOP
