@@ -12,7 +12,7 @@ The main `dc` script goes into `~/bin` and is used to control docker-compose (dc
 
 The `dc-completion` script goes into `/etc/bash.completion.d/` and provides `<TAB>` autocompletion (or it should)
 
-## Assumtions
+## Assumptions
 There are a few assumptions:
 - An environment variable DC_DIR has been set, that contains docker-compose files. If the file does not exist, it assumes that the docker-compose files live in (subdirectories of) ~/docker/
 - There is one environment (`.env`) file, which is located in `${DC_DIR}`/.env
