@@ -141,11 +141,11 @@ function start(){
             SERVICE_STACK=$(grep -r ${SERVICE} ${TMP_DIR} | rev | cut -d / -f 1 | rev | cut -d : -f 1 )
             # echo "${SERVICE_STACK}"
             # echo "Found ${SERVICE} in ${SERVICE_STACK}"
-            echo "cd ${DC_DIR}/${SERVICE_STACK}"
-            echo "${DC_COMMAND} start ${SERVICE}"
-            echo "cd -"
+            cd ${DC_DIR}/${SERVICE_STACK}
+            ${DC_COMMAND} start ${SERVICE}
+            cd -
         else
-            echo "Service ${SERVICE} was not found in any of the stacks. Does it show up when you run 'dc list'?"
+            echo "ERROR: Service ${SERVICE} was not found in any of the stacks. Does it show up when you run 'dc list'?"
         fi
     done
     }
@@ -161,12 +161,12 @@ function stop(){
             SERVICE_STACK=$(grep -r ${SERVICE} ${TMP_DIR} | rev | cut -d / -f 1 | rev | cut -d : -f 1 )
             # echo "${SERVICE_STACK}"
             # echo "Found ${SERVICE} in ${SERVICE_STACK}"
-            echo "cd ${DC_DIR}/${SERVICE_STACK}"
-            echo "${DC_COMMAND} stop ${SERVICE}"
-            echo "${DC_COMMAND} rm -f ${SERVICE}"
-            echo "cd -"
+            cd ${DC_DIR}/${SERVICE_STACK}
+            ${DC_COMMAND} stop ${SERVICE}
+            ${DC_COMMAND} rm -f ${SERVICE}
+            cd -
         else
-            echo "Service ${SERVICE} was not found in any of the stacks. Does it show up when you run 'dc list'?"
+            echo "ERROR: Service ${SERVICE} was not found in any of the stacks. Does it show up when you run 'dc list'?"
         fi
     done
     }
@@ -174,7 +174,7 @@ function stop(){
 # RESTART
 # Restart is basically a stop and start in sequence
 function restart(){
-    echo "Restarting the following services: $@"
+    echo "Restarting the following service(s): $@"
     stop $@
     start $@
     }
