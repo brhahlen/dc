@@ -142,6 +142,7 @@ function start(){
         echo "cd ${DC_DIR}/${SERVICE_STACK}"
         echo "${DC_COMMAND} start ${SERVICE}"
         echo "cd -"
+    done
     }
 
 # STOP
