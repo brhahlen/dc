@@ -25,6 +25,14 @@ export TMP_DIR="/tmp/dc_stack_services"
 export RED='\033[0;31m'
 export NC='\033[0m' # No Color
 
+###### PREREQUISITE CHECKS
+# tee
+if ! command -v tee &> /dev/null
+then
+    echo "tee could not be found, please install it to use dc"
+    exit 1
+fi
+
 ###### HELPER FUNCTIONS
 # TMP STACK SERVICES
 function tmp_stack_files(){
@@ -138,7 +146,7 @@ function list(){
         echo "-----------------------------------"
         printf "Stack ${RED}${STACK_NAME}${NC} contains services:\n"
         cd $stack
-        ${DC_COMMAND} ps --services -a | tee 
+        ${DC_COMMAND} ps --services -a | tee ${TMP_DIR}/${STACK_NAME}
         cd - > /dev/null
     done
     }
