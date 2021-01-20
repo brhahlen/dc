@@ -264,18 +264,17 @@ function pull(){
 
 # NETWORK
 function network(){
-    echo "This function will create the macvlan network, create an interface, routes so the services can access each other, and makes the interface and routes permanent."
+    # Check for root access
+    if [[ $EUID -ne 0 ]]; then
+        echo "This function must be run using root privileges (using sudo)"
+        exit 1
+    fi    echo "This function will create the macvlan network, create an interface, routes so the services can access each other, and makes the interface and routes permanent."
     echo "You need to be root, or use sudo, to execute this function"
     # Ensure that they want to continue
     read -p "Do you wish to continue? " -n 1 -r
     echo    # (optional) move to a new line
     if [[ ! $REPLY =~ ^[Yy]$ ]]
     then
-        exit 1
-    fi
-    # Check for root access
-    if [[ $EUID -ne 0 ]]; then
-        echo "This function must be run using root privileges (using sudo)" 
         exit 1
     fi
     echo "Creating the MACVLAN network"
