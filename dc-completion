@@ -28,6 +28,10 @@ _dc_completions()
                 DC_COMMAND="${DC_CMD} --env-file ${ENV}"
                 TMP_DIR="/tmp/dc_stack_services"
                 STACK_NAME=$(echo ${STACK} | rev | cut -d / -f 1 | rev)
+                if [ ! -d "${TMP_DIR}" ]; then
+                    # echo "${TMP_DIR} not found. Creating..."
+                    mkdir -p ${TMP_DIR}
+                fi
                 if [ -f ${TMP_DIR}/${STACK_NAME} ]; then
                     # echo "File exists, checking age"
                     if [ "$(find ${TMP_DIR}/${STACK_NAME} -mmin +30)" ]; then
