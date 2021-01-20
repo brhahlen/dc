@@ -8,14 +8,21 @@ It is was created for my own purposes, it is by no means perfect, and there are 
 - You are able to use tab-completion (provided by `dc-completion`)
 
 # Installation
-The main `dc` script goes into `~/bin` and is used to control docker-compose (dc) stack(s)
+Installing `dc` can be done by executing `sudo bash ./dc install` from the command line.
 
-The `dc-completion` script goes into `/etc/bash.completion.d/` and provides `<TAB>` autocompletion (or it should)
+The following actions will be performed:
+- `dc` is copied to `~/bin` and made executable (directory will be created if it doesn't exist)
+- `dc-completion` is copied to `/etc/bash.completion.d/` (directory will be created if it does not exist)
+- `/bin` is added to your path in `~/.bashrc`
+- You will be asked where your docker-compose stacks are defined, this will be set into a variable, `DC_DIR` and added to your `~/.bashrc`
+
+Updating can be done by running `sudo bash ./dc install` again, it will not perform the additions to `~/.bashrc`
 
 ## Prerequisites
 Prerequisites for `dc` are:
  - `tee` is installed
  - `docker-compose` version is 1.25.0 or higher
+ - `bash-completion` is installed
 
 ## Assumptions
 There are a few assumptions:
@@ -24,13 +31,14 @@ There are a few assumptions:
 
 # Usage
 Provides the following main functions:
+- install - installs dc for the current user - *ONLY* possible using `sudo`
 - up      - bring up all stacks, an individual stack, or multiple stacks
 - down    - brings down all stacks, an individual stack, or multiple stacks
 - start   - start one or more services
 - stop    - stop one or more services
 - restart - restart one or more services
 - pull    - pulls images
-- network - create the macvlan network that is needed
+- network - create the macvlan network that is needed - *ONLY* possible using `sudo`
 - list    - lists all stacks and services in the stack
 
 # Thoughts/To Do's
