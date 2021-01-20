@@ -2,4 +2,4 @@
 # Copyright (C) 2021 Ben Hählen
 # This is the completion file for `dc`
 
-complete -W `` dc
+# complete -W `` dc
