@@ -46,19 +46,19 @@ function tmp_dir_stack_files(){
 # TMP_STACK FILES AGE
 function tmp_stack_files_age(){
     tmp_dir_stack_files
-    for stack in $(find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -u);
+    for STACK in $(find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -u);
     do
-        STACK_NAME=$(echo $stack | rev | cut -d / -f 1 | rev)
+        STACK_NAME=$(echo ${STACK} | rev | cut -d / -f 1 | rev)
         if [ -f ${TMP_DIR}/${STACK_NAME} ]; then
             # echo "File exists, checking age"
             if [ "$(find ${TMP_DIR}/${STACK_NAME} -mmin +30)" ]; then
                 # echo "File is too old, refreshing"
-                cd $stack
+                cd ${STACK}
                 ${DC_COMMAND} ps --services -a > ${TMP_DIR}/${STACK_NAME}
             fi
         else
             # echo "File does not exist, creating"
-            cd $stack
+            cd ${STACK}
             ${DC_COMMAND} ps --services -a > ${TMP_DIR}/${STACK_NAME}
         fi
     done
@@ -88,21 +88,25 @@ function up () {
         echo "No argument provided, please use the name of a stack or all"
     elif [ "$1" == "all" ]; then
         echo "Bringing up all stacks"
-        for stack in $(find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -u);
+        for STACK in $(find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -u);
         do
-            echo -e "\n$stack:"
-            cd $stack
+            echo -e "\n${STACK}:"
+            cd $STACK
             ${DC_COMMAND} up -d
             cd - > /dev/null
         done
     else
-        for stack in $@;
+        for STACK in $@;
         do
-            STACK="${DC_DIR}/$stack"
-            echo "Bringing up stack(s) $stack"
-            cd ${STACK}
-            ${DC_COMMAND} up -d
-            cd - > /dev/null
+            STACK_DIR="${DC_DIR}/${STACK}"
+            if [ -d "${STACK_DIR}" ]; then
+                echo "Bringing up stack(s) ${STACK}"
+                cd ${STACK_DIR}
+                ${DC_COMMAND} up -d
+                cd - > /dev/null
+            else
+                echo "Stack ${STACK} does not exist. Did you type the name correctly?"
+            fi
         done
     fi
     }
@@ -113,21 +117,25 @@ function down(){
         echo "No argument provided, please use the name of a stack or all"
     elif [ "$1" == "all" ]; then
         echo "Bringing down all stacks"
-        for stack in $(find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -ur);
+        for STACK in $(find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -ur);
         do
-            echo -e "\n$stack:"
-            cd $stack
+            echo -e "\n${STACK}:"
+            cd ${STACK}
             ${DC_COMMAND} down
             cd - > /dev/null
         done
     else
-        for stack in $@;
+        for STACK in $@;
         do
-            STACK="${DC_DIR}/$stack"
-            echo "Bringing down stack(s) $stack"
-            cd ${STACK}
-            ${DC_COMMAND} down
-            cd - > /dev/null
+            STACK_DIR="${DC_DIR}/${STACK}"
+            if [ -d "${STACK_DIR}" ]; then
+                echo "Bringing down stack(s) ${STACK}"
+                cd ${STACK_DIR}
+                ${DC_COMMAND} down
+                cd - > /dev/null
+            else
+                echo "Stack ${STACK} does not exist. Did you type the name correctly?"
+            fi
         done
     fi
     }
@@ -236,12 +244,12 @@ ip route add 192.168.2.0/24 dev lan_net_shim" #> ~/bin/docker-macvlan.sh
 function list(){
     tmp_dir_stack_files
     echo "Listing Stacks and Services"
-    for stack in $(find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -u);
+    for STACK in $(find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -u);
     do
-        STACK_NAME=$(echo $stack | rev | cut -d / -f 1 | rev)
+        STACK_NAME=$(echo ${STACK} | rev | cut -d / -f 1 | rev)
         echo "-----------------------------------"
         printf "Stack ${RED}${STACK_NAME}${NC} contains services:\n"
-        cd $stack
+        cd ${STACK}
         ${DC_COMMAND} ps --services -a | tee ${TMP_DIR}/${STACK_NAME}
         cd - > /dev/null
     done
