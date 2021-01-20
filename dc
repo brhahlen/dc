@@ -97,11 +97,6 @@ return 0
 # INSTALL
 function install(){
     unset DC_DIR
-    # Check for root access
-    if [[ $EUID -ne 0 ]]; then
-        echo "This function must be run using root privileges (using sudo)" 
-        exit 1
-    fi
     echo "Copying dc binary to ~/bin and making it executable"
     if [ ! -d ~/bin ]; then
         echo "~/bin does not exist. Creating..."
@@ -110,13 +105,19 @@ function install(){
     cp -f dc ~/bin
     chmod u+x ~/bin/dc
     # Do stuff here
-    echo "Copying dc-completion binary to /etc/bash-completion.d/ and making it executable"
-    if [ ! -d /etc/bash-completion.d ]; then
-        echo "/etc/bash-completion.d does not exist. Creating..."
-        mkdir -p /etc/bash-completion.d
+    echo "Copying dc-completion binary to /etc/bash_completion.d/ and making it executable"
+    # Check for root access
+    if [[ $EUID -ne 0 ]]; then
+        echo "This function must be run using root privileges (using sudo)" 
+        exit 1
+    else
+        if [ ! -d /etc/bash_completion.d ]; then
+            echo "/etc/bash_completion.d does not exist. Creating..."
+            mkdir -p /etc/bash_completion.d
+        fi
+        cp -f dc-completion /etc/bash_completion.d
+        chmod +x /etc/bash_completion.d
     fi
-    cp -f dc-completion /etc/bash-completion.d
-    chmod +x /etc/bash-completion.d
     if ! [[ "$PATH" =~ "$HOME/bin:" ]]
     then
         echo "Adding dc to PATH"
