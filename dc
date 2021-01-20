@@ -35,12 +35,16 @@ then
 fi
 # docker-compose version
 # Copied from https://unix.stackexchange.com/a/285928
-DOCKER_COMPOSE_VERSION="$(docker-compose --version | cut -d " " -f 3)"
+DOCKER_COMPOSE_VERSION="$(docker-compose --version | cut -d " " -f 3 | cut -d "," -f 1)"
+#echo "${DOCKER_COMPOSE_VERSION}"
 MIN_VERSION="1.25.0"
- if [ "$(printf '%s\n' "${MIN_VERISON}" "${DOCKER_COMPOSE_VERSION}" | sort -V | head -n1)" = "${MIN_VERSION}" ]; then 
-        echo "Greater than or equal to ${MIN_VERSION}"
- else
-        echo "Less than ${MIN_VERSION}"
+ if [ ! "$(printf '%s\n' "${MIN_VERSION}" "${DOCKER_COMPOSE_VERSION}" | sort -V | head -n1)" = "${MIN_VERSION}" ]; then 
+        #echo "Greater than or equal to ${MIN_VERSION}"
+	#exit 1
+ #else
+        echo "You are running docker-compose version ${DOCKER_COMPOSE_VERSION}. This script requires version ${MIN_VERSION} or higher, due to the use of the --env-file option."
+	echo "Please install a newer version of docker-compose. You can find this at https://github.com/docker/compose/releases"
+	exit 1
  fi
 
 ###### HELPER FUNCTIONS
