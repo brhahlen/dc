@@ -38,11 +38,13 @@ _dc_completions()
                         # echo "File is too old, refreshing"
                         cd ${STACK}
                         ${DC_COMMAND} ps --services -a > ${TMP_DIR}/${STACK_NAME}
+                        cd - > /dev/null
                     fi
                 else
                     # echo "File does not exist, creating"
                     cd ${STACK}
                     ${DC_COMMAND} ps --services -a > ${TMP_DIR}/${STACK_NAME}
+                    cd - > /dev/null
                 fi
             done
             # On to the completion
