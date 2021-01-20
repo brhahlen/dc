@@ -38,7 +38,7 @@ fi
 DOCKER_COMPOSE_VERSION="$(docker-compose --version | cut -d " " -f 3 | cut -d "," -f 1)"
 #echo "${DOCKER_COMPOSE_VERSION}"
 MIN_VERSION="1.25.0"
-if [ ! "$(printf '%s\n' "${MIN_VERSION}" "${DOCKER_COMPOSE_VERSION}" | sort -V | head -n1)" = "${MIN_VERSION}" ]; then 
+if [ ! "$(printf '%s\n' "${MIN_VERSION}" "${DOCKER_COMPOSE_VERSION}" | sort -V | head -n1)" = "${MIN_VERSION}" ]; then
     echo "You are running docker-compose version ${DOCKER_COMPOSE_VERSION}. This script requires version ${MIN_VERSION} or higher, due to the use of the --env-file option."
     echo "Please install a newer version of docker-compose. You can find this at https://github.com/docker/compose/releases"
     exit 1
