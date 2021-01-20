@@ -112,7 +112,7 @@ function install(){
         mkdir -p ${HOME_DIR}/bin
     fi
     cp -f dc ${HOME_DIR}/bin
-    chmod u+x ${HOME_DIR}/bin/dc
+    chmod 744 ${HOME_DIR}/bin/dc
     chown -R $SUDO_USER:${GID} ${HOME_DIR}/bin
     # Do stuff here
     echo "Copying dc-completion binary to /etc/bash_completion.d/ and making it executable"
