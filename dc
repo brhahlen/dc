@@ -75,6 +75,7 @@ function show_usage (){
     printf " ${RED}start${NC}     Starts one or more services\n"
     printf " ${RED}stop${NC}      Stops one or more services\n"
     printf " ${RED}restart${NC}   Restarts one or more services\n"
+    printf " ${RED}pull${NC}      Pulls an image of a service"
     printf " ${RED}network${NC}   Create the MacVLAN network\n"
     printf " ${RED}list${NC}      List stacks and services in the stacks\n"
     printf " ${RED}help${NC}      Print help\n"
@@ -188,6 +189,25 @@ function restart(){
     start $@
     }
 
+# PULL
+function pull(){
+    echo "Pulling images for the following service(s): $@"
+    tmp_stack_files_age
+    for SERVICE in $@;
+    do
+        if grep -r -q -w ${SERVICE} ${TMP_DIR}; then
+            SERVICE_STACK=$(grep -r ${SERVICE} ${TMP_DIR} | rev | cut -d / -f 1 | rev | cut -d : -f 1 )
+            # echo "${SERVICE_STACK}"
+            # echo "Found ${SERVICE} in ${SERVICE_STACK}"
+            cd ${DC_DIR}/${SERVICE_STACK}
+            ${DC_COMMAND} pull ${SERVICE}
+            cd - > /dev/null
+        else
+            echo "ERROR: Service ${SERVICE} was not found in any of the stacks. Does it show up when you run 'dc list'?"
+        fi
+    done
+    }
+
 # NETWORK
 function network(){
     echo "This function will create the macvlan network, create an interface, routes so the services can access each other, and makes the interface and routes permanent."
@@ -280,6 +300,11 @@ case ${1} in
 # ----------- restart ------------
     "restart")
         restart ${@:2}
+        ;;
+
+# ----------- pull ------------
+    "pull")
+        pull ${@:2}
         ;;
 
 # ----------- network ------------
