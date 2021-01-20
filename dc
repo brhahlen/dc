@@ -104,6 +104,7 @@ function install(){
     # Who is executing the script?
     echo "User running the installation is $SUDO_USER"
     HOME_DIR=$(grep $SUDO_USER /etc/passwd | cut -d ":" -f 6)
+    GID=$(grep $SUDO_USER /etc/passwd | cut -d ":" -f 4)
     echo "Home directory is ${HOME_DIR}"
     echo "Copying dc binary to ${HOME_DIR}/bin and making it executable"
     if [ ! -d ${HOME_DIR}/bin ]; then
@@ -112,7 +113,7 @@ function install(){
     fi
     cp -f dc ${HOME_DIR}/bin
     chmod u+x ${HOME_DIR}/bin/dc
-    chown $SUDO_USER ${HOME_DIR}/bin/dc
+    chown $SUDO_USER:${GID} ${HOME_DIR}/bin/dc
     # Do stuff here
     echo "Copying dc-completion binary to /etc/bash_completion.d/ and making it executable"
     # Check for root access
