@@ -121,8 +121,7 @@ function install(){
         mkdir -p /etc/bash_completion.d
     fi
     cp -f dc-completion /etc/bash_completion.d
-    chmod +x /etc/bash_completion.d
-    fi
+    chmod +x /etc/bash_completion.d/dc-completion
     if ! grep -q "$HOME/bin" ${HOME_DIR}/.bashrc; then
         echo "Adding dc to PATH"
         echo "PATH=\"$HOME/bin:$PATH\"" >> ~/.bashrc
