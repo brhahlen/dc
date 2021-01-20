@@ -21,23 +21,24 @@ _dc_completions()
             ;;
         start|stop|restart|pull)
             # We might need to create the tmp-files, so reusing the command from dc, however, this is duplicating stuff, which is not nice, but for a MVP, it works
-            for STACK in $(find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -u);
-            do
-                TMP_DIR="/tmp/dc_stack_services"
-                STACK_NAME=$(echo ${STACK} | rev | cut -d / -f 1 | rev)
-                if [ -f ${TMP_DIR}/${STACK_NAME} ]; then
-                    # echo "File exists, checking age"
-                    if [ "$(find ${TMP_DIR}/${STACK_NAME} -mmin +30)" ]; then
-                        # echo "File is too old, refreshing"
-                        cd ${STACK}
-                        ${DC_COMMAND} ps --services -a > ${TMP_DIR}/${STACK_NAME}
-                    fi
-                else
-                    # echo "File does not exist, creating"
-                    cd ${STACK}
-                    ${DC_COMMAND} ps --services -a > ${TMP_DIR}/${STACK_NAME}
-                fi
-            done
+            dc list > /dev/null
+            # for STACK in $(find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -u);
+            # do
+            #     TMP_DIR="/tmp/dc_stack_services"
+            #     STACK_NAME=$(echo ${STACK} | rev | cut -d / -f 1 | rev)
+            #     if [ -f ${TMP_DIR}/${STACK_NAME} ]; then
+            #         # echo "File exists, checking age"
+            #         if [ "$(find ${TMP_DIR}/${STACK_NAME} -mmin +30)" ]; then
+            #             # echo "File is too old, refreshing"
+            #             cd ${STACK}
+            #             ${DC_COMMAND} ps --services -a > ${TMP_DIR}/${STACK_NAME}
+            #         fi
+            #     else
+            #         # echo "File does not exist, creating"
+            #         cd ${STACK}
+            #         ${DC_COMMAND} ps --services -a > ${TMP_DIR}/${STACK_NAME}
+            #     fi
+            # done
             # On to the completion
             local services=$(for SERVICE in `cat /tmp/dc_stack_services/*`; do echo ${SERVICE} ; done )
             COMPREPLY=( $(compgen -W "${services}" -- ${cur}) )
