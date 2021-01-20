@@ -24,6 +24,11 @@ _dc_completions()
             COMPREPLY=( $(compgen -W "${services}" -- ${cur}) )
             return 0
             ;;
+        install|network|list|help)
+            return
+            ;;
+        *)
+        ;;
     esac
 
    COMPREPLY=($(compgen -W "${opts}" -- ${cur}))
