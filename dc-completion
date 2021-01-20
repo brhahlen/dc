@@ -24,7 +24,6 @@ _dc_completions()
             COMPREPLY=( $(compgen -W "${services}" -- ${cur}) )
             return 0
             ;;
-        *)
         ;;
     esac
 
