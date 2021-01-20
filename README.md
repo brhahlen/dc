@@ -12,6 +12,11 @@ The main `dc` script goes into `~/bin` and is used to control docker-compose (dc
 
 The `dc-completion` script goes into `/etc/bash.completion.d/` and provides `<TAB>` autocompletion (or it should)
 
+## Prerequisites
+Prerequisites for `dc` are:
+ - `tee` is installed
+ - `docker-compose` version is 1.25.0 or higher
+
 ## Assumptions
 There are a few assumptions:
 - An environment variable DC_DIR has been set, that contains docker-compose files. If the file does not exist, it assumes that the docker-compose files live in (subdirectories of) ~/docker/
@@ -24,6 +29,7 @@ Provides the following main functions:
 - start   - start one or more services
 - stop    - stop one or more services
 - restart - restart one or more services
+- pull    - pulls images
 - network - create the macvlan network that is needed
 - list    - lists all stacks and services in the stack
 
