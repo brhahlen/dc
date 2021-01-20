@@ -1,5 +1,5 @@
-#!/bin/bash
+#/usr/bin/env bash
 # Copyright (C) 2021 Ben Hählen
 # This is the completion file for `dc`
 
-# complete -W `` dc
+complete -W "1-backends 2-home" dc
