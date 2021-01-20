@@ -1,5 +1,66 @@
-#!/bin/bash
+#/usr/bin/env bash
 # Copyright (C) 2021 Ben Hählen
 # This is the completion file for `dc`
+_dc_completions()
+{
+    local cur prev opts base
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+    cmd="${COMP_WORDS[1]}"
 
-# complete -W `` dc
+    # Basic/main options that will be completed
+    opts="install up down start stop restart pull network list help"
+
+    # Based on the arguments, we can run functions
+    case "$cmd" in
+        up|down)
+            local stacks=$(for STACK in `find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -u | rev | cut -d / -f 1 | rev`; do echo ${STACK} ; done )
+            COMPREPLY=( $(compgen -W "${stacks}" -- ${cur}) )
+            return 0
+            ;;
+        start|stop|restart|pull)
+            # We might need to create the tmp-files, so reusing the command from dc, however, this is duplicating stuff, which is not nice, but for a MVP, it works
+            for STACK in $(find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -u);
+            do
+                ENV="${DC_DIR}/.env"
+                DC_CMD=`which docker-compose`
+                DC_COMMAND="${DC_CMD} --env-file ${ENV}"
+                TMP_DIR="/tmp/dc_stack_services"
+                STACK_NAME=$(echo ${STACK} | rev | cut -d / -f 1 | rev)
+                if [ ! -d "${TMP_DIR}" ]; then
+                    # echo "${TMP_DIR} not found. Creating..."
+                    mkdir -p ${TMP_DIR}
+                fi
+                if [ -f ${TMP_DIR}/${STACK_NAME} ]; then
+                    # echo "File exists, checking age"
+                    if [ "$(find ${TMP_DIR}/${STACK_NAME} -mmin +30)" ]; then
+                        # echo "File is too old, refreshing"
+                        cd ${STACK}
+                        ${DC_COMMAND} ps --services -a > ${TMP_DIR}/${STACK_NAME}
+                        cd - > /dev/null
+                    fi
+                else
+                    # echo "File does not exist, creating"
+                    cd ${STACK}
+                    ${DC_COMMAND} ps --services -a > ${TMP_DIR}/${STACK_NAME}
+                    cd - > /dev/null
+                fi
+            done
+            # On to the completion
+            local services=$(for SERVICE in `cat /tmp/dc_stack_services/*`; do echo ${SERVICE} ; done )
+            COMPREPLY=( $(compgen -W "${services}" -- ${cur}) )
+            return 0
+            ;;
+        install|network|list|help)
+            return
+            ;;
+        *)
+        ;;
+    esac
+
+   COMPREPLY=($(compgen -W "${opts}" -- ${cur}))
+   return 0
+}
+
+complete -F _dc_completions dc
