@@ -1,5 +1,36 @@
 #/usr/bin/env bash
 # Copyright (C) 2021 Ben Hählen
 # This is the completion file for `dc`
+_dc_completions()
+{
+    local cur prev opts base
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
 
-complete -W "1-backends 2-home" dc
+    # Basic/main options that will be completed
+    opts="install up down start stop restart pull network list help"
+
+    # Based on the arguments, we can run functions
+    case "${prev}" in
+        up)
+            local stacks=$(for STACK in `find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -u`; do echo ${STACK} ; done )
+            COMPREPLY=( $(compgen -W "${stacks}" -- ${cur}) )
+            return 0
+            ;;
+        start)
+            local names=$(for x in `ls -1 /etc/xen/*.cfg`; do echo ${x/\/etc\/xen\//} ; done )
+            COMPREPLY=( $(compgen -W "${names}" -- ${cur}) )
+            local services=$(for SERVICE in `cat /tmp/dc_stack_services/*`; do echo ${SERVICE} ; done )
+            COMPREPLY=( $(compgen -W "${services}" -- ${cur}) )
+            return 0
+            ;;
+        *)
+        ;;
+    esac
+
+   COMPREPLY=($(compgen -W "${opts}" -- ${cur}))
+   return 0
+}
+
+complete -F _dc_completions dc
