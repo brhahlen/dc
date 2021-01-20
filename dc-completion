@@ -19,8 +19,6 @@ _dc_completions()
             return 0
             ;;
         start)
-            local names=$(for x in `ls -1 /etc/xen/*.cfg`; do echo ${x/\/etc\/xen\//} ; done )
-            COMPREPLY=( $(compgen -W "${names}" -- ${cur}) )
             local services=$(for SERVICE in `cat /tmp/dc_stack_services/*`; do echo ${SERVICE} ; done )
             COMPREPLY=( $(compgen -W "${services}" -- ${cur}) )
             return 0
