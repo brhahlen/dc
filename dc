@@ -133,7 +133,7 @@ function install(){
     fi
     if ! grep -q DC_DIR ${HOME_DIR}/.bashrc; then
         echo "Set DC_DIR variable and add to ${HOME_DIR}/.bashrc"
-        read -p "Where are your docker-compose stacks located?" DC_DIR
+        read -p "Where are your docker-compose stacks located? " DC_DIR
         echo "export DC_DIR=${DC_DIR}" >> ${HOME_DIR}/.bashrc
     fi
 }
