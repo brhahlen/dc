@@ -23,6 +23,7 @@ _dc_completions()
             # We might need to create the tmp-files, so reusing the command from dc, however, this is duplicating stuff, which is not nice, but for a MVP, it works
             for STACK in $(find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -u);
             do
+                TMP_DIR="/tmp/dc_stack_services"
                 STACK_NAME=$(echo ${STACK} | rev | cut -d / -f 1 | rev)
                 if [ -f ${TMP_DIR}/${STACK_NAME} ]; then
                     # echo "File exists, checking age"
