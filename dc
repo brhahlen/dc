@@ -33,6 +33,15 @@ then
     echo "tee could not be found, please install it to use dc"
     exit 1
 fi
+# docker-compose version
+# Copied from https://unix.stackexchange.com/a/285928
+DOCKER_COMPOSE_VERSION="$(docker-compose --version | cut -d " " -f 3)"
+MIN_VERSION="1.25.0"
+ if [ "$(printf '%s\n' "${MIN_VERISON}" "${DOCKER_COMPOSE_VERSION}" | sort -V | head -n1)" = "${MIN_VERSION}" ]; then 
+        echo "Greater than or equal to ${MIN_VERSION}"
+ else
+        echo "Less than ${MIN_VERSION}"
+ fi
 
 ###### HELPER FUNCTIONS
 # TMP_DIR STACK SERVICES
