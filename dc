@@ -95,8 +95,41 @@ return 0
 }
 
 # INSTALL
-function install(){ 
+function install(){
+    unset DC_DIR
+    # Check for root access
+    if [[ $EUID -ne 0 ]]; then
+        echo "This function must be run using root privileges (using sudo)" 
+        exit 1
+    fi
+    echo "Copying dc binary to ~/bin and making it executable"
+    if [ ! -d ~/bin ]; then
+        echo "~/bin does not exist. Creating..."
+        mkdir -p ~/bin
+    fi
+    cp -f dc ~/bin
+    chmod u+x ~/bin/dc
+    # Do stuff here
+    echo "Copying dc-completion binary to /etc/bash-completion.d/ and making it executable"
+    if [ ! -d /etc/bash-completion.d ]; then
+        echo "/etc/bash-completion.d does not exist. Creating..."
+        mkdir -p /etc/bash-completion.d
+    fi
+    cp -f dc-completion /etc/bash-completion.d
+    chmod +x /etc/bash-completion.d
+    if ! [[ "$PATH" =~ "$HOME/bin:" ]]
+    then
+        echo "Adding dc to PATH"
+        echo "PATH=\"$HOME/bin:$PATH\"" >> ~/.bashrc
+        echo "export PATH" >> ~/.bashrc
+    fi
+    if ! grep -q DC_DIR ~/.bashrc; then
+        echo "Set DC_DIR variable and add to ~/.bashrc"
+        read -p "Where are your docker-compose stacks located?" DC_DIR
+        echo "export DC_DIR=${DC_DIR}" >> ~/.bashrc
+    fi
 
+echo "export DC_DIR=${DC_DIR}" >> ~/.bashrc
 }
 
 # UP
@@ -237,7 +270,7 @@ function network(){
     fi
     # Check for root access
     if [[ $EUID -ne 0 ]]; then
-        echo "This function must be run as root" 
+        echo "This function must be run using root privileges (using sudo)" 
         exit 1
     fi
     echo "Creating the MACVLAN network"
