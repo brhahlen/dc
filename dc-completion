@@ -7,12 +7,13 @@ _dc_completions()
     COMPREPLY=()
     cur="${COMP_WORDS[COMP_CWORD]}"
     prev="${COMP_WORDS[COMP_CWORD-1]}"
+    cmd="${COMP_WORDS[1]}"
 
     # Basic/main options that will be completed
     opts="install up down start stop restart pull network list help"
 
     # Based on the arguments, we can run functions
-    case "$1" in
+    case "$cmd" in
         up)
             local stacks=$(for STACK in `find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -u | rev | cut -d / -f 1 | rev`; do echo ${STACK} ; done )
             COMPREPLY=( $(compgen -W "${stacks}" -- ${cur}) )
