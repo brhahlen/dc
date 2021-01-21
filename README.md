@@ -21,6 +21,8 @@ Updating can be done by running `sudo bash ./dc install` again, it will not perf
 ## Prerequisites
 Prerequisites for `dc` are:
  - `tee` is installed
+ - `grep` is installed
+ - `curl` is installed
  - `docker-compose` version is 1.25.0 or higher
  - `bash-completion` is installed
 
@@ -41,6 +43,7 @@ Provides the following main functions:
 - pull          - pulls images
 - network       - create the macvlan network that is needed - *ONLY* possible using `sudo`
 - list          - lists all stacks and services in the stack
+- version       - shows the version of `dc` and retrieves the latest version and checks there
 
 # Thoughts/To Do's
 Also, some functions can probably be offloaded into dc-completion at some point?

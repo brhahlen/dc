@@ -1,30 +1,8 @@
 #!/bin/bash
 # Copyright (C) 2021 Ben Hählen
 ##################################
-######### DESCRIPTION ############
-##################################
-# Provides the following main functions:
-# - up      - bring up all stacks, an individual stack or a container
-# - down    - brings down all stacks or an individual stack
-# - stop    - stops all stacks, an individual stack, or a container
-# - restart - restart all stacks, a stack, or a container
-# - network - create the macvlan network that is needed
-# - list    - lists all stacks and services in the stack
-##################################
-###### VARIABLES
-if [[ -z "${DC_DIR}" ]]; then
-    export DC_DIR="${HOME}/docker"
-else
-    export DC_DIR="${DC_DIR}"
-fi
-export ENV="${DC_DIR}/.env"
-export DC_CMD=`which docker-compose`
-export DC_COMMAND="${DC_CMD} --env-file ${ENV}"
-export TMP_DIR="/tmp/dc_stack_services"
-
-# COLORS
-export RED='\033[0;31m'
-export NC='\033[0m' # No Color
+# VERSION
+export DC_VERSION=v0.8.0
 
 ###### PREREQUISITE CHECKS
 # tee
@@ -35,17 +13,51 @@ then
 fi
 # docker-compose version
 # Inspired by/Copied from https://unix.stackexchange.com/a/285928
-DOCKER_COMPOSE_VERSION="$(docker-compose --version | cut -d " " -f 3 | cut -d "," -f 1)"
+if ! command -v docker-compose &> /dev/null ; then
+    echo "docker-compose could not be found, please install it to use dc"
+    exit 1
+else
+    DOCKER_COMPOSE_VERSION="$(docker-compose --version | cut -d " " -f 3 | cut -d "," -f 1)"
 #echo "${DOCKER_COMPOSE_VERSION}"
-MIN_VERSION="1.25.0"
-if [ ! "$(printf '%s\n' "${MIN_VERSION}" "${DOCKER_COMPOSE_VERSION}" | sort -V | head -n1)" = "${MIN_VERSION}" ]; then
+    MIN_VERSION="1.25.0"
+    if [ ! "$(printf '%s\n' "${MIN_VERSION}" "${DOCKER_COMPOSE_VERSION}" | sort -V | head -n1)" = "${MIN_VERSION}" ]; then
     echo "You are running docker-compose version ${DOCKER_COMPOSE_VERSION}. This script requires version ${MIN_VERSION} or higher, due to the use of the --env-file option."
     echo "Please install a newer version of docker-compose. You can find this at https://github.com/docker/compose/releases"
     exit 1
+    fi
+fi
+# curl
+if ! command -v curl &> /dev/null
+then
+    echo "curl could not be found, please install it to use dc"
+    exit 1
+fi
+# grep
+if ! command -v grep &> /dev/null
+then
+    echo "grep could not be found, please install it to use dc"
+    exit 1
 fi
 
+###### VARIABLES
+if [[ -z "${DC_DIR}" ]]; then
+    export DC_DIR="${HOME}/docker"
+else
+    export DC_DIR="${DC_DIR}"
+fi
+export ENV="${DC_DIR}/.env"
+export DC_CMD=`which docker-compose`
+export DC_COMMAND="${DC_CMD} --env-file ${ENV}"
+export TMP_DIR="/tmp/dc_stack_services"
+# VERSIONS
+export LATEST_VERSION=$(curl --silent https://api.github.com/repos/brhahlen/dc/releases/latest | grep -Po '"tag_name": "\K.*?(?=")')
+# COLORS
+export RED='\033[0;31m'
+export BLUE='\033[0;34m'
+export NC='\033[0m' # No Color
+
 ###### HELPER FUNCTIONS
-# TMP_DIR STACK SERVICES
+# MP_DIR STACK SERVICES
 function tmp_dir_stack_files(){
     if [ ! -d "${TMP_DIR}" ]; then
         # echo "${TMP_DIR} not found. Creating..."
@@ -93,6 +105,7 @@ function show_usage (){
     printf " ${RED}network${NC}        Create the MacVLAN network, needs sudo\n"
     printf " ${RED}list${NC}           List stacks and services in the stacks\n"
     printf " ${RED}help${NC}           Print help\n"
+    print "  ${RED}version${NC}        Shows the version and checks the latest version"
 
 return 0
 }
@@ -366,7 +379,24 @@ case ${1} in
     "list")
         list
         ;;
-
+# ----------- version ------------
+    "version")
+        if [[ ${DC_VERSION} =~ "dev" ]]; then
+            printf "This is version ${RED}${DC_VERSION}${NC} of ${RED}dc${NC}\n"
+            printf "This is a development version\n"
+            printf "The latest release version is ${BLUE}${LATEST_VERSION}${NC} \n"
+        else
+            printf "This is version ${DC_VERSION} of ${RED}dc${NC}\n"
+            printf "Release notes can be found at https://github.com/brhahlen/dc/releases/tag/${DC_VERSION} \n"
+            if [ ! "$(printf '%s\n' "${LATEST_VERSION}" "${DC_VERSION}" | sort -V | head -n1)" = "${LATEST_VERSION}" ]; then
+                printf "####################################\n"
+                printf "A newer version of ${RED}dc${NC} is avaiable\n"
+                printf "The latest release version is ${BLUE}${LATEST_VERSION}${NC} \n"
+                printf "This can be found at https://github.com/brhahlen/dc/releases/tag/${LATEST_VERSION} \n"
+            fi
+        fi
+        ;;
+# ----------- All others ------------
     *)
         show_usage
         ;;
