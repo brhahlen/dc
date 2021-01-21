@@ -10,7 +10,7 @@ _dc_completions()
     cmd="${COMP_WORDS[1]}"
 
     # Basic/main options that will be completed
-    OPTS="install up down start stop restart pull network list help"
+    OPTS="install up down restart-stack start stop restart pull network list help"
 
     # Based on the arguments, we can run functions
     case "$cmd" in
