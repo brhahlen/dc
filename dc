@@ -225,7 +225,9 @@ function restart-stack(){
     fi
     }
 
-
+# # Something to add to start: check if container is exited or not, and then use proper command to start
+# To check if a container is exited
+# docker-compose ps | grep Exit | cut -d " " -f 1
 # START
 function start(){
     echo "Starting the following service(s): $@"
