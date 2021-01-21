@@ -82,16 +82,17 @@ function show_usage (){
     printf "Usage: $0 [options] [stacks]\n"
     printf "\n"
     printf "Options:\n"
-    printf " ${RED}install${NC}   Install dc for the user, needs sudo\n"
-    printf " ${RED}up${NC}        Bring up all stacks, a stack, or stacks\n"
-    printf " ${RED}down${NC}      Bring down all stacks, a stack or stack(s)\n"
-    printf " ${RED}start${NC}     Starts one or more services\n"
-    printf " ${RED}stop${NC}      Stops one or more services\n"
-    printf " ${RED}restart${NC}   Restarts one or more services\n"
-    printf " ${RED}pull${NC}      Pulls an image of a service"
-    printf " ${RED}network${NC}   Create the MacVLAN network, needs sudo\n"
-    printf " ${RED}list${NC}      List stacks and services in the stacks\n"
-    printf " ${RED}help${NC}      Print help\n"
+    printf " ${RED}install${NC}        Install dc for the user, needs sudo\n"
+    printf " ${RED}up${NC}             Bring up all stacks, a stack, or stacks\n"
+    printf " ${RED}down${NC}           Bring down all stacks, a stack or stack(s)\n"
+    printf " ${RED}restart-stack${NC}  Restarts all stacks, a stack or stack(s)\n"
+    printf " ${RED}start${NC}          Starts one or more services\n"
+    printf " ${RED}stop${NC}           Stops one or more services\n"
+    printf " ${RED}restart${NC}        Restarts one or more services\n"
+    printf " ${RED}pull${NC}           Pulls an image of a service"
+    printf " ${RED}network${NC}        Create the MacVLAN network, needs sudo\n"
+    printf " ${RED}list${NC}           List stacks and services in the stacks\n"
+    printf " ${RED}help${NC}           Print help\n"
 
 return 0
 }
@@ -99,7 +100,7 @@ return 0
 # INSTALL
 function install(){
     if [[ $EUID -ne 0 ]]; then
-        echo "This function must be run using root privileges (using sudo)" 
+        echo "This function must be run using root privileges (using sudo)"
         exit 1
     fi
     unset DC_DIR
@@ -155,7 +156,7 @@ function up(){
         do
             STACK_DIR="${DC_DIR}/${STACK}"
             if [ -d "${STACK_DIR}" ]; then
-                echo "Bringing up stack(s) ${STACK}"
+                echo "Bringing up stack ${STACK}"
                 cd ${STACK_DIR}
                 ${DC_COMMAND} up -d
                 cd - > /dev/null
@@ -184,7 +185,7 @@ function down(){
         do
             STACK_DIR="${DC_DIR}/${STACK}"
             if [ -d "${STACK_DIR}" ]; then
-                echo "Bringing down stack(s) ${STACK}"
+                echo "Bringing down stack ${STACK}"
                 cd ${STACK_DIR}
                 ${DC_COMMAND} down
                 cd - > /dev/null
@@ -194,6 +195,36 @@ function down(){
         done
     fi
     }
+
+# RESTART-STACK
+function restart-stack(){
+    if [ -z "$1" ]; then
+        echo "No argument provided, please use the name of a stack or all"
+    elif [ "$1" == "all" ]; then
+        echo "Restarting all stacks"
+        for STACK in $(find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -u);
+        do
+            echo -e "\n${STACK}:"
+            cd $STACK
+            ${DC_COMMAND} restart
+            cd - > /dev/null
+        done
+    else
+        for STACK in $@;
+        do
+            STACK_DIR="${DC_DIR}/${STACK}"
+            if [ -d "${STACK_DIR}" ]; then
+                echo "Restarting stack ${STACK}"
+                cd ${STACK_DIR}
+                ${DC_COMMAND} restart
+                cd - > /dev/null
+            else
+                echo "Stack ${STACK} does not exist. Did you type the name correctly?"
+            fi
+        done
+    fi
+    }
+
 
 # START
 function start(){
@@ -297,6 +328,11 @@ case ${1} in
 # ----------- down ------------
     "down")
         down ${@:2}
+        ;;
+
+# ----------- restart-stack ------------
+    "restart-stack")
+        restart-stack ${@:2}
         ;;
 
 # ----------- start ------------
