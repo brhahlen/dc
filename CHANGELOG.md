@@ -1,3 +1,7 @@
+# Version 0.8.7
+## Fixes
+ - Release fixes
+
 # Version 0.8.6
 ## Fixes
  - Release name
