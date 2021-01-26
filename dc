@@ -3,7 +3,7 @@
 # Copyright (C) 2021 Ben Hählen
 ##################################
 # VERSION
-export DC_VERSION=v0.8.2
+export DC_VERSION=v0.8.3
 
 ###### PREREQUISITE CHECKS
 # tee
@@ -50,8 +50,6 @@ export ENV="${DC_DIR}/.env"
 export DC_CMD=`which docker-compose`
 export DC_COMMAND="${DC_CMD} --env-file ${ENV}"
 export TMP_DIR="/tmp/dc_stack_services"
-# VERSIONS
-export LATEST_VERSION=$(curl --silent https://api.github.com/repos/brhahlen/dc/releases/latest | grep -Po '"tag_name": "\K.*?(?=")')
 # COLORS
 export RED='\033[0;31m'
 export BLUE='\033[0;34m'
@@ -382,6 +380,7 @@ case ${1} in
         ;;
 # ----------- version ------------
     "version")
+        export LATEST_VERSION=$(curl --silent https://api.github.com/repos/brhahlen/dc/releases/latest | grep -Po '"tag_name": "\K.*?(?=")')
         if [[ ${DC_VERSION} =~ "dev" ]]; then
             printf "This is version ${RED}${DC_VERSION}${NC} of ${RED}dc${NC}\n"
             printf "This is a development version\n"
