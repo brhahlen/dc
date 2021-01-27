@@ -3,7 +3,7 @@
 # Copyright (C) 2021 Ben Hählen
 ##################################
 # VERSION
-export DC_VERSION=v0.8.7
+export DC_VERSION=v1.0.0
 
 ###### PREREQUISITE CHECKS
 # tee
