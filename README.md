@@ -41,7 +41,7 @@ Provides the following main functions:
 - stop          - stop one or more services
 - restart       - restart one or more services
 - pull          - pulls images
-- network       - create the macvlan network that is needed - *ONLY* possible using `sudo`
+- network       - _NOT IMPLEMENTED YET_ - create the macvlan network that is needed - *ONLY* possible using `sudo`
 - list          - lists all stacks and services in the stack
 - version       - shows the version of `dc` and retrieves the latest version and checks there
 
