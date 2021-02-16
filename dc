@@ -387,6 +387,11 @@ case ${1} in
         restart-stack ${@:2}
         ;;
 
+# ----------- logs-stack ------------
+    "logs-stack")
+        logs-stack ${@:2}
+        ;;
+
 # ----------- start ------------
     "start")
         start ${@:2}
