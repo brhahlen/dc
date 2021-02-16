@@ -1,3 +1,7 @@
+# Version 1.1.0
+## New features
+ - Added ability to view logs using `dc logs <stackname>/<containername>` command
+
 # Version 1.0.0
 This is the 1.0.0 release of `dc` :-)
 
