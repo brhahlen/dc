@@ -250,7 +250,7 @@ function logs-stack(){
             if [ -d "${STACK_DIR}" ]; then
                 echo "Showing logs for stack ${STACK}"
                 cd ${STACK_DIR}
-                ${DC_COMMAND} logs --tail=100
+                ${DC_COMMAND} logs --tail=100 -f
                 cd - > /dev/null
             else
                 echo "Stack ${STACK} does not exist. Did you type the name correctly?"
