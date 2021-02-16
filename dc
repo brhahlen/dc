@@ -3,7 +3,7 @@
 # Copyright (C) 2021 Ben Hählen
 ##################################
 # VERSION
-export DC_VERSION=v1.0.0
+export DC_VERSION=v1.1.0-dev
 
 ###### PREREQUISITE CHECKS
 # tee
@@ -307,6 +307,24 @@ function pull(){
     done
     }
 
+function logs(){
+    echo "Showing logs for the following service(s): $@"
+    tmp_stack_files_age
+    for SERVICE in $@;
+    do
+        if grep -r -q -w ${SERVICE} ${TMP_DIR}; then
+            SERVICE_STACK=$(grep -r ${SERVICE} ${TMP_DIR} | rev | cut -d / -f 1 | rev | cut -d : -f 1 )
+            # echo "${SERVICE_STACK}"
+            # echo "Found ${SERVICE} in ${SERVICE_STACK}"
+            cd ${DC_DIR}/${SERVICE_STACK}
+            ${DC_COMMAND} logs --tail=100 -f ${SERVICE}
+            cd - > /dev/null
+        else
+            echo "ERROR: Service ${SERVICE} was not found in any of the stacks. Does it show up when you run 'dc list'?"
+        fi
+    done
+    }
+
 # NETWORK
 function network(){
     echo "This function does nothing (yet)"
@@ -367,6 +385,11 @@ case ${1} in
 # ----------- pull ------------
     "pull")
         pull ${@:2}
+        ;;
+
+# ----------- logs ------------
+    "logs")
+        logs ${@:2}
         ;;
 
 # ----------- network ------------
