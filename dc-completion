@@ -16,7 +16,9 @@ _dc_completions()
     case "$cmd" in
         up|down|restart-stack|logs-stack)
             local STACKS=$(for STACK in `find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -u | rev | cut -d / -f 1 | rev`; do echo ${STACK} ; done )
-            STACKS="all ${STACKS}"
+            if [ ! "$cmd" == "logs-stack" ]; then
+                STACKS="all ${STACKS}"
+            fi
             COMPREPLY=( $(compgen -W "${STACKS}" -- ${CUR}) )
             return 0
             ;;
