@@ -237,6 +237,26 @@ function restart-stack(){
     fi
     }
 
+# RESTART-STACK
+function logs-stack(){
+    if [ -z "$1" ]; then
+        echo "No argument provided, please provide the name(s) of a stack(s)"
+    else
+        for STACK in $@;
+        do
+            STACK_DIR="${DC_DIR}/${STACK}"
+            if [ -d "${STACK_DIR}" ]; then
+                echo "Showing logs for stack ${STACK}"
+                cd ${STACK_DIR}
+                ${DC_COMMAND} logs --tail=100
+                cd - > /dev/null
+            else
+                echo "Stack ${STACK} does not exist. Did you type the name correctly?"
+            fi
+        done
+    fi
+    }
+
 # # Something to add to start: check if container is exited or not, and then use proper command to start
 # To check if a container is exited
 # docker-compose ps | grep Exit | cut -d " " -f 1
