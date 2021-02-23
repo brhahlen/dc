@@ -339,26 +339,26 @@ function logs(){
             # echo "${SERVICE_STACK}"
             # echo "Found ${SERVICE} in ${SERVICE_STACK}"
             cd ${DC_DIR}/${SERVICE_STACK}
-            ${DC_COMMAND} logs --tail=100 -f ${SERVICE} &
+            ${DC_COMMAND} logs --tail=1 -f ${SERVICE} &
             if [ -z "$WAIT_PIDS" ]
                 then
-                    echo "\$WAIT_PIDS is empty"
-                    echo "Adding $! to \$WAIT_PIDS"
                     export WAIT_PIDS="$!"
-                    echo "\$WAIT_PIDS contains $WAIT_PIDS"
                 else
-                    echo "\$WAIT_PIDS is NOT empty"
-                    echo "Adding $! to \$WAIT_PIDS"
                     export WAIT_PIDS="$WAIT_PIDS $!"
-                    echo "\$WAIT_PIDS contains $WAIT_PIDS"
             fi
-            export ID_${SERVICE}=$!
+            echo "PID=$!"
             cd - > /dev/null
         else
             echo "ERROR: Service ${SERVICE} was not found in any of the stacks. Does it show up when you run 'dc list'?"
         fi
     done
     echo "\$WAIT_PIDS contains $WAIT_PIDS"
+    for PID in $WAIT_PIDS;
+    do
+        echo "\$PID is $PID"
+	echo "ps --ppid is `ps --ppid $PID -o pid=`"
+    done
+    trap '' SIGHUP SIGINT SIGQUIT SIGTERM 
     wait $WAIT_PIDS
     }
 
