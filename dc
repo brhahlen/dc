@@ -340,11 +340,13 @@ function logs(){
             # echo "Found ${SERVICE} in ${SERVICE_STACK}"
             cd ${DC_DIR}/${SERVICE_STACK}
             ${DC_COMMAND} logs --tail=100 -f ${SERVICE} &
+            export PID_${SERVICE}=$!
             cd - > /dev/null
         else
             echo "ERROR: Service ${SERVICE} was not found in any of the stacks. Does it show up when you run 'dc list'?"
         fi
     done
+    wait
     }
 
 # NETWORK
