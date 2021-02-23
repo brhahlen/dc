@@ -330,6 +330,15 @@ function pull(){
     }
 
 function logs(){
+    trap_kill(){
+    for PID in $WAIT_PIDS;
+    do
+        echo "\$PID is $PID"
+        CHILD_PID=`ps --ppid $PID -o pid=`
+        echo "CHILD_PID is $CHILD_PID"
+        kill $CHILD_PID
+    done
+    }
     echo "Showing logs for the following service(s): $@"
     tmp_stack_files_age
     for SERVICE in $@;
@@ -353,12 +362,7 @@ function logs(){
         fi
     done
     echo "\$WAIT_PIDS contains $WAIT_PIDS"
-    for PID in $WAIT_PIDS;
-    do
-        echo "\$PID is $PID"
-	echo "ps --ppid is `ps --ppid $PID -o pid=`"
-    done
-    trap '' SIGHUP SIGINT SIGQUIT SIGTERM 
+    trap 'trap_kill' SIGHUP SIGINT SIGQUIT SIGTERM
     wait $WAIT_PIDS
     }
 
