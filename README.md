@@ -37,10 +37,12 @@ Provides the following main functions:
 - up            - bring up all stacks, an individual stack, or multiple stacks
 - down          - brings down all stacks, an individual stack, or multiple stacks
 - restart-stack - restarts all stacks, an individual stack, or multiple stacks
+- logs-stack    - show and follow the logs for a stack, outputs last 100 lines first
 - start         - start one or more services
 - stop          - stop one or more services
 - restart       - restart one or more services
 - pull          - pulls images
+- logs          - show and follow the logs for a service, outputs last 100 lines first
 - network       - _NOT IMPLEMENTED YET_ - create the macvlan network that is needed - *ONLY* possible using `sudo`
 - list          - lists all stacks and services in the stack
 - version       - shows the version of `dc` and retrieves the latest version and checks there

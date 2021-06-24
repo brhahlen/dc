@@ -3,7 +3,7 @@
 # Copyright (C) 2021 Ben Hählen
 ##################################
 # VERSION
-export DC_VERSION=v1.0.0
+export DC_VERSION=v1.1.0
 
 ###### PREREQUISITE CHECKS
 # tee
@@ -97,10 +97,12 @@ function show_usage (){
     printf " ${RED}up${NC}             Bring up all stacks, a stack, or stacks\n"
     printf " ${RED}down${NC}           Bring down all stacks, a stack or stack(s)\n"
     printf " ${RED}restart-stack${NC}  Restarts all stacks, a stack or stack(s)\n"
+    printf " ${RED}logs-stack${NC}     Shows logs for a stack or stacks\n"
     printf " ${RED}start${NC}          Starts one or more services\n"
     printf " ${RED}stop${NC}           Stops one or more services\n"
     printf " ${RED}restart${NC}        Restarts one or more services\n"
     printf " ${RED}pull${NC}           Pulls an image of a service\n"
+    printf " ${RED}logs${NC}           Shows logs for a service or services\n"
     printf " ${RED}network${NC}        Create the MacVLAN network, needs sudo\n"
     printf " ${RED}list${NC}           List stacks and services in the stacks\n"
     printf " ${RED}help${NC}           Print help\n"
@@ -237,6 +239,26 @@ function restart-stack(){
     fi
     }
 
+# RESTART-STACK
+function logs-stack(){
+    if [ -z "$1" ]; then
+        echo "No argument provided, please provide the name(s) of a stack(s)"
+    else
+        for STACK in $@;
+        do
+            STACK_DIR="${DC_DIR}/${STACK}"
+            if [ -d "${STACK_DIR}" ]; then
+                echo "Showing logs for stack ${STACK}"
+                cd ${STACK_DIR}
+                ${DC_COMMAND} logs --tail=100 -f
+                cd - > /dev/null
+            else
+                echo "Stack ${STACK} does not exist. Did you type the name correctly?"
+            fi
+        done
+    fi
+    }
+
 # # Something to add to start: check if container is exited or not, and then use proper command to start
 # To check if a container is exited
 # docker-compose ps | grep Exit | cut -d " " -f 1
@@ -307,6 +329,44 @@ function pull(){
     done
     }
 
+function logs(){
+    # Need this function to ensure that all child process are killed from the logs command
+    trap_kill(){
+    for PID in $WAIT_PIDS;
+    do
+        # echo "\$PID is $PID"
+        CHILD_PID=`ps --ppid $PID -o pid=`
+        # echo "CHILD_PID is $CHILD_PID"
+        kill $CHILD_PID
+    done
+    }
+    echo "Showing logs for the following service(s): $@"
+    tmp_stack_files_age
+    for SERVICE in $@;
+    do
+        if grep -r -q -w ${SERVICE} ${TMP_DIR}; then
+            SERVICE_STACK=$(grep -r ${SERVICE} ${TMP_DIR} | rev | cut -d / -f 1 | rev | cut -d : -f 1 )
+            # echo "${SERVICE_STACK}"
+            # echo "Found ${SERVICE} in ${SERVICE_STACK}"
+            cd ${DC_DIR}/${SERVICE_STACK}
+            ${DC_COMMAND} logs --tail=1 -f ${SERVICE} &
+            if [ -z "$WAIT_PIDS" ]
+                then
+                    export WAIT_PIDS="$!"
+                else
+                    export WAIT_PIDS="$WAIT_PIDS $!"
+            fi
+            echo "PID=$!"
+            cd - > /dev/null
+        else
+            echo "ERROR: Service ${SERVICE} was not found in any of the stacks. Does it show up when you run 'dc list'?"
+        fi
+    done
+    # echo "\$WAIT_PIDS contains $WAIT_PIDS"
+    trap 'trap_kill' SIGHUP SIGINT SIGQUIT SIGTERM
+    wait $WAIT_PIDS
+    }
+
 # NETWORK
 function network(){
     echo "This function does nothing (yet)"
@@ -349,6 +409,11 @@ case ${1} in
         restart-stack ${@:2}
         ;;
 
+# ----------- logs-stack ------------
+    "logs-stack")
+        logs-stack ${@:2}
+        ;;
+
 # ----------- start ------------
     "start")
         start ${@:2}
@@ -367,6 +432,11 @@ case ${1} in
 # ----------- pull ------------
     "pull")
         pull ${@:2}
+        ;;
+
+# ----------- logs ------------
+    "logs")
+        logs ${@:2}
         ;;
 
 # ----------- network ------------

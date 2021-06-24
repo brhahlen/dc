@@ -10,17 +10,19 @@ _dc_completions()
     cmd="${COMP_WORDS[1]}"
 
     # Basic/main options that will be completed
-    OPTS="install up down restart-stack start stop restart pull network list help version"
+    OPTS="install up down restart-stack logs-stack start stop restart pull logs network list help version"
 
     # Based on the arguments, we can run functions
     case "$cmd" in
-        up|down|restart-stack)
+        up|down|restart-stack|logs-stack)
             local STACKS=$(for STACK in `find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -u | rev | cut -d / -f 1 | rev`; do echo ${STACK} ; done )
-            STACKS="all ${STACKS}"
+            if [ ! "$cmd" == "logs-stack" ]; then
+                STACKS="all ${STACKS}"
+            fi
             COMPREPLY=( $(compgen -W "${STACKS}" -- ${CUR}) )
             return 0
             ;;
-        start|stop|restart|pull)
+        start|stop|restart|pull|logs)
             # We might need to create the tmp-files, so reusing the command from dc, however, this is duplicating stuff, which is not nice, but for a MVP, it works
             for STACK in $(find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -u);
             do
