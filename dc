@@ -268,8 +268,8 @@ function start(){
     tmp_stack_files_age
     for SERVICE in $@;
     do
-        if grep -r -q -w ${SERVICE} ${TMP_DIR}; then
-            SERVICE_STACK=$(grep -r ${SERVICE} ${TMP_DIR} | rev | cut -d / -f 1 | rev | cut -d : -f 1 )
+        if grep -r -q -x ${SERVICE} ${TMP_DIR}; then
+            SERVICE_STACK=$(grep -r -x ${SERVICE} ${TMP_DIR} | rev | cut -d / -f 1 | rev | cut -d : -f 1 )
             echo "${SERVICE_STACK}"
             echo "Found ${SERVICE} in ${SERVICE_STACK}"
             cd ${DC_DIR}/${SERVICE_STACK}
@@ -288,8 +288,8 @@ function stop(){
     tmp_stack_files_age
     for SERVICE in $@;
     do
-        if grep -r -q -w ${SERVICE} ${TMP_DIR}; then
-            SERVICE_STACK=$(grep -r ${SERVICE} ${TMP_DIR} | rev | cut -d / -f 1 | rev | cut -d : -f 1 )
+        if grep -r -q -x ${SERVICE} ${TMP_DIR}; then
+            SERVICE_STACK=$(grep -r -x ${SERVICE} ${TMP_DIR} | rev | cut -d / -f 1 | rev | cut -d : -f 1 )
             echo "${SERVICE_STACK}"
             echo "Found ${SERVICE} in ${SERVICE_STACK}"
             echo "${DC_DIR}"
@@ -318,8 +318,8 @@ function pull(){
     tmp_stack_files_age
     for SERVICE in $@;
     do
-        if grep -r -q -w ${SERVICE} ${TMP_DIR}; then
-            SERVICE_STACK=$(grep -r ${SERVICE} ${TMP_DIR} | rev | cut -d / -f 1 | rev | cut -d : -f 1 )
+        if grep -r -q -x ${SERVICE} ${TMP_DIR}; then
+            SERVICE_STACK=$(grep -r -x ${SERVICE} ${TMP_DIR} | rev | cut -d / -f 1 | rev | cut -d : -f 1 )
             # echo "${SERVICE_STACK}"
             # echo "Found ${SERVICE} in ${SERVICE_STACK}"
             cd ${DC_DIR}/${SERVICE_STACK}
@@ -346,8 +346,8 @@ function logs(){
     tmp_stack_files_age
     for SERVICE in $@;
     do
-        if grep -r -q -w ${SERVICE} ${TMP_DIR}; then
-            SERVICE_STACK=$(grep -r ${SERVICE} ${TMP_DIR} | rev | cut -d / -f 1 | rev | cut -d : -f 1 )
+        if grep -r -q -x ${SERVICE} ${TMP_DIR}; then
+            SERVICE_STACK=$(grep -r -x ${SERVICE} ${TMP_DIR} | rev | cut -d / -f 1 | rev | cut -d : -f 1 )
             # echo "${SERVICE_STACK}"
             # echo "Found ${SERVICE} in ${SERVICE_STACK}"
             cd ${DC_DIR}/${SERVICE_STACK}
