@@ -270,8 +270,8 @@ function start(){
     do
         if grep -r -q -x ${SERVICE} ${TMP_DIR}; then
             SERVICE_STACK=$(grep -r -x ${SERVICE} ${TMP_DIR} | rev | cut -d / -f 1 | rev | cut -d : -f 1 )
-            echo "${SERVICE_STACK}"
-            echo "Found ${SERVICE} in ${SERVICE_STACK}"
+            # echo "${SERVICE_STACK}"
+            # echo "Found ${SERVICE} in ${SERVICE_STACK}"
             cd ${DC_DIR}/${SERVICE_STACK}
             ${DC_COMMAND} up -d ${SERVICE}
             cd - > /dev/null
@@ -290,10 +290,10 @@ function stop(){
     do
         if grep -r -q -x ${SERVICE} ${TMP_DIR}; then
             SERVICE_STACK=$(grep -r -x ${SERVICE} ${TMP_DIR} | rev | cut -d / -f 1 | rev | cut -d : -f 1 )
-            echo "${SERVICE_STACK}"
-            echo "Found ${SERVICE} in ${SERVICE_STACK}"
-            echo "${DC_DIR}"
-        echo "cd ${DC_DIR}/${SERVICE_STACK}"
+            # echo "${SERVICE_STACK}"
+            # echo "Found ${SERVICE} in ${SERVICE_STACK}"
+            # echo "${DC_DIR}"
+        # echo "cd ${DC_DIR}/${SERVICE_STACK}"
         cd ${DC_DIR}/${SERVICE_STACK}
         ${DC_COMMAND} stop ${SERVICE}
             ${DC_COMMAND} rm -f ${SERVICE}
