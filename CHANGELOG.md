@@ -1,3 +1,7 @@
+# Version 1.2.0
+## Fixes
+- Fixed error when having two containers with same part of name
+
 # Version 1.1.0
 ## New features
  - Added ability to view container logs using `dc logs <containername>` command (accepts multiple arguments) - Fixes #31
