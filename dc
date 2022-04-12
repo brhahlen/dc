@@ -290,10 +290,12 @@ function stop(){
     do
         if grep -r -q -w ${SERVICE} ${TMP_DIR}; then
             SERVICE_STACK=$(grep -r ${SERVICE} ${TMP_DIR} | rev | cut -d / -f 1 | rev | cut -d : -f 1 )
-            # echo "${SERVICE_STACK}"
-            # echo "Found ${SERVICE} in ${SERVICE_STACK}"
-            cd ${DC_DIR}/${SERVICE_STACK}
-            ${DC_COMMAND} stop ${SERVICE}
+            #echo "${SERVICE_STACK}"
+            #echo "Found ${SERVICE} in ${SERVICE_STACK}"
+            #echo "${DC_DIR}"
+	    #echo "cd ${DC_DIR}/${SERVICE_STACK}"
+	    cd ${DC_DIR}/${SERVICE_STACK}
+	    ${DC_COMMAND} stop ${SERVICE}
             ${DC_COMMAND} rm -f ${SERVICE}
             cd - > /dev/null
         else
