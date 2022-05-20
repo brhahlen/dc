@@ -223,7 +223,7 @@ function restart-stack-hard(){
             echo -e "\n${STACK}:"
             cd $STACK
             ${DC_COMMAND} down
-            ${DC_COMMAND} up
+            ${DC_COMMAND} up -d
             cd - > /dev/null
         done
     else
@@ -234,7 +234,7 @@ function restart-stack-hard(){
                 echo "Restarting stack ${STACK}"
                 cd ${STACK_DIR}
                 ${DC_COMMAND} down
-                ${DC_COMMAND} up
+                ${DC_COMMAND} up -d
                 cd - > /dev/null
             else
                 echo "Stack ${STACK} does not exist. Did you type the name correctly?"
