@@ -10,11 +10,11 @@ _dc_completions()
     cmd="${COMP_WORDS[1]}"
 
     # Basic/main options that will be completed
-    OPTS="install up down restart-stack logs-stack start stop restart pull logs network list help version"
+    OPTS="install up down restart-stack-hard restart-stack-soft logs-stack start stop restart pull logs network list help version"
 
     # Based on the arguments, we can run functions
     case "$cmd" in
-        up|down|restart-stack|logs-stack)
+        up|down|restart-stack-hard|restart-stack-soft|logs-stack)
             local STACKS=$(for STACK in `find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -u | rev | cut -d / -f 1 | rev`; do echo ${STACK} ; done )
             if [ ! "$cmd" == "logs-stack" ]; then
                 STACKS="all ${STACKS}"

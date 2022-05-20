@@ -211,7 +211,40 @@ function down(){
     }
 
 # RESTART-STACK
-function restart-stack(){
+## HARD
+# RESTART-STACK
+function restart-stack-hard(){
+    if [ -z "$1" ]; then
+        echo "No argument provided, please use the name of a stack or all"
+    elif [ "$1" == "all" ]; then
+        echo "Hard Restarting all stacks"
+        for STACK in $(find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -u);
+        do
+            echo -e "\n${STACK}:"
+            cd $STACK
+            ${DC_COMMAND} down
+            ${DC_COMMAND} up
+            cd - > /dev/null
+        done
+    else
+        for STACK in $@;
+        do
+            STACK_DIR="${DC_DIR}/${STACK}"
+            if [ -d "${STACK_DIR}" ]; then
+                echo "Restarting stack ${STACK}"
+                cd ${STACK_DIR}
+                ${DC_COMMAND} down
+                ${DC_COMMAND} up
+                cd - > /dev/null
+            else
+                echo "Stack ${STACK} does not exist. Did you type the name correctly?"
+            fi
+        done
+    fi
+    }
+
+## SOFT
+function restart-stack-soft(){
     if [ -z "$1" ]; then
         echo "No argument provided, please use the name of a stack or all"
     elif [ "$1" == "all" ]; then
