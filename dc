@@ -439,9 +439,14 @@ case ${1} in
         down ${@:2}
         ;;
 
-# ----------- restart-stack ------------
-    "restart-stack")
-        restart-stack ${@:2}
+# ----------- restart-stack-hard ------------
+    "restart-stack-hard")
+        restart-stack-hard ${@:2}
+        ;;
+
+# ----------- restart-stack-soft ------------
+    "restart-stack-soft")
+        restart-stack-soft ${@:2}
         ;;
 
 # ----------- logs-stack ------------
