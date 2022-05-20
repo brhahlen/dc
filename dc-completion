@@ -1,5 +1,5 @@
 #/usr/bin/env bash
-# Copyright (C) 2021 Ben Hählen
+# Copyright (C) 2022 Ben Hählen
 # This is the completion file for `dc`
 _dc_completions()
 {

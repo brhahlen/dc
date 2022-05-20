@@ -1,3 +1,8 @@
+# Version 1.3.0
+## New/Modified Features
+- `restart-stack` has been renamed to `restart-stack-soft`
+- `restart-stack-hard` has been added (basically down/up stack)
+
 # Version 1.2.0
 ## Fixes
 - Fixed error when having two containers with same part of name

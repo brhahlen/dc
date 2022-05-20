@@ -1,9 +1,9 @@
 #!/bin/bash
 ##################################
-# Copyright (C) 2021 Ben Hählen
+# Copyright (C) 2022 Ben Hählen
 ##################################
 # VERSION
-export DC_VERSION=v1.2.0
+export DC_VERSION=v1.3.0
 
 ###### PREREQUISITE CHECKS
 # tee
