@@ -1,4 +1,3 @@
-# Version 1.3.0
+# Version 1.3.1
 ## New/Modified Features
-- `restart-stack` has been renamed to `restart-stack-soft`
-- `restart-stack-hard` has been added (basically down/up stack)
+- `logs` now outputs 100 lines of logs, to allow you to catch up
