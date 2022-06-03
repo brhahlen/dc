@@ -359,7 +359,7 @@ function pull(){
         if grep -r -q -x ${SERVICE} ${TMP_DIR}; then
             # SERVICE_STACK=$(grep -r -x ${SERVICE} ${TMP_DIR} | rev | cut -d / -f 1 | rev | cut -d : -f 1 )
             SERVICE_STACK=$(basename $(grep -r -x ${SERVICE} ${TMP_DIR} | cut -d : -f 1 ))
-            if [ "VERBOSE" = true]; then
+            if [ "VERBOSE" = true ]; then
                 echo "${SERVICE_STACK}"
                 echo "Found ${SERVICE} in ${SERVICE_STACK}"
             fi
