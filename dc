@@ -434,7 +434,7 @@ function list(){
 # Verbosity, yes, no?
 while getopts ":v" opt; do
   case $opt in
-    -v)
+    v)
       echo "-v was triggered!" >&2
       ;;
     *)
