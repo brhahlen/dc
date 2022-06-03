@@ -15,8 +15,8 @@ _dc_completions()
     # Based on the arguments, we can run functions
     case "$cmd" in
         v)
-            shift
-            ;;
+            cmd="${COMP_WORDS[2]}"
+            ;;&
         up|down|restart-stack-hard|restart-stack-soft|logs-stack)
             local STACKS=$(for STACK in `find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -u | rev | cut -d / -f 1 | rev`; do echo ${STACK} ; done )
             if [ ! "$cmd" == "logs-stack" ]; then
