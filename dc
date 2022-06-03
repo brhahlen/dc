@@ -58,18 +58,6 @@ export NC='\033[0m' # No Color
 export VERBOSE=false
 
 ###### HELPER FUNCTIONS
-# Verbosity, yes, no?
-while getopts ":v" opt; do
-  case $opt in
-    v)
-      echo "-v was triggered!" >&2
-      ;;
-    \?)
-      echo "Invalid option: -$OPTARG" >&2
-      ;;
-  esac
-done
-
 # TMP_DIR STACK SERVICES
 function tmp_dir_stack_files(){
     if [ ! -d "${TMP_DIR}" ]; then
@@ -443,6 +431,13 @@ function list(){
     }
 
 ###### CASES
+# Verbosity, yes, no?
+while getopts ":v" opt; do
+  case $opt in
+    -v)
+      echo "-v was triggered!" >&2
+      ;;
+    *)
 case ${1} in
 # ----------- install ------------
     "install")
