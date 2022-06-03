@@ -435,7 +435,8 @@ function list(){
 while getopts ":v" opt; do
   case $opt in
     v)
-      echo "-v was triggered!" >&2
+      echo "-v was triggered!"
+      shift 1
       ;;
     *)
 case ${1} in
