@@ -353,7 +353,8 @@ function pull(){
     for SERVICE in $@;
     do
         if grep -r -q -x ${SERVICE} ${TMP_DIR}; then
-            SERVICE_STACK=$(grep -r -x ${SERVICE} ${TMP_DIR} | rev | cut -d / -f 1 | rev | cut -d : -f 1 )
+            # SERVICE_STACK=$(grep -r -x ${SERVICE} ${TMP_DIR} | rev | cut -d / -f 1 | rev | cut -d : -f 1 )
+            SERVICE_STACK=basename $(grep -r -x ${SERVICE} ${TMP_DIR} | cut -d : -f 1 )
             # echo "${SERVICE_STACK}"
             # echo "Found ${SERVICE} in ${SERVICE_STACK}"
             cd ${DC_DIR}/${SERVICE_STACK}
