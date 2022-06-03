@@ -441,7 +441,7 @@ while getopts ":v" opt; do
       echo "Invalid option: -$OPTARG" >&2
       ;;
   esac
-done
+# done
 case ${1} in
 # ----------- install ------------
     "install")
@@ -535,3 +535,4 @@ case ${1} in
         show_usage
         ;;
 esac
+done
