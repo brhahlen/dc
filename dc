@@ -527,12 +527,12 @@ case ${1} in
         fi
         ;;
 # ----------- All others ------------
-    *)
-        echo "Invalid command ${RED}${1}${NC}, showing help"
-        show_usage
-        ;;
     "")
         echo "Missing command, showing help"
+        show_usage
+        ;;
+    *)
+        echo "Invalid command ${RED} ${1} ${NC}, showing help"
         show_usage
         ;;
 esac
