@@ -59,16 +59,15 @@ export VERBOSE=false
 
 ###### HELPER FUNCTIONS
 # Verbosity, yes, no?
-while getopts ":v:" option; do
-   case $option in
-      v) # Enable verbosity
-         export VERBOSE=true
-         echo "Verbosity enabled"
-         shift;;
-     \?) # Invalid option
-         echo "Error: Invalid option"
-         exit;;
-   esac
+while getopts ":v" opt; do
+  case $opt in
+    v)
+      echo "-v was triggered!" >&2
+      ;;
+    \?)
+      echo "Invalid option: -$OPTARG" >&2
+      ;;
+  esac
 done
 
 # TMP_DIR STACK SERVICES
