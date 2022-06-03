@@ -54,9 +54,24 @@ export TMP_DIR="/tmp/dc_stack_services"
 export RED='\033[0;31m'
 export BLUE='\033[0;34m'
 export NC='\033[0m' # No Color
+# Verbosity
+export VERBOSE=false
 
 ###### HELPER FUNCTIONS
-# MP_DIR STACK SERVICES
+# Verbosity, yes, no?
+while getopts ":v:" option; do
+   case $option in
+      v) # Enable verbosity
+         export VERBOSE=true
+         echo "Verbosity enabled";;
+         Name=$OPTARG;;
+     \?) # Invalid option
+         echo "Error: Invalid option"
+         exit;;
+   esac
+done
+
+# TMP_DIR STACK SERVICES
 function tmp_dir_stack_files(){
     if [ ! -d "${TMP_DIR}" ]; then
         # echo "${TMP_DIR} not found. Creating..."
