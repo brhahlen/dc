@@ -64,7 +64,6 @@ while getopts ":v:" option; do
       v) # Enable verbosity
          export VERBOSE=true
          echo "Verbosity enabled";;
-         Name=$OPTARG;;
      \?) # Invalid option
          echo "Error: Invalid option"
          exit;;
