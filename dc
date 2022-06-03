@@ -359,8 +359,10 @@ function pull(){
         if grep -r -q -x ${SERVICE} ${TMP_DIR}; then
             # SERVICE_STACK=$(grep -r -x ${SERVICE} ${TMP_DIR} | rev | cut -d / -f 1 | rev | cut -d : -f 1 )
             SERVICE_STACK=$(basename $(grep -r -x ${SERVICE} ${TMP_DIR} | cut -d : -f 1 ))
-            # echo "${SERVICE_STACK}"
-            # echo "Found ${SERVICE} in ${SERVICE_STACK}"
+            if [ "VERBOSE" = true]; then
+                echo "${SERVICE_STACK}"
+                echo "Found ${SERVICE} in ${SERVICE_STACK}"
+            fi
             cd ${DC_DIR}/${SERVICE_STACK}
             ${DC_COMMAND} pull ${SERVICE}
             cd - > /dev/null
@@ -433,107 +435,108 @@ function list(){
 ###### CASES
 # Verbosity, yes, no?
 while getopts ":v" opt; do
-  case $opt in
-    v)
-      echo "-v was triggered!" >&2
-      shift
-      ;;
-    # \?)
-    #   echo "Invalid option: -$OPTARG" >&2
-    #   ;;
-  esac
+    case $opt in
+        v)
+        echo "-v was triggered!" >&2
+        export VERBOSE=true
+        shift
+        ;;
+        # \?)
+        #   echo "Invalid option: -$OPTARG" >&2
+        #   ;;
+    esac
 # done
-case ${1} in
-# ----------- install ------------
-    "install")
-        install
-        ;;
+    case ${1} in
+    # ----------- install ------------
+        "install")
+            install
+            ;;
 
-# ----------- up ------------
-    "up")
-        up ${@:2}
-        ;;
+    # ----------- up ------------
+        "up")
+            up ${@:2}
+            ;;
 
-# ----------- down ------------
-    "down")
-        down ${@:2}
-        ;;
+    # ----------- down ------------
+        "down")
+            down ${@:2}
+            ;;
 
-# ----------- restart-stack-hard ------------
-    "restart-stack-hard")
-        restart-stack-hard ${@:2}
-        ;;
+    # ----------- restart-stack-hard ------------
+        "restart-stack-hard")
+            restart-stack-hard ${@:2}
+            ;;
 
-# ----------- restart-stack-soft ------------
-    "restart-stack-soft")
-        restart-stack-soft ${@:2}
-        ;;
+    # ----------- restart-stack-soft ------------
+        "restart-stack-soft")
+            restart-stack-soft ${@:2}
+            ;;
 
-# ----------- logs-stack ------------
-    "logs-stack")
-        logs-stack ${@:2}
-        ;;
+    # ----------- logs-stack ------------
+        "logs-stack")
+            logs-stack ${@:2}
+            ;;
 
-# ----------- start ------------
-    "start")
-        start ${@:2}
-        ;;
+    # ----------- start ------------
+        "start")
+            start ${@:2}
+            ;;
 
-# ----------- stop ------------
-    "stop")
-        stop ${@:2}
-        ;;
+    # ----------- stop ------------
+        "stop")
+            stop ${@:2}
+            ;;
 
-# ----------- restart ------------
-    "restart")
-        restart ${@:2}
-        ;;
+    # ----------- restart ------------
+        "restart")
+            restart ${@:2}
+            ;;
 
-# ----------- pull ------------
-    "pull")
-        pull ${@:2}
-        ;;
+    # ----------- pull ------------
+        "pull")
+            pull ${@:2}
+            ;;
 
-# ----------- logs ------------
-    "logs")
-        logs ${@:2}
-        ;;
+    # ----------- logs ------------
+        "logs")
+            logs ${@:2}
+            ;;
 
-# ----------- network ------------
-    "network")
-        network
-        ;;
+    # ----------- network ------------
+        "network")
+            network
+            ;;
 
-# ----------- list ------------
-    "list")
-        list
-        ;;
-# ----------- version ------------
-    "version")
-        export LATEST_VERSION=$(curl --silent https://api.github.com/repos/brhahlen/dc/releases/latest | grep -Po '"tag_name": "\K.*?(?=")')
-        if [[ ${DC_VERSION} =~ "dev" ]]; then
-            printf "This is version ${RED}${DC_VERSION}${NC} of ${RED}dc${NC}\n"
-            printf "This is a development version\n"
-            printf "The latest release version is ${BLUE}${LATEST_VERSION}${NC} \n"
-        else
-            printf "This is version ${DC_VERSION} of ${RED}dc${NC}\n"
-            printf "Release notes can be found at https://github.com/brhahlen/dc/releases/tag/${DC_VERSION} \n"
-            if [ ! "$(printf '%s\n' "${LATEST_VERSION}" "${DC_VERSION}" | sort -V | head -n1)" = "${LATEST_VERSION}" ]; then
-                printf "####################################\n"
-                printf "A newer version of ${RED}dc${NC} is avaiable\n"
+    # ----------- list ------------
+        "list")
+            list
+            ;;
+    # ----------- version ------------
+        "version")
+            export LATEST_VERSION=$(curl --silent https://api.github.com/repos/brhahlen/dc/releases/latest | grep -Po '"tag_name": "\K.*?(?=")')
+            if [[ ${DC_VERSION} =~ "dev" ]]; then
+                printf "This is version ${RED}${DC_VERSION}${NC} of ${RED}dc${NC}\n"
+                printf "This is a development version\n"
                 printf "The latest release version is ${BLUE}${LATEST_VERSION}${NC} \n"
-                printf "This can be found at https://github.com/brhahlen/dc/releases/tag/${LATEST_VERSION} \n"
+            else
+                printf "This is version ${DC_VERSION} of ${RED}dc${NC}\n"
+                printf "Release notes can be found at https://github.com/brhahlen/dc/releases/tag/${DC_VERSION} \n"
+                if [ ! "$(printf '%s\n' "${LATEST_VERSION}" "${DC_VERSION}" | sort -V | head -n1)" = "${LATEST_VERSION}" ]; then
+                    printf "####################################\n"
+                    printf "A newer version of ${RED}dc${NC} is avaiable\n"
+                    printf "The latest release version is ${BLUE}${LATEST_VERSION}${NC} \n"
+                    printf "This can be found at https://github.com/brhahlen/dc/releases/tag/${LATEST_VERSION} \n"
+                fi
             fi
-        fi
-        ;;
-# ----------- All others ------------
-    "")
-        printf "Missing command, showing help \n"
-        show_usage
-        ;;
-    *)
-        printf "Invalid command ${RED}${1}${NC}, showing help \n"
-        show_usage
-        ;;
-esac
+            ;;
+    # ----------- All others ------------
+        "")
+            printf "Missing command, showing help \n"
+            show_usage
+            ;;
+        *)
+            printf "Invalid command ${RED}${1}${NC}, showing help \n"
+            show_usage
+            ;;
+    esac
 done
