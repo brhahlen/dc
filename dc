@@ -528,11 +528,11 @@ case ${1} in
         ;;
 # ----------- All others ------------
     "")
-        echo "Missing command, showing help"
+        printf "Missing command, showing help"
         show_usage
         ;;
     *)
-        echo "Invalid command ${1}, showing help"
+        printf "Invalid command ${RED}${1}${NC}, showing help"
         show_usage
         ;;
 esac
