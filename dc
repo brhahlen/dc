@@ -532,7 +532,7 @@ case ${1} in
         show_usage
         ;;
     *)
-        echo "Invalid command ${RED} ${1} ${NC}, showing help"
+        echo "Invalid command ${1}, showing help"
         show_usage
         ;;
 esac
