@@ -70,7 +70,7 @@ function tmp_stack_files_age(){
     for STACK in $(find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -u);
     do
         # STACK_NAME=$(echo ${STACK} | rev | cut -d / -f 1 | rev)
-        STACK_NAME=$(basname ${STACK})
+        STACK_NAME=$(basename ${STACK})
         if [ -f ${TMP_DIR}/${STACK_NAME} ]; then
             # echo "File exists, checking age"
             if [ "$(find ${TMP_DIR}/${STACK_NAME} -mmin +30)" ]; then
