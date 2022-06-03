@@ -63,7 +63,8 @@ while getopts ":v:" option; do
    case $option in
       v) # Enable verbosity
          export VERBOSE=true
-         echo "Verbosity enabled";;
+         echo "Verbosity enabled"
+         shift;;
      \?) # Invalid option
          echo "Error: Invalid option"
          exit;;
