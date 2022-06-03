@@ -14,7 +14,7 @@ _dc_completions()
 
     # Based on the arguments, we can run functions
     case "$cmd" in
-        v)
+        -v)
             cmd="${COMP_WORDS[2]}"
             ;;&
         up|down|restart-stack-hard|restart-stack-soft|logs-stack)
