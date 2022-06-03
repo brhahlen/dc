@@ -13,10 +13,10 @@ _dc_completions()
     OPTS="install up down restart-stack-hard restart-stack-soft logs-stack start stop restart pull logs network list help version"
 
     # Based on the arguments, we can run functions
-    case "$cmd" in
+    case "$PREV" in
         up|down|restart-stack-hard|restart-stack-soft|logs-stack)
             local STACKS=$(for STACK in `find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -u | rev | cut -d / -f 1 | rev`; do echo ${STACK} ; done )
-            if [ ! "$cmd" == "logs-stack" ]; then
+            if [ ! "$PREV" == "logs-stack" ]; then
                 STACKS="all ${STACKS}"
             fi
             COMPREPLY=( $(compgen -W "${STACKS}" -- ${CUR}) )
