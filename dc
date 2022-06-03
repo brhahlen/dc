@@ -528,6 +528,7 @@ case ${1} in
         ;;
 # ----------- All others ------------
     *)
+        echo "Invalid option ${1}, showing help"
         show_usage
         ;;
 esac
