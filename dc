@@ -437,9 +437,9 @@ while getopts ":v" opt; do
     v)
       echo "-v was triggered!" >&2
       ;;
-    \?)
-      echo "Invalid option: -$OPTARG" >&2
-      ;;
+    # \?)
+    #   echo "Invalid option: -$OPTARG" >&2
+    #   ;;
   esac
 # done
 case ${1} in
