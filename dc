@@ -357,7 +357,6 @@ function pull(){
     for SERVICE in $@;
     do
         if grep -r -q -x ${SERVICE} ${TMP_DIR}; then
-            # SERVICE_STACK=$(grep -r -x ${SERVICE} ${TMP_DIR} | rev | cut -d / -f 1 | rev | cut -d : -f 1 )
             SERVICE_STACK=$(basename $(grep -r -x ${SERVICE} ${TMP_DIR} | cut -d : -f 1 ))
             if [ "${VERBOSE}" = true ]; then
                 echo "${SERVICE_STACK}"
@@ -388,10 +387,11 @@ function logs(){
     for SERVICE in $@;
     do
         if grep -r -q -x ${SERVICE} ${TMP_DIR}; then
-            # SERVICE_STACK=$(grep -r -x ${SERVICE} ${TMP_DIR} | rev | cut -d / -f 1 | rev | cut -d : -f 1 )
             SERVICE_STACK=$(basename $(grep -r -x ${SERVICE} ${TMP_DIR} | cut -d : -f 1 ))
-            # echo "${SERVICE_STACK}"
-            # echo "Found ${SERVICE} in ${SERVICE_STACK}"
+            if [ "${VERBOSE}" = true ]; then
+                echo "${SERVICE_STACK}"
+                echo "Found ${SERVICE} in ${SERVICE_STACK}"
+            fi
             cd ${DC_DIR}/${SERVICE_STACK}
             ${DC_COMMAND} logs --tail=100 -f ${SERVICE} &
             if [ -z "$WAIT_PIDS" ]
@@ -406,7 +406,9 @@ function logs(){
             echo "ERROR: Service ${SERVICE} was not found in any of the stacks. Does it show up when you run 'dc list'?"
         fi
     done
-    # echo "\$WAIT_PIDS contains $WAIT_PIDS"
+    if [ "${VERBOSE}" = true ]; then
+        echo "\$WAIT_PIDS contains $WAIT_PIDS"
+    fi
     trap 'trap_kill' SIGHUP SIGINT SIGQUIT SIGTERM
     wait $WAIT_PIDS
     }
@@ -422,7 +424,6 @@ function list(){
     echo "Listing Stacks and Services"
     for STACK in $(find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -u);
     do
-        # STACK_NAME=$(echo ${STACK} | rev | cut -d / -f 1 | rev)
         STACK_NAME=$(basename ${STACK})
         echo "-----------------------------------"
         printf "Stack ${RED}${STACK_NAME}${NC} contains services:\n"
@@ -445,7 +446,6 @@ while getopts ":v" opt; do
         #   echo "Invalid option: -$OPTARG" >&2
         #   ;;
     esac
-# done
     case ${1} in
     # ----------- install ------------
         "install")
