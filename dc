@@ -435,13 +435,13 @@ function list(){
 
 ###### CASES
 # Verbosity, yes, no?
-while getopts "v" opt; do
+while getopts ":v" opt; do
     case $opt in
         v)
             export VERBOSE=true
             ;;
         *)
-            printf "${OPTARG} \n"
+            printf "${OPT} \n"
             printf "Invalid option ${RED}-$opt${NC} provided\n"
             printf "Currently allowed option is:\n"
             printf " ${RED}-v${NC}        Enables verbosity\n"
