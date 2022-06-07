@@ -319,6 +319,7 @@ function start(){
                 echo "ERROR: Service ${SERVICE} was not found in any of the stacks. Does it show up when you run 'dc list'?"
             fi
         done
+    fi
     }
 
 # STOP
