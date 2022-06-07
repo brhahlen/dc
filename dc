@@ -441,8 +441,8 @@ while getopts "v" opt; do
             export VERBOSE=true
             ;;
         *)
-            printf "Invalid option ${RED}${opt}${NC} provided"
-            printf "Currently allowed option is:"
+            printf "Invalid option ${RED}-$opt${NC} provided\n"
+            printf "Currently allowed option is:\n"
             printf " ${RED}-v${NC}        Enables verbosity\n"
             exit
             ;;
