@@ -8,7 +8,7 @@ _dc_completions()
     CUR="${COMP_WORDS[COMP_CWORD]}"
     PREV="${COMP_WORDS[COMP_CWORD-1]}"
 
-    if [ ${1} == "-v"]; then
+    if [ ${1} == "-v" ]; then
         echo "Verbosity is on"
         cmd="${COMP_WORDS[2]}"
     else
