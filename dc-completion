@@ -12,7 +12,7 @@ _dc_completions()
         echo "Verbosity is on"
         cmd="${COMP_WORDS[2]}"
     else
-        cmd="${COMP_WORDs[1]}"
+        cmd="${COMP_WORDS[1]}"
     fi
 
     # Basic/main options that will be completed
