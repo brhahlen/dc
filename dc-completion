@@ -10,8 +10,14 @@ _dc_completions()
 
     if [ ${1} == "-v" ]; then
         echo "Verbosity is on"
+        echo ${1}
+        echo ${2}
+        echo ${COMP_WORDS}
         cmd="${COMP_WORDS[2]}"
     else
+        echo ${1}
+        echo ${2}
+        echo ${COMP_WORDS}
         cmd="${COMP_WORDS[1]}"
     fi
 
