@@ -300,22 +300,25 @@ function logs-stack(){
 # docker-compose ps | grep Exit | cut -d " " -f 1
 # START
 function start(){
-    echo "Starting the following service(s): $@"
-    tmp_stack_files_age
-    for SERVICE in $@;
-    do
-        if grep -r -q -x ${SERVICE} ${TMP_DIR}; then
-            # SERVICE_STACK=$(grep -r -x ${SERVICE} ${TMP_DIR} | rev | cut -d / -f 1 | rev | cut -d : -f 1 )
-            SERVICE_STACK=$(basename $(grep -r -x ${SERVICE} ${TMP_DIR} | cut -d : -f 1 ))
-            # echo "${SERVICE_STACK}"
-            # echo "Found ${SERVICE} in ${SERVICE_STACK}"
-            cd ${DC_DIR}/${SERVICE_STACK}
-            ${DC_COMMAND} up -d ${SERVICE}
-            cd - > /dev/null
-        else
-            echo "ERROR: Service ${SERVICE} was not found in any of the stacks. Does it show up when you run 'dc list'?"
-        fi
-    done
+    if [ -z "$1" ]; then
+        echo "No argument provided, please provide the name of one or more services"
+    else
+        echo "Starting the following service(s): $@"
+        tmp_stack_files_age
+        for SERVICE in $@;
+        do
+            if grep -r -q -x ${SERVICE} ${TMP_DIR}; then
+                # SERVICE_STACK=$(grep -r -x ${SERVICE} ${TMP_DIR} | rev | cut -d / -f 1 | rev | cut -d : -f 1 )
+                SERVICE_STACK=$(basename $(grep -r -x ${SERVICE} ${TMP_DIR} | cut -d : -f 1 ))
+                # echo "${SERVICE_STACK}"
+                # echo "Found ${SERVICE} in ${SERVICE_STACK}"
+                cd ${DC_DIR}/${SERVICE_STACK}
+                ${DC_COMMAND} up -d ${SERVICE}
+                cd - > /dev/null
+            else
+                echo "ERROR: Service ${SERVICE} was not found in any of the stacks. Does it show up when you run 'dc list'?"
+            fi
+        done
     }
 
 # STOP
