@@ -443,7 +443,7 @@ while getopts ":v" opt; do
         \?)
             printf "${opt} \n"
             printf "${OPTARG} \n"
-            printf "Invalid option ${RED}-$opt${NC} provided\n"
+            printf "Invalid option ${RED}-${OPTARG}${NC} provided\n"
             printf "Currently allowed option is:\n"
             printf " ${RED}-v${NC}        Enables verbosity\n"
             exit
