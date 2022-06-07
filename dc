@@ -438,13 +438,16 @@ function list(){
 while getopts ":v" opt; do
     case $opt in
         v)
-        echo "-v was triggered!" >&2
-        export VERBOSE=true
-        shift
-        ;;
-        # \?)
-        #   echo "Invalid option: -$OPTARG" >&2
-        #   ;;
+            echo "-v was triggered!" >&2
+            export VERBOSE=true
+            shift
+            ;;
+        "")
+            echo "No Options provided, continuing"
+            ;;
+        *)
+            echo "Invalid option provided"
+            ;;
     esac
     case ${1} in
     # ----------- install ------------
