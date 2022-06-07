@@ -7,7 +7,12 @@ _dc_completions()
     COMPREPLY=()
     CUR="${COMP_WORDS[COMP_CWORD]}"
     PREV="${COMP_WORDS[COMP_CWORD-1]}"
-    cmd="${COMP_WORDS[1]}"
+
+    if [ "${COMP_WORDS[1]}" == "-v" ]; then
+        cmd="${COMP_WORDS[2]}"
+    else
+        cmd="${COMP_WORDS[1]}"
+    fi
 
     # Basic/main options that will be completed
     OPTS="install up down restart-stack-hard restart-stack-soft logs-stack start stop restart pull logs network list help version"

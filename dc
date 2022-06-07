@@ -3,7 +3,7 @@
 # Copyright (C) 2022 Ben Hählen
 ##################################
 # VERSION
-export DC_VERSION=v1.3.1
+export DC_VERSION=v1.4.0
 
 ###### PREREQUISITE CHECKS
 # tee
@@ -54,9 +54,11 @@ export TMP_DIR="/tmp/dc_stack_services"
 export RED='\033[0;31m'
 export BLUE='\033[0;34m'
 export NC='\033[0m' # No Color
+# Verbosity
+export VERBOSE=false
 
 ###### HELPER FUNCTIONS
-# MP_DIR STACK SERVICES
+# TMP_DIR STACK SERVICES
 function tmp_dir_stack_files(){
     if [ ! -d "${TMP_DIR}" ]; then
         # echo "${TMP_DIR} not found. Creating..."
@@ -69,7 +71,8 @@ function tmp_stack_files_age(){
     tmp_dir_stack_files
     for STACK in $(find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -u);
     do
-        STACK_NAME=$(echo ${STACK} | rev | cut -d / -f 1 | rev)
+        # STACK_NAME=$(echo ${STACK} | rev | cut -d / -f 1 | rev)
+        STACK_NAME=$(basename ${STACK})
         if [ -f ${TMP_DIR}/${STACK_NAME} ]; then
             # echo "File exists, checking age"
             if [ "$(find ${TMP_DIR}/${STACK_NAME} -mmin +30)" ]; then
@@ -90,9 +93,9 @@ function tmp_stack_files_age(){
 ###### MAIN FUNCTIONS
 # USAGE
 function show_usage (){
-    printf "Usage: $0 [options] [stacks]\n"
+    printf "Usage: $0 [command] [stacks]\n"
     printf "\n"
-    printf "Options:\n"
+    printf "Commands:\n"
     printf " ${RED}install${NC}        Install dc for the user, needs sudo\n"
     printf " ${RED}up${NC}             Bring up all stacks, a stack, or stacks\n"
     printf " ${RED}down${NC}           Bring down all stacks, a stack or stack(s)\n"
@@ -297,109 +300,137 @@ function logs-stack(){
 # docker-compose ps | grep Exit | cut -d " " -f 1
 # START
 function start(){
-    echo "Starting the following service(s): $@"
-    tmp_stack_files_age
-    for SERVICE in $@;
-    do
-        if grep -r -q -x ${SERVICE} ${TMP_DIR}; then
-            SERVICE_STACK=$(grep -r -x ${SERVICE} ${TMP_DIR} | rev | cut -d / -f 1 | rev | cut -d : -f 1 )
-            # echo "${SERVICE_STACK}"
-            # echo "Found ${SERVICE} in ${SERVICE_STACK}"
-            cd ${DC_DIR}/${SERVICE_STACK}
-            ${DC_COMMAND} up -d ${SERVICE}
-            cd - > /dev/null
-        else
-            echo "ERROR: Service ${SERVICE} was not found in any of the stacks. Does it show up when you run 'dc list'?"
-        fi
-    done
+    if [ -z "$1" ]; then
+        echo "No argument provided, please provide the name of one or more services"
+    else
+        echo "Starting the following service(s): $@"
+        tmp_stack_files_age
+        for SERVICE in $@;
+        do
+            if grep -r -q -x ${SERVICE} ${TMP_DIR}; then
+                # SERVICE_STACK=$(grep -r -x ${SERVICE} ${TMP_DIR} | rev | cut -d / -f 1 | rev | cut -d : -f 1 )
+                SERVICE_STACK=$(basename $(grep -r -x ${SERVICE} ${TMP_DIR} | cut -d : -f 1 ))
+                # echo "${SERVICE_STACK}"
+                # echo "Found ${SERVICE} in ${SERVICE_STACK}"
+                cd ${DC_DIR}/${SERVICE_STACK}
+                ${DC_COMMAND} up -d ${SERVICE}
+                cd - > /dev/null
+            else
+                echo "ERROR: Service ${SERVICE} was not found in any of the stacks. Does it show up when you run 'dc list'?"
+            fi
+        done
+    fi
     }
 
 # STOP
 # Stop also removes the image
 function stop(){
-    echo "Stopping the following service(s): $@"
-    tmp_stack_files_age
-    for SERVICE in $@;
-    do
-        if grep -r -q -x ${SERVICE} ${TMP_DIR}; then
-            SERVICE_STACK=$(grep -r -x ${SERVICE} ${TMP_DIR} | rev | cut -d / -f 1 | rev | cut -d : -f 1 )
-            # echo "${SERVICE_STACK}"
-            # echo "Found ${SERVICE} in ${SERVICE_STACK}"
-            # echo "${DC_DIR}"
-        # echo "cd ${DC_DIR}/${SERVICE_STACK}"
-        cd ${DC_DIR}/${SERVICE_STACK}
-        ${DC_COMMAND} stop ${SERVICE}
-            ${DC_COMMAND} rm -f ${SERVICE}
-            cd - > /dev/null
-        else
-            echo "ERROR: Service ${SERVICE} was not found in any of the stacks. Does it show up when you run 'dc list'?"
-        fi
-    done
+    if [ -z "$1" ]; then
+        echo "No argument provided, please provide the name of one or more services"
+    else
+        echo "Stopping the following service(s): $@"
+        tmp_stack_files_age
+        for SERVICE in $@;
+        do
+            if grep -r -q -x ${SERVICE} ${TMP_DIR}; then
+                # SERVICE_STACK=$(grep -r -x ${SERVICE} ${TMP_DIR} | rev | cut -d / -f 1 | rev | cut -d : -f 1 )
+                SERVICE_STACK=$(basename $(grep -r -x ${SERVICE} ${TMP_DIR} | cut -d : -f 1 ))
+                # echo "${SERVICE_STACK}"
+                # echo "Found ${SERVICE} in ${SERVICE_STACK}"
+                # echo "${DC_DIR}"
+            # echo "cd ${DC_DIR}/${SERVICE_STACK}"
+            cd ${DC_DIR}/${SERVICE_STACK}
+            ${DC_COMMAND} stop ${SERVICE}
+                ${DC_COMMAND} rm -f ${SERVICE}
+                cd - > /dev/null
+            else
+                echo "ERROR: Service ${SERVICE} was not found in any of the stacks. Does it show up when you run 'dc list'?"
+            fi
+        done
+    fi
     }
 
 # RESTART
 # Restart is basically a stop and start in sequence
 function restart(){
-    echo "Restarting the following service(s): $@"
-    stop $@
-    start $@
+    if [ -z "$1" ]; then
+        echo "No argument provided, please provide the name of one or more services"
+    else
+        echo "Restarting the following service(s): $@"
+        stop $@
+        start $@
+    fi
     }
 
 # PULL
 function pull(){
-    echo "Pulling images for the following service(s): $@"
-    tmp_stack_files_age
-    for SERVICE in $@;
-    do
-        if grep -r -q -x ${SERVICE} ${TMP_DIR}; then
-            SERVICE_STACK=$(grep -r -x ${SERVICE} ${TMP_DIR} | rev | cut -d / -f 1 | rev | cut -d : -f 1 )
-            # echo "${SERVICE_STACK}"
-            # echo "Found ${SERVICE} in ${SERVICE_STACK}"
-            cd ${DC_DIR}/${SERVICE_STACK}
-            ${DC_COMMAND} pull ${SERVICE}
-            cd - > /dev/null
-        else
-            echo "ERROR: Service ${SERVICE} was not found in any of the stacks. Does it show up when you run 'dc list'?"
-        fi
-    done
+    if [ -z "$1" ]; then
+        echo "No argument provided, please provide the name of one or more services"
+    else
+        echo "Pulling images for the following service(s): $@"
+        tmp_stack_files_age
+        for SERVICE in $@;
+        do
+            if grep -r -q -x ${SERVICE} ${TMP_DIR}; then
+                SERVICE_STACK=$(basename $(grep -r -x ${SERVICE} ${TMP_DIR} | cut -d : -f 1 ))
+                if [ "${VERBOSE}" = true ]; then
+                    echo "${SERVICE_STACK}"
+                    echo "Found ${SERVICE} in ${SERVICE_STACK}"
+                fi
+                cd ${DC_DIR}/${SERVICE_STACK}
+                ${DC_COMMAND} pull ${SERVICE}
+                cd - > /dev/null
+            else
+                echo "ERROR: Service ${SERVICE} was not found in any of the stacks. Does it show up when you run 'dc list'?"
+            fi
+        done
+    fi
     }
 
 function logs(){
     # Need this function to ensure that all child process are killed from the logs command
-    trap_kill(){
-    for PID in $WAIT_PIDS;
-    do
-        # echo "\$PID is $PID"
-        CHILD_PID=`ps --ppid $PID -o pid=`
-        # echo "CHILD_PID is $CHILD_PID"
-        kill $CHILD_PID
-    done
-    }
-    echo "Showing logs for the following service(s): $@"
-    tmp_stack_files_age
-    for SERVICE in $@;
-    do
-        if grep -r -q -x ${SERVICE} ${TMP_DIR}; then
-            SERVICE_STACK=$(grep -r -x ${SERVICE} ${TMP_DIR} | rev | cut -d / -f 1 | rev | cut -d : -f 1 )
-            # echo "${SERVICE_STACK}"
-            # echo "Found ${SERVICE} in ${SERVICE_STACK}"
-            cd ${DC_DIR}/${SERVICE_STACK}
-            ${DC_COMMAND} logs --tail=100 -f ${SERVICE} &
-            if [ -z "$WAIT_PIDS" ]
-                then
-                    export WAIT_PIDS="$!"
-                else
-                    export WAIT_PIDS="$WAIT_PIDS $!"
+    if [ -z "$1" ]; then
+        echo "No argument provided, please provide the name of one or more services"
+    else
+        trap_kill(){
+        for PID in $WAIT_PIDS;
+        do
+            # echo "\$PID is $PID"
+            CHILD_PID=`ps --ppid $PID -o pid=`
+            # echo "CHILD_PID is $CHILD_PID"
+            kill $CHILD_PID
+        done
+        }
+        echo "Showing logs for the following service(s): $@"
+        tmp_stack_files_age
+        for SERVICE in $@;
+        do
+            if grep -r -q -x ${SERVICE} ${TMP_DIR}; then
+                SERVICE_STACK=$(basename $(grep -r -x ${SERVICE} ${TMP_DIR} | cut -d : -f 1 ))
+                if [ "${VERBOSE}" = true ]; then
+                    echo "${SERVICE_STACK}"
+                    echo "Found ${SERVICE} in ${SERVICE_STACK}"
+                fi
+                cd ${DC_DIR}/${SERVICE_STACK}
+                ${DC_COMMAND} logs --tail=100 -f ${SERVICE} &
+                if [ -z "$WAIT_PIDS" ]
+                    then
+                        export WAIT_PIDS="$!"
+                    else
+                        export WAIT_PIDS="$WAIT_PIDS $!"
+                fi
+                echo "PID=$!"
+                cd - > /dev/null
+            else
+                echo "ERROR: Service ${SERVICE} was not found in any of the stacks. Does it show up when you run 'dc list'?"
             fi
-            echo "PID=$!"
-            cd - > /dev/null
-        else
-            echo "ERROR: Service ${SERVICE} was not found in any of the stacks. Does it show up when you run 'dc list'?"
+        done
+        if [ "${VERBOSE}" = true ]; then
+            echo "\$WAIT_PIDS contains $WAIT_PIDS"
         fi
-    done
-    # echo "\$WAIT_PIDS contains $WAIT_PIDS"
-    trap 'trap_kill' SIGHUP SIGINT SIGQUIT SIGTERM
-    wait $WAIT_PIDS
+        trap 'trap_kill' SIGHUP SIGINT SIGQUIT SIGTERM
+        wait $WAIT_PIDS
+    fi
     }
 
 # NETWORK
@@ -413,7 +444,7 @@ function list(){
     echo "Listing Stacks and Services"
     for STACK in $(find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -u);
     do
-        STACK_NAME=$(echo ${STACK} | rev | cut -d / -f 1 | rev)
+        STACK_NAME=$(basename ${STACK})
         echo "-----------------------------------"
         printf "Stack ${RED}${STACK_NAME}${NC} contains services:\n"
         cd ${STACK}
@@ -423,91 +454,114 @@ function list(){
     }
 
 ###### CASES
-case ${1} in
-# ----------- install ------------
-    "install")
-        install
-        ;;
+# Verbosity, yes, no?
+while getopts ":v" opt; do
+    case $opt in
+        v)
+            export VERBOSE=true
+            ;;
+        \?)
+            printf "${opt} \n"
+            printf "${OPTARG} \n"
+            printf "Invalid option ${RED}-${OPTARG}${NC} provided\n"
+            printf "Currently allowed option is:\n"
+            printf " ${RED}-v${NC}        Enables verbosity\n"
+            exit
+            ;;
+    esac
+done
+    shift $(( OPTIND - 1 ))
+    case ${1} in
+    # ----------- install ------------
+        "install")
+            install
+            ;;
 
-# ----------- up ------------
-    "up")
-        up ${@:2}
-        ;;
+    # ----------- up ------------
+        "up")
+            up ${@:2}
+            ;;
 
-# ----------- down ------------
-    "down")
-        down ${@:2}
-        ;;
+    # ----------- down ------------
+        "down")
+            down ${@:2}
+            ;;
 
-# ----------- restart-stack-hard ------------
-    "restart-stack-hard")
-        restart-stack-hard ${@:2}
-        ;;
+    # ----------- restart-stack-hard ------------
+        "restart-stack-hard")
+            restart-stack-hard ${@:2}
+            ;;
 
-# ----------- restart-stack-soft ------------
-    "restart-stack-soft")
-        restart-stack-soft ${@:2}
-        ;;
+    # ----------- restart-stack-soft ------------
+        "restart-stack-soft")
+            restart-stack-soft ${@:2}
+            ;;
 
-# ----------- logs-stack ------------
-    "logs-stack")
-        logs-stack ${@:2}
-        ;;
+    # ----------- logs-stack ------------
+        "logs-stack")
+            logs-stack ${@:2}
+            ;;
 
-# ----------- start ------------
-    "start")
-        start ${@:2}
-        ;;
+    # ----------- start ------------
+        "start")
+            start ${@:2}
+            ;;
 
-# ----------- stop ------------
-    "stop")
-        stop ${@:2}
-        ;;
+    # ----------- stop ------------
+        "stop")
+            stop ${@:2}
+            ;;
 
-# ----------- restart ------------
-    "restart")
-        restart ${@:2}
-        ;;
+    # ----------- restart ------------
+        "restart")
+            restart ${@:2}
+            ;;
 
-# ----------- pull ------------
-    "pull")
-        pull ${@:2}
-        ;;
+    # ----------- pull ------------
+        "pull")
+            pull ${@:2}
+            ;;
 
-# ----------- logs ------------
-    "logs")
-        logs ${@:2}
-        ;;
+    # ----------- logs ------------
+        "logs")
+            logs ${@:2}
+            ;;
 
-# ----------- network ------------
-    "network")
-        network
-        ;;
+    # ----------- network ------------
+        "network")
+            network
+            ;;
 
-# ----------- list ------------
-    "list")
-        list
-        ;;
-# ----------- version ------------
-    "version")
-        export LATEST_VERSION=$(curl --silent https://api.github.com/repos/brhahlen/dc/releases/latest | grep -Po '"tag_name": "\K.*?(?=")')
-        if [[ ${DC_VERSION} =~ "dev" ]]; then
-            printf "This is version ${RED}${DC_VERSION}${NC} of ${RED}dc${NC}\n"
-            printf "This is a development version\n"
-            printf "The latest release version is ${BLUE}${LATEST_VERSION}${NC} \n"
-        else
-            printf "This is version ${DC_VERSION} of ${RED}dc${NC}\n"
-            printf "Release notes can be found at https://github.com/brhahlen/dc/releases/tag/${DC_VERSION} \n"
-            if [ ! "$(printf '%s\n' "${LATEST_VERSION}" "${DC_VERSION}" | sort -V | head -n1)" = "${LATEST_VERSION}" ]; then
-                printf "####################################\n"
-                printf "A newer version of ${RED}dc${NC} is avaiable\n"
+    # ----------- list ------------
+        "list")
+            list
+            ;;
+    # ----------- version ------------
+        "version")
+            export LATEST_VERSION=$(curl --silent https://api.github.com/repos/brhahlen/dc/releases/latest | grep -Po '"tag_name": "\K.*?(?=")')
+            if [[ ${DC_VERSION} =~ "dev" ]]; then
+                printf "This is version ${RED}${DC_VERSION}${NC} of ${RED}dc${NC}\n"
+                printf "This is a development version\n"
                 printf "The latest release version is ${BLUE}${LATEST_VERSION}${NC} \n"
-                printf "This can be found at https://github.com/brhahlen/dc/releases/tag/${LATEST_VERSION} \n"
+            else
+                printf "This is version ${DC_VERSION} of ${RED}dc${NC}\n"
+                printf "Release notes can be found at https://github.com/brhahlen/dc/releases/tag/${DC_VERSION} \n"
+                if [ ! "$(printf '%s\n' "${LATEST_VERSION}" "${DC_VERSION}" | sort -V | head -n1)" = "${LATEST_VERSION}" ]; then
+                    printf "####################################\n"
+                    printf "A newer version of ${RED}dc${NC} is avaiable\n"
+                    printf "The latest release version is ${BLUE}${LATEST_VERSION}${NC} \n"
+                    printf "This can be found at https://github.com/brhahlen/dc/releases/tag/${LATEST_VERSION} \n"
+                fi
             fi
-        fi
-        ;;
-# ----------- All others ------------
-    *)
-        show_usage
-        ;;
-esac
+            ;;
+    # ----------- All others ------------
+        "")
+            printf "Missing command, showing help \n"
+            show_usage
+            ;;
+        *)
+            printf "Invalid command ${RED}${1}${NC}, showing help \n"
+            show_usage
+            ;;
+    esac
+#done
