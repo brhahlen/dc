@@ -325,96 +325,112 @@ function start(){
 # STOP
 # Stop also removes the image
 function stop(){
-    echo "Stopping the following service(s): $@"
-    tmp_stack_files_age
-    for SERVICE in $@;
-    do
-        if grep -r -q -x ${SERVICE} ${TMP_DIR}; then
-            # SERVICE_STACK=$(grep -r -x ${SERVICE} ${TMP_DIR} | rev | cut -d / -f 1 | rev | cut -d : -f 1 )
-            SERVICE_STACK=$(basename $(grep -r -x ${SERVICE} ${TMP_DIR} | cut -d : -f 1 ))
-            # echo "${SERVICE_STACK}"
-            # echo "Found ${SERVICE} in ${SERVICE_STACK}"
-            # echo "${DC_DIR}"
-        # echo "cd ${DC_DIR}/${SERVICE_STACK}"
-        cd ${DC_DIR}/${SERVICE_STACK}
-        ${DC_COMMAND} stop ${SERVICE}
-            ${DC_COMMAND} rm -f ${SERVICE}
-            cd - > /dev/null
-        else
-            echo "ERROR: Service ${SERVICE} was not found in any of the stacks. Does it show up when you run 'dc list'?"
-        fi
-    done
+    if [ -z "$1" ]; then
+        echo "No argument provided, please provide the name of one or more services"
+    else
+        echo "Stopping the following service(s): $@"
+        tmp_stack_files_age
+        for SERVICE in $@;
+        do
+            if grep -r -q -x ${SERVICE} ${TMP_DIR}; then
+                # SERVICE_STACK=$(grep -r -x ${SERVICE} ${TMP_DIR} | rev | cut -d / -f 1 | rev | cut -d : -f 1 )
+                SERVICE_STACK=$(basename $(grep -r -x ${SERVICE} ${TMP_DIR} | cut -d : -f 1 ))
+                # echo "${SERVICE_STACK}"
+                # echo "Found ${SERVICE} in ${SERVICE_STACK}"
+                # echo "${DC_DIR}"
+            # echo "cd ${DC_DIR}/${SERVICE_STACK}"
+            cd ${DC_DIR}/${SERVICE_STACK}
+            ${DC_COMMAND} stop ${SERVICE}
+                ${DC_COMMAND} rm -f ${SERVICE}
+                cd - > /dev/null
+            else
+                echo "ERROR: Service ${SERVICE} was not found in any of the stacks. Does it show up when you run 'dc list'?"
+            fi
+        done
+    fi
     }
 
 # RESTART
 # Restart is basically a stop and start in sequence
 function restart(){
-    echo "Restarting the following service(s): $@"
-    stop $@
-    start $@
+    if [ -z "$1" ]; then
+        echo "No argument provided, please provide the name of one or more services"
+    else
+        echo "Restarting the following service(s): $@"
+        stop $@
+        start $@
+    fi
     }
 
 # PULL
 function pull(){
-    echo "Pulling images for the following service(s): $@"
-    tmp_stack_files_age
-    for SERVICE in $@;
-    do
-        if grep -r -q -x ${SERVICE} ${TMP_DIR}; then
-            SERVICE_STACK=$(basename $(grep -r -x ${SERVICE} ${TMP_DIR} | cut -d : -f 1 ))
-            if [ "${VERBOSE}" = true ]; then
-                echo "${SERVICE_STACK}"
-                echo "Found ${SERVICE} in ${SERVICE_STACK}"
+    if [ -z "$1" ]; then
+        echo "No argument provided, please provide the name of one or more services"
+    else
+        echo "Pulling images for the following service(s): $@"
+        tmp_stack_files_age
+        for SERVICE in $@;
+        do
+            if grep -r -q -x ${SERVICE} ${TMP_DIR}; then
+                SERVICE_STACK=$(basename $(grep -r -x ${SERVICE} ${TMP_DIR} | cut -d : -f 1 ))
+                if [ "${VERBOSE}" = true ]; then
+                    echo "${SERVICE_STACK}"
+                    echo "Found ${SERVICE} in ${SERVICE_STACK}"
+                fi
+                cd ${DC_DIR}/${SERVICE_STACK}
+                ${DC_COMMAND} pull ${SERVICE}
+                cd - > /dev/null
+            else
+                echo "ERROR: Service ${SERVICE} was not found in any of the stacks. Does it show up when you run 'dc list'?"
             fi
-            cd ${DC_DIR}/${SERVICE_STACK}
-            ${DC_COMMAND} pull ${SERVICE}
-            cd - > /dev/null
-        else
-            echo "ERROR: Service ${SERVICE} was not found in any of the stacks. Does it show up when you run 'dc list'?"
-        fi
-    done
+        done
+    fi
     }
 
 function logs(){
     # Need this function to ensure that all child process are killed from the logs command
-    trap_kill(){
-    for PID in $WAIT_PIDS;
-    do
-        # echo "\$PID is $PID"
-        CHILD_PID=`ps --ppid $PID -o pid=`
-        # echo "CHILD_PID is $CHILD_PID"
-        kill $CHILD_PID
-    done
-    }
-    echo "Showing logs for the following service(s): $@"
-    tmp_stack_files_age
-    for SERVICE in $@;
-    do
-        if grep -r -q -x ${SERVICE} ${TMP_DIR}; then
-            SERVICE_STACK=$(basename $(grep -r -x ${SERVICE} ${TMP_DIR} | cut -d : -f 1 ))
-            if [ "${VERBOSE}" = true ]; then
-                echo "${SERVICE_STACK}"
-                echo "Found ${SERVICE} in ${SERVICE_STACK}"
+    if [ -z "$1" ]; then
+        echo "No argument provided, please provide the name of one or more services"
+    else
+        trap_kill(){
+        for PID in $WAIT_PIDS;
+        do
+            # echo "\$PID is $PID"
+            CHILD_PID=`ps --ppid $PID -o pid=`
+            # echo "CHILD_PID is $CHILD_PID"
+            kill $CHILD_PID
+        done
+        }
+        echo "Showing logs for the following service(s): $@"
+        tmp_stack_files_age
+        for SERVICE in $@;
+        do
+            if grep -r -q -x ${SERVICE} ${TMP_DIR}; then
+                SERVICE_STACK=$(basename $(grep -r -x ${SERVICE} ${TMP_DIR} | cut -d : -f 1 ))
+                if [ "${VERBOSE}" = true ]; then
+                    echo "${SERVICE_STACK}"
+                    echo "Found ${SERVICE} in ${SERVICE_STACK}"
+                fi
+                cd ${DC_DIR}/${SERVICE_STACK}
+                ${DC_COMMAND} logs --tail=100 -f ${SERVICE} &
+                if [ -z "$WAIT_PIDS" ]
+                    then
+                        export WAIT_PIDS="$!"
+                    else
+                        export WAIT_PIDS="$WAIT_PIDS $!"
+                fi
+                echo "PID=$!"
+                cd - > /dev/null
+            else
+                echo "ERROR: Service ${SERVICE} was not found in any of the stacks. Does it show up when you run 'dc list'?"
             fi
-            cd ${DC_DIR}/${SERVICE_STACK}
-            ${DC_COMMAND} logs --tail=100 -f ${SERVICE} &
-            if [ -z "$WAIT_PIDS" ]
-                then
-                    export WAIT_PIDS="$!"
-                else
-                    export WAIT_PIDS="$WAIT_PIDS $!"
-            fi
-            echo "PID=$!"
-            cd - > /dev/null
-        else
-            echo "ERROR: Service ${SERVICE} was not found in any of the stacks. Does it show up when you run 'dc list'?"
+        done
+        if [ "${VERBOSE}" = true ]; then
+            echo "\$WAIT_PIDS contains $WAIT_PIDS"
         fi
-    done
-    if [ "${VERBOSE}" = true ]; then
-        echo "\$WAIT_PIDS contains $WAIT_PIDS"
+        trap 'trap_kill' SIGHUP SIGINT SIGQUIT SIGTERM
+        wait $WAIT_PIDS
     fi
-    trap 'trap_kill' SIGHUP SIGINT SIGQUIT SIGTERM
-    wait $WAIT_PIDS
     }
 
 # NETWORK
