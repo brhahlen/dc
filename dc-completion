@@ -15,12 +15,14 @@ _dc_completions()
         echo "2 is ${2}"
         echo "COMP_WORDS is ${COMP_WORDS}"
         cmd="${COMP_WORDS[2]}"
+        echo "cmd is ${cmd}"
     else
         echo "Verbosity is off"
         echo "1 is ${1}"
         echo "2 is ${2}"
         echo "COMP_WORDS is ${COMP_WORDS}"
         cmd="${COMP_WORDS[1]}"
+        echo "cmd is ${cmd}"
     fi
 
     # Basic/main options that will be completed
