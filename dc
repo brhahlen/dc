@@ -5,14 +5,7 @@
 # VERSION
 export DC_VERSION=v1.5.0-dev
 
-###### PREREQUISITE CHECKS
-# tee
-if ! command -v tee &> /dev/null
-then
-    echo "tee could not be found, please install it to use dc"
-    exit 1
-fi
-# docker-compose version
+# docker-compose version or `docker compose` - we prefer the official plugin
 # Inspired by/Copied from https://unix.stackexchange.com/a/285928
 if ! command -v docker-compose &> /dev/null ; then
     echo "docker-compose could not be found, please install it to use dc"
@@ -26,18 +19,6 @@ else
     echo "Please install a newer version of docker-compose. You can find this at https://github.com/docker/compose/releases"
     exit 1
     fi
-fi
-# curl
-if ! command -v curl &> /dev/null
-then
-    echo "curl could not be found, please install it to use dc"
-    exit 1
-fi
-# grep
-if ! command -v grep &> /dev/null
-then
-    echo "grep could not be found, please install it to use dc"
-    exit 1
 fi
 
 ###### VARIABLES
@@ -116,6 +97,26 @@ return 0
 
 # INSTALL
 function install(){
+    ###### PREREQUISITE CHECKS
+    # tee
+    if ! command -v tee &> /dev/null
+    then
+        echo "tee could not be found, please install it to use dc"
+        exit 1
+    fi
+    # curl
+    if ! command -v curl &> /dev/null
+    then
+        echo "curl could not be found, please install it to use dc"
+        exit 1
+    fi
+    # grep
+    if ! command -v grep &> /dev/null
+    then
+        echo "grep could not be found, please install it to use dc"
+        exit 1
+    fi
+    # Check if sudo
     if [[ $EUID -ne 0 ]]; then
         echo "This function must be run using root privileges (using sudo)"
         exit 1
