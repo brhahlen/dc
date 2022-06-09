@@ -146,7 +146,7 @@ function install(){
         echo "${HOME}/.bash_completion.d does not exist. Creating..."
         mkdir -p ${HOME}/.bash_completion.d
     fi
-    if [ ! ${HOME}/.bash_completion ]; then
+    if [ ! -f ${HOME}/.bash_completion ]; then
         echo "${HOME}/.bash_completion does not exist. Creating..."
         touch ${HOME}/.bash_completion
         echo "Adding bash_completion lines to file"
