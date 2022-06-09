@@ -119,6 +119,18 @@ function install(){
         echo "grep could not be found, please install it to use dc"
         exit 1
     fi
+    # unzip
+    if ! command -v unzip &> /dev/null
+    then
+        echo "unzip could not be found, please install it to use dc"
+        exit 1
+    fi
+    # wget
+    if ! command -v wget &> /dev/null
+    then
+        echo "wget could not be found, please install it to use dc"
+        exit 1
+    fi
     unset DC_DIR
     echo "Home directory is ${HOME}"
     echo "Copying dc binary to ${HOME}/bin and making it executable"
@@ -539,14 +551,29 @@ done
         "list")
             list
             ;;
-    # ----------- version ------------
+    # ----------- update ------------
         "update")
             export LATEST_VERSION=$(curl --silent https://api.github.com/repos/brhahlen/dc/releases/latest | grep -Po '"tag_name": "\K.*?(?=")')
+            export UPDATE_TMP=/tmp/dc_update
             printf "You are on version ${DC_VERSION} of ${RED}dc${NC}\n"
                 if [ ! "$(printf '%s\n' "${LATEST_VERSION}" "${DC_VERSION}" | sort -V | head -n1)" = "${LATEST_VERSION}" ]; then
-                    printf "Version ${BLUE}${LATEST_VERSION}${NC} of ${RED}dc${NC} is available and will be downloaded and installed"
+                    printf "Version ${BLUE}${LATEST_VERSION}${NC} of ${RED}dc${NC} is available and will be downloaded and installed \n"
+                    printf "Downloading... \n"
+                    if [ ! -d ${UPDATE_TMP} ]; then
+                        echo "${UPDATE_TMP} does not exist. Creating..."
+                        mkdir -p ${UPDATE_TMP}
+                    fi
+                    wget -q --show-progress https://github.com/brhahlen/dc/releases/download/${LATEST_VERSION}/dc-release.zip -O ${UPDATE_TMP}/dc-release.zip
+                    printf "Extracting... \n"
+                    unzip ${UPDATE_TMP}/dc-release.zip -d ${UPDATE_TMP}
+                    printf "Updating..."
+                    cd ${UPDATE_TMP}
+                    bash ./dc install
+                    printf "Cleanup..."
+                    rm -rf ${UPDATE_TMP}
+                    printf "Done"
                 else
-                    printf "This is the latest version, no update needed"
+                    printf "This is the latest version, no update needed \n"
                 fi
             ;;
     # ----------- version ------------
