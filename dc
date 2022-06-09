@@ -540,6 +540,16 @@ done
             list
             ;;
     # ----------- version ------------
+        "update")
+            export LATEST_VERSION=$(curl --silent https://api.github.com/repos/brhahlen/dc/releases/latest | grep -Po '"tag_name": "\K.*?(?=")')
+            printf "You are on version ${DC_VERSION} of ${RED}dc${NC}\n"
+                if [ ! "$(printf '%s\n' "${LATEST_VERSION}" "${DC_VERSION}" | sort -V | head -n1)" = "${LATEST_VERSION}" ]; then
+                    printf "Version ${BLUE}${LATEST_VERSION}${NC} of ${RED}dc${NC} is available and will be downloaded and installed"
+                else
+                    printf "This is the latest version, no update needed"
+                fi
+            ;;
+    # ----------- version ------------
         "version")
             export LATEST_VERSION=$(curl --silent https://api.github.com/repos/brhahlen/dc/releases/latest | grep -Po '"tag_name": "\K.*?(?=")')
             if [[ ${DC_VERSION} =~ "dev" ]]; then
