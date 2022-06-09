@@ -154,7 +154,7 @@ function install(){
         echo "source ${HOME}/.bash_completion" >> ${HOME}/.bashrc
     fi
     cp -f dc-completion ${HOME}/.bash_completion.d
-    chmod u+x ${HOME}/bash_completion.d/dc-completion
+    chmod u+x ${HOME}/.bash_completion.d/dc-completion
     # Add dc to PATH
     if ! grep -q "\$HOME/bin" ${HOME}/.bashrc; then
         echo "Adding dc to PATH"
