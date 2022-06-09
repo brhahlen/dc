@@ -150,7 +150,7 @@ function install(){
         echo "${HOME}/.bash_completion does not exist. Creating..."
         touch ${HOME}/.bash_completion
         echo "Adding bash_completion lines to file"
-        echo -e "for bcfile in ~/.bash_completion.d/* ; do\n  . $bcfile\ndone" >> ${HOME}/.bash_completion
+        echo -e "for bcfile in ~/.bash_completion.d/* ; do\n  . \$bcfile\ndone" >> ${HOME}/.bash_completion
         echo "source ${HOME}/.bash_completion" >> ${HOME}/.bashrc
     fi
     cp -f dc-completion ${HOME}/.bash_completion.d
