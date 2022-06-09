@@ -28,7 +28,9 @@ else
     export DC_DIR="${DC_DIR}"
 fi
 export ENV="${DC_DIR}/.env"
+###### Need to set this to either `docker compose` or `docker-compose`
 export DC_CMD=`which docker-compose`
+#######################################
 export DC_COMMAND="${DC_CMD} --env-file ${ENV}"
 export TMP_DIR="/tmp/dc_stack_services"
 # COLORS
@@ -117,42 +119,53 @@ function install(){
         exit 1
     fi
     # Check if sudo
-    if [[ $EUID -ne 0 ]]; then
-        echo "This function must be run using root privileges (using sudo)"
-        exit 1
-    fi
+    # if [[ $EUID -ne 0 ]]; then
+    #     echo "This function must be run using root privileges (using sudo)"
+    #     exit 1
+    # fi
     unset DC_DIR
     # Who is executing the script?
-    echo "User running the installation is $SUDO_USER"
-    HOME_DIR=$(grep $SUDO_USER /etc/passwd | cut -d ":" -f 6)
-    GID=$(grep $SUDO_USER /etc/passwd | cut -d ":" -f 4)
-    echo "Home directory is ${HOME_DIR}"
-    echo "Copying dc binary to ${HOME_DIR}/bin and making it executable"
-    if [ ! -d ${HOME_DIR}/bin ]; then
-        echo "${HOME_DIR}/bin does not exist. Creating..."
-        mkdir -p ${HOME_DIR}/bin
+    # echo "User running the installation is $SUDO_USER"
+    # HOME_DIR=$(grep $SUDO_USER /etc/passwd | cut -d ":" -f 6)
+    # GID=$(grep $SUDO_USER /etc/passwd | cut -d ":" -f 4)
+    # echo "Home directory is ${HOME_DIR}"
+    echo "Home directory is ${HOME}"
+    echo "Copying dc binary to ${HOME}/bin and making it executable"
+    if [ ! -d ${HOME}/bin ]; then
+        echo "${HOME}/bin does not exist. Creating..."
+        mkdir -p ${HOME}/bin
     fi
-    cp -f dc ${HOME_DIR}/bin
-    chmod 744 ${HOME_DIR}/bin/dc
-    chown -R $SUDO_USER:${GID} ${HOME_DIR}/bin
+    cp -f dc ${HOME}/bin
+    chmod 744 ${HOME}/bin/dc
+    # chown -R $SUDO_USER:${GID} ${HOME_DIR}/bin
     # Do stuff here
-    echo "Copying dc-completion binary to /etc/bash_completion.d/ and making it executable"
+    # echo "Copying dc-completion binary to /etc/bash_completion.d/ and making it executable"
+    echo "Copying dc-completion binary to ${HOME}/.bash_completion.d/ and making it executable"
     # Check for root access
-    if [ ! -d /etc/bash_completion.d ]; then
-        echo "/etc/bash_completion.d does not exist. Creating..."
-        mkdir -p /etc/bash_completion.d
+    if [ ! -d ${HOME}/.bash_completion.d ]; then
+        echo "${HOME}/.bash_completion.d does not exist. Creating..."
+        mkdir -p ${HOME}/.bash_completion.d
     fi
-    cp -f dc-completion /etc/bash_completion.d
-    chmod +x /etc/bash_completion.d/dc-completion
-    if ! grep -q "\$HOME/bin" ${HOME_DIR}/.bashrc; then
+    if [ ! ${HOME}/.bash_completion ]; then
+        echo "${HOME}/.bash_completion does not exist. Creating..."
+        touch ${HOME}/.bash_completion
+        echo "Adding bash_completion lines to file"
+        echo -e "for bcfile in ~/.bash_completion.d/* ; do\n  . $bcfile\ndone" >> ${HOME}/.bash_completion
+        echo "source ${HOME}/.bash_completion" >> ${HOME}/.bashrc
+    fi
+    cp -f dc-completion ${HOME}/.bash_completion.d
+    chmod u+x ${HOME}/bash_completion.d/dc-completion
+    # Add dc to PATH
+    if ! grep -q "\$HOME/bin" ${HOME}/.bashrc; then
         echo "Adding dc to PATH"
-        echo "PATH=\"\$HOME/bin:\$PATH\"" >> ${HOME_DIR}/.bashrc
-        echo "export PATH" >> ${HOME_DIR}/.bashrc
+        echo "PATH=\"\$HOME/bin:\$PATH\"" >> ${HOME}/.bashrc
+        echo "export PATH" >> ${HOME}/.bashrc
     fi
-    if ! grep -q DC_DIR ${HOME_DIR}/.bashrc; then
-        echo "Set DC_DIR variable and add to ${HOME_DIR}/.bashrc"
+    # Add DC_DIR to bashrc
+    if ! grep -q DC_DIR ${HOME}/.bashrc; then
+        echo "Set DC_DIR variable and add to ${HOME}/.bashrc"
         read -p "Where are your docker-compose stacks located? " DC_DIR
-        echo "export DC_DIR=${DC_DIR}" >> ${HOME_DIR}/.bashrc
+        echo "export DC_DIR=${DC_DIR}" >> ${HOME}/.bashrc
     fi
 }
 
