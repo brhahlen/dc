@@ -118,17 +118,7 @@ function install(){
         echo "grep could not be found, please install it to use dc"
         exit 1
     fi
-    # Check if sudo
-    # if [[ $EUID -ne 0 ]]; then
-    #     echo "This function must be run using root privileges (using sudo)"
-    #     exit 1
-    # fi
     unset DC_DIR
-    # Who is executing the script?
-    # echo "User running the installation is $SUDO_USER"
-    # HOME_DIR=$(grep $SUDO_USER /etc/passwd | cut -d ":" -f 6)
-    # GID=$(grep $SUDO_USER /etc/passwd | cut -d ":" -f 4)
-    # echo "Home directory is ${HOME_DIR}"
     echo "Home directory is ${HOME}"
     echo "Copying dc binary to ${HOME}/bin and making it executable"
     if [ ! -d ${HOME}/bin ]; then
@@ -137,9 +127,7 @@ function install(){
     fi
     cp -f dc ${HOME}/bin
     chmod 744 ${HOME}/bin/dc
-    # chown -R $SUDO_USER:${GID} ${HOME_DIR}/bin
     # Do stuff here
-    # echo "Copying dc-completion binary to /etc/bash_completion.d/ and making it executable"
     echo "Copying dc-completion binary to ${HOME}/.bash_completion.d/ and making it executable"
     # Check for root access
     if [ ! -d ${HOME}/.bash_completion.d ]; then
