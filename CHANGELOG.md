@@ -1,3 +1,8 @@
+# Version 1.5.3
+## Improvements
+- Code Cleanup
+- Added consistency in `printf` vs `echo` (#38)
+
 # Version 1.5.2
 ## New/Modified Features
 - Added `help` as a supported function (#39)

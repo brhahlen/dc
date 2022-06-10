@@ -1,9 +1,4 @@
-# Version 1.5.2
-## New/Modified Features
-- Added `help` as a supported function (#39)
-
+# Version 1.5.3
 ## Improvements
-- Code cleanup
-
-## Bug fixes
-- Fixed issue with `dc-completion` (#40)
+- Code Cleanup
+- Added consistency in `printf` vs `echo` (#38)
