@@ -7,19 +7,9 @@ export DC_VERSION=v1.5.0-dev
 
 # docker-compose version or `docker compose` - we prefer the official plugin
 # Inspired by/Copied from https://unix.stackexchange.com/a/285928
-if ! command -v docker-compose &> /dev/null ; then
-    echo "docker-compose could not be found, please install it to use dc"
-    exit 1
-else
-    DOCKER_COMPOSE_VERSION="$(docker-compose --version | cut -d " " -f 3 | cut -d "," -f 1)"
-#echo "${DOCKER_COMPOSE_VERSION}"
-    MIN_VERSION="1.25.0"
-    if [ ! "$(printf '%s\n' "${MIN_VERSION}" "${DOCKER_COMPOSE_VERSION}" | sort -V | head -n1)" = "${MIN_VERSION}" ]; then
-    echo "You are running docker-compose version ${DOCKER_COMPOSE_VERSION}. This script requires version ${MIN_VERSION} or higher, due to the use of the --env-file option."
-    echo "Please install a newer version of docker-compose. You can find this at https://github.com/docker/compose/releases"
-    exit 1
-    fi
-fi
+
+## Need to move this bit to installer
+
 
 ###### VARIABLES
 if [[ -z "${DC_DIR}" ]]; then
@@ -28,8 +18,6 @@ else
     export DC_DIR="${DC_DIR}"
 fi
 export ENV="${DC_DIR}/.env"
-###### Need to set this to either `docker compose` or `docker-compose`
-export DC_CMD=`which docker-compose`
 #######################################
 export DC_COMMAND="${DC_CMD} --env-file ${ENV}"
 export TMP_DIR="/tmp/dc_stack_services"
@@ -131,6 +119,24 @@ function install(){
         echo "wget could not be found, please install it to use dc"
         exit 1
     fi
+    # Checking for docker compose or docker-compose
+    if docker compose &> /dev/null ; then
+        printf "Found ${RED}docker compose${NC}\n"
+        export DC_CMD="docker compose"
+    elif docker-compose &> /dev/null ; then
+        echo "docker-compose found"
+        echo "Checking docker-compose version"
+        DOCKER_COMPOSE_VERSION="$(docker-compose --version | cut -d " " -f 3 | cut -d "," -f 1)"
+        MIN_VERSION="1.25.0"
+        if [ ! "$(printf '%s\n' "${MIN_VERSION}" "${DOCKER_COMPOSE_VERSION}" | sort -V | head -n1)" = "${MIN_VERSION}" ]; then
+            printf "You are running docker-compose version ${DOCKER_COMPOSE_VERSION}. This script requires version ${MIN_VERSION} or higher, due to the use of the --env-file option.\n"
+            printf "Please install a newer version of docker-compose. You can find this at https://github.com/docker/compose/releases \n"
+            exit 1
+        fi
+        export DC_CMD="docker-compose"
+    else
+        printf "Could not find either ${RED}docker compose${NC} or ${RED}docker-compose${NC} on this system. Please install either one (${RED}docker compose${NC} is preferred) to use ${RED}dc${NC}\n"
+    fi
     unset DC_DIR
     echo "Home directory is ${HOME}"
     echo "Copying dc binary to ${HOME}/bin and making it executable"
@@ -167,6 +173,11 @@ function install(){
         echo "Set DC_DIR variable and add to ${HOME}/.bashrc"
         read -p "Where are your docker-compose stacks located? " DC_DIR
         echo "export DC_DIR=${DC_DIR}" >> ${HOME}/.bashrc
+    fi
+    # Add DC_CMD to bashrc
+    if ! grep -q DC_CMD ${HOME}/.bashrc; then
+        echo "Set DC_CMD command variable and add to ${HOME}/.bashrc"
+        echo "export DC_CMD=${DC_CMD}" >> ${HOME}/.bashrc
     fi
 }
 
