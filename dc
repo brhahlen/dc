@@ -179,7 +179,11 @@ function install(){
     # Add DC_CMD to bashrc
     if ! grep -q DC_CMD ${HOME}/.bashrc; then
         echo "Set DC_CMD command variable and add to ${HOME}/.bashrc"
-        echo "export DC_CMD=${DC_CMD}" >> ${HOME}/.bashrc
+        echo "export DC_CMD='${DC_CMD}'" >> ${HOME}/.bashrc
+    else
+        printf "Replacing DC_CMD variable"
+        sed -i '/DC_CMD=/d' ${HOME}/.bashrc
+        echo "export DC_CMD='${DC_CMD}'" >> ${HOME}/.bashrc
     fi
 }
 

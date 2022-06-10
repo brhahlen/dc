@@ -9,8 +9,8 @@
 - Fixed issue with `dc-completion` (#40)
 
 # Version 1.5.1
-## Bug Fix
-- Fixed .bashrc quote problem
+## Bug fix
+- Fixed `.bashrc` quote problem
 
 # Version 1.5.0
 ## New/Modified Features
