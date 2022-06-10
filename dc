@@ -5,12 +5,6 @@
 # VERSION
 export DC_VERSION=v1.6.0-dev
 
-# docker-compose version or `docker compose` - we prefer the official plugin
-# Inspired by/Copied from https://unix.stackexchange.com/a/285928
-
-## Need to move this bit to installer
-
-
 ###### VARIABLES
 if [[ -z "${DC_DIR}" ]]; then
     export DC_DIR="${HOME}/docker"
