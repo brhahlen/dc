@@ -3,42 +3,13 @@
 # Copyright (C) 2022 Ben Hählen
 ##################################
 # VERSION
-export DC_VERSION=v1.4.0
+export DC_VERSION=v1.5.0-dev
 
-###### PREREQUISITE CHECKS
-# tee
-if ! command -v tee &> /dev/null
-then
-    echo "tee could not be found, please install it to use dc"
-    exit 1
-fi
-# docker-compose version
+# docker-compose version or `docker compose` - we prefer the official plugin
 # Inspired by/Copied from https://unix.stackexchange.com/a/285928
-if ! command -v docker-compose &> /dev/null ; then
-    echo "docker-compose could not be found, please install it to use dc"
-    exit 1
-else
-    DOCKER_COMPOSE_VERSION="$(docker-compose --version | cut -d " " -f 3 | cut -d "," -f 1)"
-#echo "${DOCKER_COMPOSE_VERSION}"
-    MIN_VERSION="1.25.0"
-    if [ ! "$(printf '%s\n' "${MIN_VERSION}" "${DOCKER_COMPOSE_VERSION}" | sort -V | head -n1)" = "${MIN_VERSION}" ]; then
-    echo "You are running docker-compose version ${DOCKER_COMPOSE_VERSION}. This script requires version ${MIN_VERSION} or higher, due to the use of the --env-file option."
-    echo "Please install a newer version of docker-compose. You can find this at https://github.com/docker/compose/releases"
-    exit 1
-    fi
-fi
-# curl
-if ! command -v curl &> /dev/null
-then
-    echo "curl could not be found, please install it to use dc"
-    exit 1
-fi
-# grep
-if ! command -v grep &> /dev/null
-then
-    echo "grep could not be found, please install it to use dc"
-    exit 1
-fi
+
+## Need to move this bit to installer
+
 
 ###### VARIABLES
 if [[ -z "${DC_DIR}" ]]; then
@@ -47,7 +18,7 @@ else
     export DC_DIR="${DC_DIR}"
 fi
 export ENV="${DC_DIR}/.env"
-export DC_CMD=`which docker-compose`
+#######################################
 export DC_COMMAND="${DC_CMD} --env-file ${ENV}"
 export TMP_DIR="/tmp/dc_stack_services"
 # COLORS
@@ -96,62 +67,117 @@ function show_usage (){
     printf "Usage: $0 [command] [stacks]\n"
     printf "\n"
     printf "Commands:\n"
-    printf " ${RED}install${NC}        Install dc for the user, needs sudo\n"
-    printf " ${RED}up${NC}             Bring up all stacks, a stack, or stacks\n"
-    printf " ${RED}down${NC}           Bring down all stacks, a stack or stack(s)\n"
-    printf " ${RED}restart-stack${NC}  Restarts all stacks, a stack or stack(s)\n"
-    printf " ${RED}logs-stack${NC}     Shows logs for a stack or stacks\n"
-    printf " ${RED}start${NC}          Starts one or more services\n"
-    printf " ${RED}stop${NC}           Stops one or more services\n"
-    printf " ${RED}restart${NC}        Restarts one or more services\n"
-    printf " ${RED}pull${NC}           Pulls an image of a service\n"
-    printf " ${RED}logs${NC}           Shows logs for a service or services\n"
-    printf " ${RED}network${NC}        Create the MacVLAN network, needs sudo\n"
-    printf " ${RED}list${NC}           List stacks and services in the stacks\n"
-    printf " ${RED}help${NC}           Print help\n"
-    printf " ${RED}version${NC}        Shows the version and checks the latest version\n"
+    printf " ${RED}install${NC}              Install dc for the user, needs sudo\n"
+    printf " ${RED}up${NC}                   Bring up all stacks, a stack, or stacks\n"
+    printf " ${RED}down${NC}                 Bring down all stacks, a stack or stack(s)\n"
+    printf " ${RED}restart-stack-hard${NC}   Restarts all stacks, a stack or stack(s)\n"
+    printf " ${RED}restart-stack-soft${NC}   Restarts all stacks, a stack or stack(s)\n"
+    printf " ${RED}logs-stack${NC}           Shows logs for a stack or stacks\n"
+    printf " ${RED}start${NC}                Starts one or more services\n"
+    printf " ${RED}stop${NC}                 Stops one or more services\n"
+    printf " ${RED}restart${NC}              Restarts one or more services\n"
+    printf " ${RED}pull${NC}                 Pulls an image of a service\n"
+    printf " ${RED}logs${NC}                 Shows logs for a service or services\n"
+    printf " ${RED}network${NC}              Create the MacVLAN network, needs sudo\n"
+    printf " ${RED}list${NC}                 List stacks and services in the stacks\n"
+    printf " ${RED}help${NC}                 Print help\n"
+    printf " ${RED}version${NC}              Shows the version and checks the latest version\n"
 
 return 0
 }
 
 # INSTALL
 function install(){
-    if [[ $EUID -ne 0 ]]; then
-        echo "This function must be run using root privileges (using sudo)"
+    ###### PREREQUISITE CHECKS
+    # tee
+    if ! command -v tee &> /dev/null
+    then
+        echo "tee could not be found, please install it to use dc"
         exit 1
     fi
+    # curl
+    if ! command -v curl &> /dev/null
+    then
+        echo "curl could not be found, please install it to use dc"
+        exit 1
+    fi
+    # grep
+    if ! command -v grep &> /dev/null
+    then
+        echo "grep could not be found, please install it to use dc"
+        exit 1
+    fi
+    # unzip
+    if ! command -v unzip &> /dev/null
+    then
+        echo "unzip could not be found, please install it to use dc"
+        exit 1
+    fi
+    # wget
+    if ! command -v wget &> /dev/null
+    then
+        echo "wget could not be found, please install it to use dc"
+        exit 1
+    fi
+    # Checking for docker compose or docker-compose
+    if docker compose &> /dev/null ; then
+        printf "Found ${RED}docker compose${NC}\n"
+        export DC_CMD="docker compose"
+    elif docker-compose &> /dev/null ; then
+        echo "docker-compose found"
+        echo "Checking docker-compose version"
+        DOCKER_COMPOSE_VERSION="$(docker-compose --version | cut -d " " -f 3 | cut -d "," -f 1)"
+        MIN_VERSION="1.25.0"
+        if [ ! "$(printf '%s\n' "${MIN_VERSION}" "${DOCKER_COMPOSE_VERSION}" | sort -V | head -n1)" = "${MIN_VERSION}" ]; then
+            printf "You are running docker-compose version ${DOCKER_COMPOSE_VERSION}. This script requires version ${MIN_VERSION} or higher, due to the use of the --env-file option.\n"
+            printf "Please install a newer version of docker-compose. You can find this at https://github.com/docker/compose/releases \n"
+            exit 1
+        fi
+        export DC_CMD="docker-compose"
+    else
+        printf "Could not find either ${RED}docker compose${NC} or ${RED}docker-compose${NC} on this system. Please install either one (${RED}docker compose${NC} is preferred) to use ${RED}dc${NC}\n"
+    fi
     unset DC_DIR
-    # Who is executing the script?
-    echo "User running the installation is $SUDO_USER"
-    HOME_DIR=$(grep $SUDO_USER /etc/passwd | cut -d ":" -f 6)
-    GID=$(grep $SUDO_USER /etc/passwd | cut -d ":" -f 4)
-    echo "Home directory is ${HOME_DIR}"
-    echo "Copying dc binary to ${HOME_DIR}/bin and making it executable"
-    if [ ! -d ${HOME_DIR}/bin ]; then
-        echo "${HOME_DIR}/bin does not exist. Creating..."
-        mkdir -p ${HOME_DIR}/bin
+    echo "Home directory is ${HOME}"
+    echo "Copying dc binary to ${HOME}/bin and making it executable"
+    if [ ! -d ${HOME}/bin ]; then
+        echo "${HOME}/bin does not exist. Creating..."
+        mkdir -p ${HOME}/bin
     fi
-    cp -f dc ${HOME_DIR}/bin
-    chmod 744 ${HOME_DIR}/bin/dc
-    chown -R $SUDO_USER:${GID} ${HOME_DIR}/bin
+    cp -f dc ${HOME}/bin
+    chmod 744 ${HOME}/bin/dc
     # Do stuff here
-    echo "Copying dc-completion binary to /etc/bash_completion.d/ and making it executable"
+    echo "Copying dc-completion binary to ${HOME}/.bash_completion.d/ and making it executable"
     # Check for root access
-    if [ ! -d /etc/bash_completion.d ]; then
-        echo "/etc/bash_completion.d does not exist. Creating..."
-        mkdir -p /etc/bash_completion.d
+    if [ ! -d ${HOME}/.bash_completion.d ]; then
+        echo "${HOME}/.bash_completion.d does not exist. Creating..."
+        mkdir -p ${HOME}/.bash_completion.d
     fi
-    cp -f dc-completion /etc/bash_completion.d
-    chmod +x /etc/bash_completion.d/dc-completion
-    if ! grep -q "\$HOME/bin" ${HOME_DIR}/.bashrc; then
+    if [ ! -f ${HOME}/.bash_completion ]; then
+        echo "${HOME}/.bash_completion does not exist. Creating..."
+        touch ${HOME}/.bash_completion
+        echo "Adding bash_completion lines to file"
+        echo -e "for bcfile in ~/.bash_completion.d/* ; do\n  . \$bcfile\ndone" >> ${HOME}/.bash_completion
+        echo "source ${HOME}/.bash_completion" >> ${HOME}/.bashrc
+    fi
+    cp -f dc-completion ${HOME}/.bash_completion.d
+    chmod u+x ${HOME}/.bash_completion.d/dc-completion
+    # Add dc to PATH
+    if ! grep -q "\$HOME/bin" ${HOME}/.bashrc; then
         echo "Adding dc to PATH"
-        echo "PATH=\"\$HOME/bin:\$PATH\"" >> ${HOME_DIR}/.bashrc
-        echo "export PATH" >> ${HOME_DIR}/.bashrc
+        echo "PATH=\"\$HOME/bin:\$PATH\"" >> ${HOME}/.bashrc
+        echo "export PATH" >> ${HOME}/.bashrc
     fi
-    if ! grep -q DC_DIR ${HOME_DIR}/.bashrc; then
-        echo "Set DC_DIR variable and add to ${HOME_DIR}/.bashrc"
+    # Add DC_DIR to bashrc
+    if ! grep -q DC_DIR ${HOME}/.bashrc; then
+        echo "Set DC_DIR variable and add to ${HOME}/.bashrc"
         read -p "Where are your docker-compose stacks located? " DC_DIR
-        echo "export DC_DIR=${DC_DIR}" >> ${HOME_DIR}/.bashrc
+        echo "export DC_DIR=${DC_DIR}" >> ${HOME}/.bashrc
+    fi
+    # Add DC_CMD to bashrc
+    if ! grep -q DC_CMD ${HOME}/.bashrc; then
+        echo "Set DC_CMD command variable and add to ${HOME}/.bashrc"
+        echo "export DC_CMD=${DC_CMD}" >> ${HOME}/.bashrc
     fi
 }
 
@@ -535,6 +561,31 @@ done
     # ----------- list ------------
         "list")
             list
+            ;;
+    # ----------- update ------------
+        "update")
+            export LATEST_VERSION=$(curl --silent https://api.github.com/repos/brhahlen/dc/releases/latest | grep -Po '"tag_name": "\K.*?(?=")')
+            export UPDATE_TMP=/tmp/dc_update
+            printf "You are on version ${DC_VERSION} of ${RED}dc${NC}\n"
+                if [ ! "$(printf '%s\n' "${LATEST_VERSION}" "${DC_VERSION}" | sort -V | head -n1)" = "${LATEST_VERSION}" ]; then
+                    printf "Version ${BLUE}${LATEST_VERSION}${NC} of ${RED}dc${NC} is available and will be downloaded and installed \n"
+                    printf "Downloading... \n"
+                    if [ ! -d ${UPDATE_TMP} ]; then
+                        echo "${UPDATE_TMP} does not exist. Creating..."
+                        mkdir -p ${UPDATE_TMP}
+                    fi
+                    wget -q --show-progress https://github.com/brhahlen/dc/releases/download/${LATEST_VERSION}/dc-release.zip -O ${UPDATE_TMP}/dc-release.zip
+                    printf "Extracting... \n"
+                    unzip ${UPDATE_TMP}/dc-release.zip -d ${UPDATE_TMP}
+                    printf "Updating..."
+                    cd ${UPDATE_TMP}
+                    bash ./dc install
+                    printf "Cleanup..."
+                    rm -rf ${UPDATE_TMP}
+                    printf "Done"
+                else
+                    printf "This is the latest version, no update needed \n"
+                fi
             ;;
     # ----------- version ------------
         "version")

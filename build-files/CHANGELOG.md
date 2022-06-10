@@ -1,10 +1,10 @@
-# Version 1.4.0
+# Version 1.5.0
 ## New/Modified Features
-- Added options (#20)
-- Added (basic) verbosity using the `-v` option (and have completion work as well) (#15)
+- Added `update` function (#30)
+- Added support for `docker compose` (#33)
 
 ## Improvements
-- Move from `rev | cut | rev` to `basename`
-- Renamed `options` to `commands`, as options will be used elsewhere
-- Explain why help is shown when invalid or no command is used
-- Added error handling when not provding services for `start`, `stop`, `restart`, `logs`
+- Moved prerequisite checks to install function, unnecessary to run everytime
+- Moved `docker compose` and `docker-compose` checks out of the main script and to installer
+- Removed sudo requirement (#34)
+- Made bash_completion to be user-based, instead of global
