@@ -491,7 +491,7 @@ function list(){
     for STACK in $(find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -u);
     do
         STACK_NAME=$(basename ${STACK})
-        printf "----------------------------------- \n"
+        printf "=================================== \n"
         printf "Stack ${RED}${STACK_NAME}${NC} contains services: \n"
         cd ${STACK}
         ${DC_COMMAND} ps --services -a | tee ${TMP_DIR}/${STACK_NAME}
