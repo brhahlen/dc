@@ -595,6 +595,7 @@ done
                     else
                         printf "Cleanup previous update files... \n"
                         rm -rf ${UPDATE_TMP}
+                        mkdir ${UPDATE_TMP}
                     fi
                     printf "Downloading... \n"
                     wget -q --show-progress https://github.com/brhahlen/dc/releases/download/${LATEST_VERSION}/dc-release.zip -O ${UPDATE_TMP}/dc-release.zip
