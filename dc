@@ -81,6 +81,7 @@ function show_usage (){
     printf " ${RED}network${NC}              Create the MacVLAN network, needs sudo\n"
     printf " ${RED}list${NC}                 List stacks and services in the stacks\n"
     printf " ${RED}help${NC}                 Print help\n"
+    printf " ${RED}update${NC}               Updates dc to the latest version\n"
     printf " ${RED}version${NC}              Shows the version and checks the latest version\n"
 
 return 0
@@ -606,6 +607,9 @@ done
             fi
             ;;
     # ----------- All others ------------
+        "help")
+            show_usage
+            ;;
         "")
             printf "Missing command, showing help \n"
             show_usage
