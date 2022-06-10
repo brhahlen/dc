@@ -12,7 +12,7 @@ Installing `dc` can be done by executing `sudo bash ./dc install` from the comma
 
 The following actions will be performed:
 - `dc` is copied to `~/bin` and made executable (directory will be created if it doesn't exist)
-- `dc-completion` is copied to `/etc/bash.completion.d/` (directory will be created if it does not exist)
+- `dc-completion` is copied to `$HOME/.bash.completion.d/` (directory will be created if it does not exist)
 - `/bin` is added to your path in `~/.bashrc`
 - You will be asked where your docker-compose stacks are defined, this will be set into a variable, `DC_DIR` and added to your `~/.bashrc`
 
@@ -23,7 +23,8 @@ Prerequisites for `dc` are:
  - `tee` is installed
  - `grep` is installed
  - `curl` is installed
- - `docker-compose` version is 1.25.0 or higher
+ - `wget` is installed
+ - `docker compose` plugin is installed or `docker-compose` is installed and the version is 1.25.0 or higher
  - `bash-completion` is installed
 
 ## Assumptions
@@ -45,6 +46,7 @@ Provides the following main functions:
 - logs          - show and follow the logs for a service, outputs last 100 lines first
 - network       - _NOT IMPLEMENTED YET_ - create the macvlan network that is needed - *ONLY* possible using `sudo`
 - list          - lists all stacks and services in the stack
+- update        - updates `dc` to the latest available version
 - version       - shows the version of `dc` and retrieves the latest version and checks there
 
 # Thoughts/To Do's
