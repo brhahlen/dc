@@ -1,3 +1,7 @@
+# Version 1.5.1
+## Bug fix
+- Fixed `.bashrc` quote problem
+
 # Version 1.5.0
 ## New/Modified Features
 - Added `update` function (#30)
