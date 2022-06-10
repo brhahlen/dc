@@ -1,3 +1,10 @@
+# Version 1.5.4
+## Bug fixes
+- printf bug fixed
+
+## Improvements
+- Update process changed a bit, trying to squash a weird bug
+
 # Version 1.5.3
 ## Improvements
 - Code Cleanup

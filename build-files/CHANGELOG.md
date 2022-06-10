@@ -1,4 +1,6 @@
-# Version 1.5.3
+# Version 1.5.4
+## Bug fixes
+- printf bug fixed
+
 ## Improvements
-- Code Cleanup
-- Added consistency in `printf` vs `echo` (#38)
+- Update process changed a bit, trying to squash a weird bug
