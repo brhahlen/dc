@@ -12,6 +12,13 @@ else
     export DC_DIR="${DC_DIR}"
 fi
 export ENV="${DC_DIR}/.env"
+
+if [[ -z "${DC_CMD}" ]]; then
+    export DC_CMD="docker compose"
+else
+    export DC_CMD="${DC_CMD}"
+fi
+
 #######################################
 export DC_COMMAND="${DC_CMD} --env-file ${ENV}"
 export TMP_DIR="/tmp/dc_stack_services"
