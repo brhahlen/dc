@@ -3,13 +3,7 @@
 # Copyright (C) 2022 Ben Hählen
 ##################################
 # VERSION
-export DC_VERSION=v1.5.1
-
-# docker-compose version or `docker compose` - we prefer the official plugin
-# Inspired by/Copied from https://unix.stackexchange.com/a/285928
-
-## Need to move this bit to installer
-
+export DC_VERSION=v1.5.2
 
 ###### VARIABLES
 if [[ -z "${DC_DIR}" ]]; then
@@ -18,6 +12,13 @@ else
     export DC_DIR="${DC_DIR}"
 fi
 export ENV="${DC_DIR}/.env"
+
+if [[ -z "${DC_CMD}" ]]; then
+    export DC_CMD="docker compose"
+else
+    export DC_CMD="${DC_CMD}"
+fi
+
 #######################################
 export DC_COMMAND="${DC_CMD} --env-file ${ENV}"
 export TMP_DIR="/tmp/dc_stack_services"
@@ -81,6 +82,7 @@ function show_usage (){
     printf " ${RED}network${NC}              Create the MacVLAN network, needs sudo\n"
     printf " ${RED}list${NC}                 List stacks and services in the stacks\n"
     printf " ${RED}help${NC}                 Print help\n"
+    printf " ${RED}update${NC}               Updates dc to the latest version\n"
     printf " ${RED}version${NC}              Shows the version and checks the latest version\n"
 
 return 0
@@ -408,6 +410,7 @@ function pull(){
                     echo "Found ${SERVICE} in ${SERVICE_STACK}"
                 fi
                 cd ${DC_DIR}/${SERVICE_STACK}
+                echo "Running command: ${DC_COMMAND} pull ${SERVICE}"
                 ${DC_COMMAND} pull ${SERVICE}
                 cd - > /dev/null
             else
@@ -610,6 +613,9 @@ done
             fi
             ;;
     # ----------- All others ------------
+        "help")
+            show_usage
+            ;;
         "")
             printf "Missing command, showing help \n"
             show_usage
