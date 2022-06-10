@@ -406,7 +406,7 @@ function pull(){
                     echo "Found ${SERVICE} in ${SERVICE_STACK}"
                 fi
                 cd ${DC_DIR}/${SERVICE_STACK}
-                echo "${DC_COMMAND} pull ${SERVICE}"
+                echo "Running command: ${DC_COMMAND} pull ${SERVICE}"
                 ${DC_COMMAND} pull ${SERVICE}
                 cd - > /dev/null
             else
