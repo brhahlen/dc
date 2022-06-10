@@ -499,6 +499,53 @@ function list(){
     done
     }
 
+# VERSION
+function show_version(){
+    export LATEST_VERSION=$(curl --silent https://api.github.com/repos/brhahlen/dc/releases/latest | grep -Po '"tag_name": "\K.*?(?=")')
+    if [[ ${DC_VERSION} =~ "dev" ]]; then
+        printf "This is version ${RED}${DC_VERSION}${NC} of ${RED}dc${NC} \n"
+        printf "This is a development version \n"
+        printf "The latest release version is ${BLUE}${LATEST_VERSION}${NC} \n"
+    else
+        printf "This is version ${DC_VERSION} of ${RED}dc${NC} \n"
+        printf "Release notes can be found at https://github.com/brhahlen/dc/releases/tag/${DC_VERSION} \n"
+        if [ ! "$(printf '%s\n' "${LATEST_VERSION}" "${DC_VERSION}" | sort -V | head -n1)" = "${LATEST_VERSION}" ]; then
+            printf "#################################### \n"
+            printf "A newer version of ${RED}dc${NC} is avaiable \n"
+            printf "The latest release version is ${BLUE}${LATEST_VERSION}${NC} \n"
+            printf "This can be found at https://github.com/brhahlen/dc/releases/tag/${LATEST_VERSION} \n"
+        fi
+    fi
+}
+
+function update(){
+    export LATEST_VERSION=$(curl --silent https://api.github.com/repos/brhahlen/dc/releases/latest | grep -Po '"tag_name": "\K.*?(?=")')
+    export UPDATE_TMP=/tmp/dc_update
+    printf "You are on version ${DC_VERSION} of ${RED}dc${NC} \n"
+        if [ ! "$(printf '%s\n' "${LATEST_VERSION}" "${DC_VERSION}" | sort -V | head -n1)" = "${LATEST_VERSION}" ]; then
+            printf "Version ${BLUE}${LATEST_VERSION}${NC} of ${RED}dc${NC} is available and will be downloaded and installed \n"
+            if [ ! -d ${UPDATE_TMP} ]; then
+                printf "${UPDATE_TMP} does not exist. Creating... \n"
+                mkdir -p ${UPDATE_TMP}
+            else
+                printf "Cleanup previous update files... \n"
+                rm -rf ${UPDATE_TMP}
+                mkdir ${UPDATE_TMP}
+            fi
+            printf "Downloading... \n"
+            wget -q --show-progress https://github.com/brhahlen/dc/releases/download/${LATEST_VERSION}/dc-release.zip -O ${UPDATE_TMP}/dc-release.zip
+            printf "Extracting... \n"
+            unzip ${UPDATE_TMP}/dc-release.zip -d ${UPDATE_TMP}
+            printf "Updating... \n"
+            cd ${UPDATE_TMP}
+            bash ${UPDATE_TMP}/dc install
+            cd - > /dev/null
+            printf "Done \n"
+        else
+            printf "This is the latest version, no update needed \n"
+        fi
+}
+
 ###### CASES
 # Verbosity, yes, no?
 while getopts ":v" opt; do
@@ -584,49 +631,11 @@ done
             ;;
     # ----------- update ------------
         "update")
-            export LATEST_VERSION=$(curl --silent https://api.github.com/repos/brhahlen/dc/releases/latest | grep -Po '"tag_name": "\K.*?(?=")')
-            export UPDATE_TMP=/tmp/dc_update
-            printf "You are on version ${DC_VERSION} of ${RED}dc${NC} \n"
-                if [ ! "$(printf '%s\n' "${LATEST_VERSION}" "${DC_VERSION}" | sort -V | head -n1)" = "${LATEST_VERSION}" ]; then
-                    printf "Version ${BLUE}${LATEST_VERSION}${NC} of ${RED}dc${NC} is available and will be downloaded and installed \n"
-                    if [ ! -d ${UPDATE_TMP} ]; then
-                        printf "${UPDATE_TMP} does not exist. Creating... \n"
-                        mkdir -p ${UPDATE_TMP}
-                    else
-                        printf "Cleanup previous update files... \n"
-                        rm -rf ${UPDATE_TMP}
-                        mkdir ${UPDATE_TMP}
-                    fi
-                    printf "Downloading... \n"
-                    wget -q --show-progress https://github.com/brhahlen/dc/releases/download/${LATEST_VERSION}/dc-release.zip -O ${UPDATE_TMP}/dc-release.zip
-                    printf "Extracting... \n"
-                    unzip ${UPDATE_TMP}/dc-release.zip -d ${UPDATE_TMP}
-                    printf "Updating... \n"
-                    cd ${UPDATE_TMP}
-                    bash ${UPDATE_TMP}/dc install
-                    cd - > /dev/null
-                    printf "Done \n"
-                else
-                    printf "This is the latest version, no update needed \n"
-                fi
+            update
             ;;
     # ----------- version ------------
         "version")
-            export LATEST_VERSION=$(curl --silent https://api.github.com/repos/brhahlen/dc/releases/latest | grep -Po '"tag_name": "\K.*?(?=")')
-            if [[ ${DC_VERSION} =~ "dev" ]]; then
-                printf "This is version ${RED}${DC_VERSION}${NC} of ${RED}dc${NC} \n"
-                printf "This is a development version \n"
-                printf "The latest release version is ${BLUE}${LATEST_VERSION}${NC} \n"
-            else
-                printf "This is version ${DC_VERSION} of ${RED}dc${NC} \n"
-                printf "Release notes can be found at https://github.com/brhahlen/dc/releases/tag/${DC_VERSION} \n"
-                if [ ! "$(printf '%s\n' "${LATEST_VERSION}" "${DC_VERSION}" | sort -V | head -n1)" = "${LATEST_VERSION}" ]; then
-                    printf "#################################### \n"
-                    printf "A newer version of ${RED}dc${NC} is avaiable \n"
-                    printf "The latest release version is ${BLUE}${LATEST_VERSION}${NC} \n"
-                    printf "This can be found at https://github.com/brhahlen/dc/releases/tag/${LATEST_VERSION} \n"
-                fi
-            fi
+            show_version
             ;;
     # ----------- All others ------------
         "help")
