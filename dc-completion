@@ -22,7 +22,7 @@ _dc_completions()
     fi
 
     # Basic/main options that will be completed
-    OPTS="install up down restart-stack-hard restart-stack-soft logs-stack start stop restart pull logs network list help version"
+    OPTS="install up down restart-stack-hard restart-stack-soft logs-stack start stop restart pull logs network list help update version"
 
     # Based on the arguments, we can run functions
     case "$cmd" in
