@@ -604,6 +604,7 @@ done
                     printf "Updating... \n"
                     cd ${UPDATE_TMP}
                     bash ${UPDATE_TMP}/dc install
+                    cd - > /dev/null
                     printf "Done \n"
                 else
                     printf "This is the latest version, no update needed \n"
