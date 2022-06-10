@@ -535,7 +535,7 @@ function update(){
             printf "Downloading... \n"
             wget -q --show-progress https://github.com/brhahlen/dc/releases/download/${LATEST_VERSION}/dc-release.zip -O ${UPDATE_TMP}/dc-release.zip
             printf "Extracting... \n"
-            unzip ${UPDATE_TMP}/dc-release.zip -d ${UPDATE_TMP}
+            unzip -q ${UPDATE_TMP}/dc-release.zip -d ${UPDATE_TMP}
             printf "Updating... \n"
             cd ${UPDATE_TMP}
             bash ${UPDATE_TMP}/dc install
