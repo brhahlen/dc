@@ -506,9 +506,9 @@ function list(){
         cd ${STACK}
         # Fix for change in behaviour, remove in v2.0.0
         if [ "${DC_CMD}" = "docker-compose" ]; then
-            ${DC_COMMAND} ps --services -a > ${TMP_DIR}/${STACK_NAME}
+            ${DC_COMMAND} ps --services -a | tee ${TMP_DIR}/${STACK_NAME}
         else
-            ${DC_COMMAND} config --services > ${TMP_DIR}/${STACK_NAME}
+            ${DC_COMMAND} config --services | tee ${TMP_DIR}/${STACK_NAME}
         fi
         cd - > /dev/null
     done
