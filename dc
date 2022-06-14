@@ -55,7 +55,12 @@ function tmp_stack_files_age(){
                     printf "File is too old, refreshing \n"
                 fi
                 cd ${STACK}
-                ${DC_COMMAND} ps --services -a > ${TMP_DIR}/${STACK_NAME}
+                # Fix for change in behaviour, remove in v2.0.0
+                if [ "${DC_CMD}" = "docker-compose" ]; then
+                    ${DC_COMMAND} ps --services -a > ${TMP_DIR}/${STACK_NAME}
+                else
+                    ${DC_COMMAND} config --services > ${TMP_DIR}/${STACK_NAME}
+                fi
                 cd - > /dev/null
             fi
         else
@@ -63,7 +68,12 @@ function tmp_stack_files_age(){
                 printf "File does not exist, creating \n"
             fi
             cd ${STACK}
-            ${DC_COMMAND} ps --services -a > ${TMP_DIR}/${STACK_NAME}
+            # Fix for change in behaviour, remove in v2.0.0
+            if [ "${DC_CMD}" = "docker-compose" ]; then
+                ${DC_COMMAND} ps --services -a > ${TMP_DIR}/${STACK_NAME}
+            else
+                ${DC_COMMAND} config --services > ${TMP_DIR}/${STACK_NAME}
+            fi
             cd - > /dev/null
         fi
     done
@@ -494,7 +504,12 @@ function list(){
         printf "=================================== \n"
         printf "Stack ${RED}${STACK_NAME}${NC} contains services: \n"
         cd ${STACK}
-        ${DC_COMMAND} ps --services -a | tee ${TMP_DIR}/${STACK_NAME}
+        # Fix for change in behaviour, remove in v2.0.0
+        if [ "${DC_CMD}" = "docker-compose" ]; then
+            ${DC_COMMAND} ps --services -a > ${TMP_DIR}/${STACK_NAME}
+        else
+            ${DC_COMMAND} config --services > ${TMP_DIR}/${STACK_NAME}
+        fi
         cd - > /dev/null
     done
     }
