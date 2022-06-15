@@ -13,13 +13,8 @@ else
 fi
 export ENV="${DC_DIR}/.env"
 
-if [[ -z "${DC_CMD}" ]]; then
-    export DC_CMD="docker compose"
-else
-    export DC_CMD="${DC_CMD}"
-fi
-
 #######################################
+export DC_CMD="docker compose"
 export DC_COMMAND="${DC_CMD} --env-file ${ENV}"
 export TMP_DIR="/tmp/dc_stack_services"
 # COLORS
@@ -55,12 +50,7 @@ function tmp_stack_files_age(){
                     printf "File is too old, refreshing \n"
                 fi
                 cd ${STACK}
-                # Fix for change in behaviour, remove in v2.0.0
-                if [ "${DC_CMD}" = "docker-compose" ]; then
-                    ${DC_COMMAND} ps --services -a > ${TMP_DIR}/${STACK_NAME}
-                else
-                    ${DC_COMMAND} config --services > ${TMP_DIR}/${STACK_NAME}
-                fi
+                ${DC_COMMAND} config --services > ${TMP_DIR}/${STACK_NAME}
                 cd - > /dev/null
             fi
         else
@@ -68,12 +58,7 @@ function tmp_stack_files_age(){
                 printf "File does not exist, creating \n"
             fi
             cd ${STACK}
-            # Fix for change in behaviour, remove in v2.0.0
-            if [ "${DC_CMD}" = "docker-compose" ]; then
-                ${DC_COMMAND} ps --services -a > ${TMP_DIR}/${STACK_NAME}
-            else
-                ${DC_COMMAND} config --services > ${TMP_DIR}/${STACK_NAME}
-            fi
+            ${DC_COMMAND} config --services > ${TMP_DIR}/${STACK_NAME}
             cd - > /dev/null
         fi
     done
@@ -142,19 +127,8 @@ function install(){
     if docker compose &> /dev/null ; then
         printf "Found ${RED}docker compose${NC} \n"
         export DC_CMD="docker compose"
-    elif docker-compose &> /dev/null ; then
-        printf "Found ${RED}docker-compose${NC} \n"
-        printf "Checking ${RED}docker-compose${NC} version \n"
-        DOCKER_COMPOSE_VERSION="$(docker-compose --version | cut -d " " -f 3 | cut -d "," -f 1)"
-        MIN_VERSION="1.25.0"
-        if [ ! "$(printf '%s\n' "${MIN_VERSION}" "${DOCKER_COMPOSE_VERSION}" | sort -V | head -n1)" = "${MIN_VERSION}" ]; then
-            printf "You are running docker-compose version ${DOCKER_COMPOSE_VERSION}. This script requires version ${MIN_VERSION} or higher, due to the use of the --env-file option. \n"
-            printf "Please install a newer version of docker-compose. You can find this at https://github.com/docker/compose/releases \n"
-            exit 1
-        fi
-        export DC_CMD="docker-compose"
     else
-        printf "Could not find either ${RED}docker compose${NC} or ${RED}docker-compose${NC} on this system. Please install either one (${RED}docker compose${NC} is preferred) to use ${RED}dc${NC} \n"
+        printf "Could not find either ${RED}docker compose${NC}. Please install ${RED}docker compose${NC} to use ${RED}dc${NC} \n"
     fi
     unset DC_DIR
     printf "Home directory is ${HOME} \n"
@@ -193,14 +167,10 @@ function install(){
         read -p "Where are your docker-compose stacks located? " DC_DIR
         echo "export DC_DIR=${DC_DIR}" >> ${HOME}/.bashrc
     fi
-    # Add DC_CMD to bashrc
-    if ! grep -q DC_CMD ${HOME}/.bashrc; then
-        printf "Set DC_CMD command variable and add to ${HOME}/.bashrc \n"
-        echo "export DC_CMD='${DC_CMD}'" >> ${HOME}/.bashrc
-    else
-        printf "Replacing DC_CMD variable \n"
+    # Remove DC_CMD to bashrc
+    if grep -q DC_CMD ${HOME}/.bashrc; then
+        printf "Removing DC_CMD variable \n"
         sed -i '/DC_CMD=/d' ${HOME}/.bashrc
-        echo "export DC_CMD='${DC_CMD}'" >> ${HOME}/.bashrc
     fi
 }
 
@@ -504,12 +474,7 @@ function list(){
         printf "=================================== \n"
         printf "Stack ${RED}${STACK_NAME}${NC} contains services: \n"
         cd ${STACK}
-        # Fix for change in behaviour, remove in v2.0.0
-        if [ "${DC_CMD}" = "docker-compose" ]; then
-            ${DC_COMMAND} ps --services -a | tee ${TMP_DIR}/${STACK_NAME}
-        else
-            ${DC_COMMAND} config --services | tee ${TMP_DIR}/${STACK_NAME}
-        fi
+        ${DC_COMMAND} config --services | tee ${TMP_DIR}/${STACK_NAME}
         cd - > /dev/null
     done
     }
