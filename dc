@@ -29,7 +29,7 @@ export VERBOSE=false
 function tmp_dir_stack_files(){
     if [ ! -d "${TMP_DIR}" ]; then
         if [ "${VERBOSE}" = true ]; then
-            printf "${TMP_DIR} not found. Creating... \n"
+            printf "%s not found. Creating... \n" "${TMP_DIR}"
         fi
         mkdir -p ${TMP_DIR}
     fi
@@ -38,9 +38,9 @@ function tmp_dir_stack_files(){
 # TMP_STACK FILES AGE
 function tmp_stack_files_age(){
     tmp_dir_stack_files
-    for STACK in $(find ${DC_DIR} -name docker-compose.yml -printf '%h \n' | sort -u);
+    for STACK in $(find "${DC_DIR}" -name docker-compose.yml -printf '%h \n' | sort -u);
     do
-        STACK_NAME=$(basename ${STACK})
+        STACK_NAME=$(basename "${STACK}")
         if [ -f ${TMP_DIR}/${STACK_NAME} ]; then
             if [ "${VERBOSE}" = true ]; then
                 printf "File exists, checking age \n"
@@ -49,17 +49,17 @@ function tmp_stack_files_age(){
                 if [ "${VERBOSE}" = true ]; then
                     printf "File is too old, refreshing \n"
                 fi
-                cd ${STACK}
+                cd "${STACK}" || { echo "cd failed"; exit 1; }
                 ${DC_COMMAND} config --services > ${TMP_DIR}/${STACK_NAME}
-                cd - > /dev/null
+                cd - > /dev/null || { echo "cd failed"; exit 1; }
             fi
         else
             if [ "${VERBOSE}" = true ]; then
                 printf "File does not exist, creating \n"
             fi
-            cd ${STACK}
+            cd "${STACK}" || { echo "cd failed"; exit 1; }
             ${DC_COMMAND} config --services > ${TMP_DIR}/${STACK_NAME}
-            cd - > /dev/null
+            cd - > /dev/null || { echo "cd failed"; exit 1; }
         fi
     done
 }
@@ -178,9 +178,9 @@ function up(){
         for STACK in $(find "${DC_DIR}" -name docker-compose.yml -printf '%h\n' | sort -u);
         do
             printf "\n%s:\n" "${STACK}"
-            cd "${STACK}"
+            cd "${STACK}" || { echo "cd failed"; exit 1; }
             ${DC_COMMAND} up -d
-            cd - > /dev/null
+            cd - > /dev/null || { echo "cd failed"; exit 1; }
         done
     else
         for STACK in "$@";
@@ -188,9 +188,9 @@ function up(){
             STACK_DIR="${DC_DIR}/${STACK}"
             if [ -d "${STACK_DIR}" ]; then
                 printf "Bringing up stack %s \n" "${STACK}"
-                cd "${STACK_DIR}"
+                cd "${STACK_DIR}" || { echo "cd failed"; exit 1; }
                 ${DC_COMMAND} up -d
-                cd - > /dev/null
+                cd - > /dev/null || { echo "cd failed"; exit 1; }
             else
                 printf "Stack %s does not exist. Did you type the name correctly? \n" "${STACK}"
             fi
@@ -204,24 +204,24 @@ function down(){
         printf "No argument provided, please use the name of a stack or all \n"
     elif [ "$1" == "all" ]; then
         printf "Bringing down all stacks \n"
-        for STACK in $(find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -ur);
+        for STACK in $(find "${DC_DIR}" -name docker-compose.yml -printf '%h\n' | sort -ur);
         do
             printf "\n${STACK}:\n"
-            cd ${STACK}
+            cd "${STACK}" || { echo "cd failed"; exit 1; }
             ${DC_COMMAND} down
-            cd - > /dev/null
+            cd - > /dev/null || { echo "cd failed"; exit 1; }
         done
     else
         for STACK in "$@";
         do
             STACK_DIR="${DC_DIR}/${STACK}"
             if [ -d "${STACK_DIR}" ]; then
-                printf "Bringing down stack ${STACK} \n"
-                cd ${STACK_DIR}
+                printf "Bringing down stack %s \n" "${STACK}"
+                cd ${STACK_DIR} || { echo "cd failed"; exit 1; }
                 ${DC_COMMAND} down
-                cd - > /dev/null
+                cd - > /dev/null || { echo "cd failed"; exit 1; }
             else
-                printf "Stack ${STACK} does not exist. Did you type the name correctly? \n"
+                printf "Stack %s does not exist. Did you type the name correctly? \n" "${STACK}"
             fi
         done
     fi
@@ -235,26 +235,26 @@ function restart-stack-hard(){
         printf "No argument provided, please use the name of a stack or all \n"
     elif [ "$1" == "all" ]; then
         printf "Hard Restarting all stacks \n"
-        for STACK in $(find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -u);
+        for STACK in $(find "${DC_DIR}" -name docker-compose.yml -printf '%h\n' | sort -u);
         do
             printf "\n${STACK}:\n"
-            cd $STACK
+            cd $STACK || { echo "cd failed"; exit 1; }
             ${DC_COMMAND} down
             ${DC_COMMAND} up -d
-            cd - > /dev/null
+            cd - > /dev/null || { echo "cd failed"; exit 1; }
         done
     else
         for STACK in "$@";
         do
             STACK_DIR="${DC_DIR}/${STACK}"
             if [ -d "${STACK_DIR}" ]; then
-                printf "Restarting stack ${STACK} \n"
-                cd ${STACK_DIR}
+                printf "Restarting stack %s \n" "${STACK}"
+                cd ${STACK_DIR} || { echo "cd failed"; exit 1; }
                 ${DC_COMMAND} down
                 ${DC_COMMAND} up -d
-                cd - > /dev/null
+                cd - > /dev/null || { echo "cd failed"; exit 1; }
             else
-                printf "Stack ${STACK} does not exist. Did you type the name correctly? \n"
+                printf "Stack %s does not exist. Did you type the name correctly? \n" "${STACK}"
             fi
         done
     fi
@@ -266,24 +266,24 @@ function restart-stack-soft(){
         printf "No argument provided, please use the name of a stack or all \n"
     elif [ "$1" == "all" ]; then
         printf "Restarting all stacks \n"
-        for STACK in $(find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -u);
+        for STACK in $(find "${DC_DIR}" -name docker-compose.yml -printf '%h\n' | sort -u);
         do
             printf "\n${STACK}:\n"
-            cd $STACK
+            cd $STACK || { echo "cd failed"; exit 1; }
             ${DC_COMMAND} restart
-            cd - > /dev/null
+            cd - > /dev/null || { echo "cd failed"; exit 1; }
         done
     else
         for STACK in "$@";
         do
             STACK_DIR="${DC_DIR}/${STACK}"
             if [ -d "${STACK_DIR}" ]; then
-                printf "Restarting stack ${STACK} \n"
-                cd ${STACK_DIR}
+                printf "Restarting stack %s \n" "${STACK}"
+                cd ${STACK_DIR} || { echo "cd failed"; exit 1; }
                 ${DC_COMMAND} restart
-                cd - > /dev/null
+                cd - > /dev/null || { echo "cd failed"; exit 1; }
             else
-                printf "Stack ${STACK} does not exist. Did you type the name correctly? \n"
+                printf "Stack %s does not exist. Did you type the name correctly? \n" "${STACK}"
             fi
         done
     fi
@@ -298,12 +298,12 @@ function logs-stack(){
         do
             STACK_DIR="${DC_DIR}/${STACK}"
             if [ -d "${STACK_DIR}" ]; then
-                printf "Showing logs for stack ${STACK} \n"
-                cd ${STACK_DIR}
+                printf "Showing logs for stack %s \n" "${STACK}"
+                cd ${STACK_DIR} || { echo "cd failed"; exit 1; }
                 ${DC_COMMAND} logs --tail=100 -f
-                cd - > /dev/null
+                cd - > /dev/null || { echo "cd failed"; exit 1; }
             else
-                printf "Stack ${STACK} does not exist. Did you type the name correctly? \n"
+                printf "Stack %s does not exist. Did you type the name correctly? \n" "${STACK}"
             fi
         done
     fi
@@ -322,14 +322,14 @@ function start(){
         for SERVICE in "$@";
         do
             if grep -r -q -x ${SERVICE} ${TMP_DIR}; then
-                SERVICE_STACK=$(basename $(grep -r -x ${SERVICE} ${TMP_DIR} | cut -d : -f 1 ))
+                SERVICE_STACK=$(basename "$(grep -r -x ${SERVICE} ${TMP_DIR} | cut -d : -f 1 )")
                 if [ "${VERBOSE}" = true ]; then
                     printf "${SERVICE_STACK} \n"
                     printf "Found ${SERVICE} in ${SERVICE_STACK} \n"
                 fi
-                cd ${DC_DIR}/${SERVICE_STACK}
+                cd ${DC_DIR}/${SERVICE_STACK} || { echo "cd failed"; exit 1; }
                 ${DC_COMMAND} up -d ${SERVICE}
-                cd - > /dev/null
+                cd - > /dev/null || { echo "cd failed"; exit 1; }
             else
                 printf "ERROR: Service ${SERVICE} was not found in any of the stacks. Does it show up when you run ${RED}dc list${NC}? \n"
             fi
@@ -348,17 +348,17 @@ function stop(){
         for SERVICE in "$@";
         do
             if grep -r -q -x ${SERVICE} ${TMP_DIR}; then
-                SERVICE_STACK=$(basename $(grep -r -x ${SERVICE} ${TMP_DIR} | cut -d : -f 1 ))
+                SERVICE_STACK=$(basename "$(grep -r -x ${SERVICE} ${TMP_DIR} | cut -d : -f 1 )")
                 if [ "${VERBOSE}" = true ]; then
                     printf "${SERVICE_STACK} \n"
                     printf "Found ${SERVICE} in ${SERVICE_STACK} \n"
                     printf "${DC_DIR} \n"
                     printf "cd ${DC_DIR}/${SERVICE_STACK} \n"
                 fi
-                cd ${DC_DIR}/${SERVICE_STACK}
+                cd ${DC_DIR}/${SERVICE_STACK} || { echo "cd failed"; exit 1; }
                 ${DC_COMMAND} stop ${SERVICE}
                 ${DC_COMMAND} rm -f ${SERVICE}
-                cd - > /dev/null
+                cd - > /dev/null || { echo "cd failed"; exit 1; }
             else
                 printf "ERROR: Service ${SERVICE} was not found in any of the stacks. Does it show up when you run ${RED}dc list${NC}? \n"
             fi
@@ -388,15 +388,15 @@ function pull(){
         for SERVICE in "$@";
         do
             if grep -r -q -x ${SERVICE} ${TMP_DIR}; then
-                SERVICE_STACK=$(basename $(grep -r -x ${SERVICE} ${TMP_DIR} | cut -d : -f 1 ))
+                SERVICE_STACK=$(basename "$(grep -r -x ${SERVICE} ${TMP_DIR} | cut -d : -f 1 )")
                 if [ "${VERBOSE}" = true ]; then
                     printf "${SERVICE_STACK} \n"
                     printf "Found ${SERVICE} in ${SERVICE_STACK} \n"
                 fi
-                cd ${DC_DIR}/${SERVICE_STACK}
+                cd ${DC_DIR}/${SERVICE_STACK} || { echo "cd failed"; exit 1; }
                 printf "Running command: ${DC_COMMAND} pull ${SERVICE} \n"
                 ${DC_COMMAND} pull ${SERVICE}
-                cd - > /dev/null
+                cd - > /dev/null || { echo "cd failed"; exit 1; }
             else
                 printf "ERROR: Service ${SERVICE} was not found in any of the stacks. Does it show up when you run ${RED}dc list${NC}? \n"
             fi
@@ -427,12 +427,12 @@ function logs(){
         for SERVICE in "$@";
         do
             if grep -r -q -x ${SERVICE} ${TMP_DIR}; then
-                SERVICE_STACK=$(basename $(grep -r -x ${SERVICE} ${TMP_DIR} | cut -d : -f 1 ))
+                SERVICE_STACK=$(basename "$(grep -r -x ${SERVICE} ${TMP_DIR} | cut -d : -f 1 )")
                 if [ "${VERBOSE}" = true ]; then
                     printf "${SERVICE_STACK} \n"
                     printf "Found ${SERVICE} in ${SERVICE_STACK} \n"
                 fi
-                cd ${DC_DIR}/${SERVICE_STACK}
+                cd ${DC_DIR}/${SERVICE_STACK} || { echo "cd failed"; exit 1; }
                 ${DC_COMMAND} logs --tail=100 -f ${SERVICE} &
                 if [ -z "$WAIT_PIDS" ]
                     then
@@ -441,7 +441,7 @@ function logs(){
                         export WAIT_PIDS="$WAIT_PIDS $!"
                 fi
                 printf "PID=$! \n"
-                cd - > /dev/null
+                cd - > /dev/null || { echo "cd failed"; exit 1; }
             else
                 printf "ERROR: Service ${SERVICE} was not found in any of the stacks. Does it show up when you run ${RED}dc list${NC}? \n"
             fi
@@ -463,20 +463,21 @@ function network(){
 function list(){
     tmp_dir_stack_files
     printf "Listing Stacks and Services \n"
-    for STACK in $(find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -u);
+    for STACK in $(find "${DC_DIR}" -name docker-compose.yml -printf '%h\n' | sort -u);
     do
-        STACK_NAME=$(basename ${STACK})
+        STACK_NAME=$(basename "${STACK}")
         printf "=================================== \n"
         printf "Stack ${RED}${STACK_NAME}${NC} contains services: \n"
-        cd ${STACK}
+        cd "${STACK}" || { echo "cd failed"; exit 1; }
         ${DC_COMMAND} config --services | tee ${TMP_DIR}/${STACK_NAME}
-        cd - > /dev/null
+        cd - > /dev/null || { echo "cd failed"; exit 1; }
     done
     }
 
 # VERSION
 function show_version(){
-    export LATEST_VERSION=$(curl --silent https://api.github.com/repos/brhahlen/dc/releases/latest | grep -Po '"tag_name": "\K.*?(?=")')
+    LATEST_VERSION=$(curl --silent https://api.github.com/repos/brhahlen/dc/releases/latest | grep -Po '"tag_name": "\K.*?(?=")')
+    export LATEST_VERSION
     if [[ ${DC_VERSION} =~ "dev" ]]; then
         printf "This is version ${RED}${DC_VERSION}${NC} of ${RED}dc${NC} \n"
         printf "This is a development version \n"
@@ -494,7 +495,8 @@ function show_version(){
 }
 
 function update(){
-    export LATEST_VERSION=$(curl --silent https://api.github.com/repos/brhahlen/dc/releases/latest | grep -Po '"tag_name": "\K.*?(?=")')
+    LATEST_VERSION=$(curl --silent https://api.github.com/repos/brhahlen/dc/releases/latest | grep -Po '"tag_name": "\K.*?(?=")')
+    export LATEST_VERSION
     export UPDATE_TMP=/tmp/dc_update
     printf "You are on version ${DC_VERSION} of ${RED}dc${NC} \n"
         if [ ! "$(printf '%s\n' "${LATEST_VERSION}" "${DC_VERSION}" | sort -V | head -n1)" = "${LATEST_VERSION}" ]; then
@@ -512,9 +514,9 @@ function update(){
             printf "Extracting... \n"
             unzip -q ${UPDATE_TMP}/dc-release.zip -d ${UPDATE_TMP}
             printf "Updating... \n"
-            cd ${UPDATE_TMP}
+            cd ${UPDATE_TMP} || { echo "cd failed"; exit 1; }
             bash ${UPDATE_TMP}/dc install
-            cd - > /dev/null
+            cd - > /dev/null || { echo "cd failed"; exit 1; }
             printf "Done \n"
         else
             printf "This is the latest version, no update needed \n"
