@@ -1,6 +1,9 @@
 #/usr/bin/env bash
 # Copyright (C) 2022 Ben Hählen
 # This is the completion file for `dc`
+##############
+# Version 1.6.0
+##############
 _dc_completions()
 {
     local CUR PREV OPTS BASE
