@@ -549,62 +549,50 @@ done
         "install")
             install
             ;;
-
     # ----------- up ------------
         "up")
             up ${@:2}
             ;;
-
     # ----------- down ------------
         "down")
             down ${@:2}
             ;;
-
     # ----------- restart-stack-hard ------------
         "restart-stack-hard")
             restart-stack-hard ${@:2}
             ;;
-
     # ----------- restart-stack-soft ------------
         "restart-stack-soft")
             restart-stack-soft ${@:2}
             ;;
-
     # ----------- logs-stack ------------
         "logs-stack")
             logs-stack ${@:2}
             ;;
-
     # ----------- start ------------
         "start")
             start ${@:2}
             ;;
-
     # ----------- stop ------------
         "stop")
             stop ${@:2}
             ;;
-
     # ----------- restart ------------
         "restart")
             restart ${@:2}
             ;;
-
     # ----------- pull ------------
         "pull")
             pull ${@:2}
             ;;
-
     # ----------- logs ------------
         "logs")
             logs ${@:2}
             ;;
-
     # ----------- network ------------
         "network")
             network
             ;;
-
     # ----------- list ------------
         "list")
             list
