@@ -1,6 +1,9 @@
 #/usr/bin/env bash
 # Copyright (C) 2022 Ben Hählen
 # This is the completion file for `dc`
+##############
+# Version 1.6.0
+##############
 _dc_completions()
 {
     local CUR PREV OPTS BASE
@@ -22,7 +25,7 @@ _dc_completions()
     fi
 
     # Basic/main options that will be completed
-    OPTS="install up down restart-stack-hard restart-stack-soft logs-stack start stop restart pull logs network list help version"
+    OPTS="install up down restart-stack-hard restart-stack-soft logs-stack start stop restart pull logs network list help update version"
 
     # Based on the arguments, we can run functions
     case "$cmd" in
