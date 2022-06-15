@@ -609,7 +609,7 @@ case ${1} in
         show_usage
         ;;
     *)
-        printf "Invalid command %b %s %b , showing help \n" ${RED} "${1}" ${NC}
+        printf "Invalid command %b%s%b, showing help \n" "${RED}" "${1}" "${NC}"
         show_usage
         ;;
 esac
