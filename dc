@@ -94,32 +94,27 @@ return 0
 function install(){
     ###### PREREQUISITE CHECKS
     # tee
-    if ! command -v tee &> /dev/null
-    then
+    if ! command -v tee &> /dev/null ; then
         printf "tee could not be found, please install it to use dc \n"
         exit 1
     fi
     # curl
-    if ! command -v curl &> /dev/null
-    then
+    if ! command -v curl &> /dev/null ; then
         printf "curl could not be found, please install it to use dc \n"
         exit 1
     fi
     # grep
-    if ! command -v grep &> /dev/null
-    then
+    if ! command -v grep &> /dev/null ; then
         printf "grep could not be found, please install it to use dc \n"
         exit 1
     fi
     # unzip
-    if ! command -v unzip &> /dev/null
-    then
+    if ! command -v unzip &> /dev/null ; then
         printf "unzip could not be found, please install it to use dc \n"
         exit 1
     fi
     # wget
-    if ! command -v wget &> /dev/null
-    then
+    if ! command -v wget &> /dev/null ; then
         printf "wget could not be found, please install it to use dc \n"
         exit 1
     fi
@@ -133,7 +128,7 @@ function install(){
     unset DC_DIR
     printf "Home directory is ${HOME} \n"
     printf "Copying dc binary to ${HOME}/bin and making it executable \n"
-    if [ ! -d ${HOME}/bin ]; then
+    if [ ! -d ${HOME}/bin  ]; then
         printf "${HOME}/bin does not exist. Creating... \n"
         mkdir -p ${HOME}/bin
     fi
@@ -142,11 +137,11 @@ function install(){
     # Do stuff here
     printf "Copying dc-completion binary to ${HOME}/.bash_completion.d/ and making it executable \n"
     # Check for root access
-    if [ ! -d ${HOME}/.bash_completion.d ]; then
+    if [ ! -d ${HOME}/.bash_completion.d ] ; then
         printf "${HOME}/.bash_completion.d does not exist. Creating... \n"
         mkdir -p ${HOME}/.bash_completion.d
     fi
-    if [ ! -f ${HOME}/.bash_completion ]; then
+    if [ ! -f ${HOME}/.bash_completion ] ; then
         printf "${HOME}/.bash_completion does not exist. Creating... \n"
         touch ${HOME}/.bash_completion
         printf "Adding bash_completion lines to file \n"
@@ -156,19 +151,19 @@ function install(){
     cp -f dc-completion ${HOME}/.bash_completion.d
     chmod u+x ${HOME}/.bash_completion.d/dc-completion
     # Add dc to PATH
-    if ! grep -q "\$HOME/bin" ${HOME}/.bashrc; then
+    if ! grep -q "\$HOME/bin" ${HOME}/.bashrc ; then
         printf "Adding dc to PATH \n"
         echo "PATH=\"\$HOME/bin:\$PATH\"" >> ${HOME}/.bashrc
         echo "export PATH" >> ${HOME}/.bashrc
     fi
     # Add DC_DIR to bashrc
-    if ! grep -q DC_DIR ${HOME}/.bashrc; then
+    if ! grep -q DC_DIR ${HOME}/.bashrc ; then
         printf "Set DC_DIR variable and add to ${HOME}/.bashrc \n"
         read -p "Where are your docker-compose stacks located? " DC_DIR
         echo "export DC_DIR=${DC_DIR}" >> ${HOME}/.bashrc
     fi
     # Remove DC_CMD to bashrc
-    if grep -q DC_CMD ${HOME}/.bashrc; then
+    if grep -q DC_CMD ${HOME}/.bashrc ; then
         printf "Removing DC_CMD variable \n"
         sed -i '/DC_CMD=/d' ${HOME}/.bashrc
     fi
@@ -180,24 +175,24 @@ function up(){
         printf "No argument provided, please use the name of a stack or all \n"
     elif [ "$1" == "all" ]; then
         printf "Bringing up all stacks \n"
-        for STACK in $(find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -u);
+        for STACK in $(find "${DC_DIR}" -name docker-compose.yml -printf '%h\n' | sort -u);
         do
-            printf "\n${STACK}:\n"
-            cd $STACK
+            printf "\n%s:\n" "${STACK}"
+            cd "${STACK}"
             ${DC_COMMAND} up -d
             cd - > /dev/null
         done
     else
-        for STACK in $@;
+        for STACK in "$@";
         do
             STACK_DIR="${DC_DIR}/${STACK}"
             if [ -d "${STACK_DIR}" ]; then
-                printf "Bringing up stack ${STACK} \n"
-                cd ${STACK_DIR}
+                printf "Bringing up stack %s \n" "${STACK}"
+                cd "${STACK_DIR}"
                 ${DC_COMMAND} up -d
                 cd - > /dev/null
             else
-                printf "Stack ${STACK} does not exist. Did you type the name correctly? \n"
+                printf "Stack %s does not exist. Did you type the name correctly? \n" "${STACK}"
             fi
         done
     fi
@@ -217,7 +212,7 @@ function down(){
             cd - > /dev/null
         done
     else
-        for STACK in $@;
+        for STACK in "$@";
         do
             STACK_DIR="${DC_DIR}/${STACK}"
             if [ -d "${STACK_DIR}" ]; then
@@ -249,7 +244,7 @@ function restart-stack-hard(){
             cd - > /dev/null
         done
     else
-        for STACK in $@;
+        for STACK in "$@";
         do
             STACK_DIR="${DC_DIR}/${STACK}"
             if [ -d "${STACK_DIR}" ]; then
@@ -279,7 +274,7 @@ function restart-stack-soft(){
             cd - > /dev/null
         done
     else
-        for STACK in $@;
+        for STACK in "$@";
         do
             STACK_DIR="${DC_DIR}/${STACK}"
             if [ -d "${STACK_DIR}" ]; then
@@ -299,7 +294,7 @@ function logs-stack(){
     if [ -z "$1" ]; then
         printf "No argument provided, please provide the name(s) of a stack(s) \n"
     else
-        for STACK in $@;
+        for STACK in "$@";
         do
             STACK_DIR="${DC_DIR}/${STACK}"
             if [ -d "${STACK_DIR}" ]; then
@@ -322,9 +317,9 @@ function start(){
     if [ -z "$1" ]; then
         printf "No argument provided, please provide the name of one or more services \n"
     else
-        printf "Starting the following service(s): $@ \n"
+        printf "Starting the following service(s): %s \n" "$@"
         tmp_stack_files_age
-        for SERVICE in $@;
+        for SERVICE in "$@";
         do
             if grep -r -q -x ${SERVICE} ${TMP_DIR}; then
                 SERVICE_STACK=$(basename $(grep -r -x ${SERVICE} ${TMP_DIR} | cut -d : -f 1 ))
@@ -348,9 +343,9 @@ function stop(){
     if [ -z "$1" ]; then
         printf "No argument provided, please provide the name of one or more services \n"
     else
-        printf "Stopping the following service(s): $@ \n"
+        printf "Stopping the following service(s): %s \n" "$@"
         tmp_stack_files_age
-        for SERVICE in $@;
+        for SERVICE in "$@";
         do
             if grep -r -q -x ${SERVICE} ${TMP_DIR}; then
                 SERVICE_STACK=$(basename $(grep -r -x ${SERVICE} ${TMP_DIR} | cut -d : -f 1 ))
@@ -377,9 +372,9 @@ function restart(){
     if [ -z "$1" ]; then
         printf "No argument provided, please provide the name of one or more services \n"
     else
-        printf "Restarting the following service(s): $@ \n"
-        stop $@
-        start $@
+        printf "Restarting the following service(s): %s \n" "$@"
+        stop "$@"
+        start "$@"
     fi
     }
 
@@ -388,9 +383,9 @@ function pull(){
     if [ -z "$1" ]; then
         printf "No argument provided, please provide the name of one or more services \n"
     else
-        printf "Pulling images for the following service(s): $@ \n"
+        printf "Pulling images for the following service(s): %s \n" "$@"
         tmp_stack_files_age
-        for SERVICE in $@;
+        for SERVICE in "$@";
         do
             if grep -r -q -x ${SERVICE} ${TMP_DIR}; then
                 SERVICE_STACK=$(basename $(grep -r -x ${SERVICE} ${TMP_DIR} | cut -d : -f 1 ))
@@ -427,9 +422,9 @@ function logs(){
             kill $CHILD_PID
         done
         }
-        printf "Showing logs for the following service(s): $@ \n"
+        printf "Showing logs for the following service(s): %s \n" "$@"
         tmp_stack_files_age
-        for SERVICE in $@;
+        for SERVICE in "$@";
         do
             if grep -r -q -x ${SERVICE} ${TMP_DIR}; then
                 SERVICE_STACK=$(basename $(grep -r -x ${SERVICE} ${TMP_DIR} | cut -d : -f 1 ))
@@ -543,79 +538,78 @@ while getopts ":v" opt; do
             ;;
     esac
 done
-    shift $(( OPTIND - 1 ))
-    case ${1} in
-    # ----------- install ------------
-        "install")
-            install
-            ;;
-    # ----------- up ------------
-        "up")
-            up ${@:2}
-            ;;
-    # ----------- down ------------
-        "down")
-            down ${@:2}
-            ;;
-    # ----------- restart-stack-hard ------------
-        "restart-stack-hard")
-            restart-stack-hard ${@:2}
-            ;;
-    # ----------- restart-stack-soft ------------
-        "restart-stack-soft")
-            restart-stack-soft ${@:2}
-            ;;
-    # ----------- logs-stack ------------
-        "logs-stack")
-            logs-stack ${@:2}
-            ;;
-    # ----------- start ------------
-        "start")
-            start ${@:2}
-            ;;
-    # ----------- stop ------------
-        "stop")
-            stop ${@:2}
-            ;;
-    # ----------- restart ------------
-        "restart")
-            restart ${@:2}
-            ;;
-    # ----------- pull ------------
-        "pull")
-            pull ${@:2}
-            ;;
-    # ----------- logs ------------
-        "logs")
-            logs ${@:2}
-            ;;
-    # ----------- network ------------
-        "network")
-            network
-            ;;
-    # ----------- list ------------
-        "list")
-            list
-            ;;
-    # ----------- update ------------
-        "update")
-            update
-            ;;
-    # ----------- version ------------
-        "version")
-            show_version
-            ;;
-    # ----------- All others ------------
-        "help")
-            show_usage
-            ;;
-        "")
-            printf "Missing command, showing help \n"
-            show_usage
-            ;;
-        *)
-            printf "Invalid command ${RED}${1}${NC}, showing help \n"
-            show_usage
-            ;;
-    esac
-#done
+shift $(( OPTIND - 1 ))
+case ${1} in
+# ----------- install ------------
+    "install")
+        install
+        ;;
+# ----------- up ------------
+    "up")
+        up "${@:2}"
+        ;;
+# ----------- down ------------
+    "down")
+        down "${@:2}"
+        ;;
+# ----------- restart-stack-hard ------------
+    "restart-stack-hard")
+        restart-stack-hard "${@:2}"
+        ;;
+# ----------- restart-stack-soft ------------
+    "restart-stack-soft")
+        restart-stack-soft "${@:2}"
+        ;;
+# ----------- logs-stack ------------
+    "logs-stack")
+        logs-stack "${@:2}"
+        ;;
+# ----------- start ------------
+    "start")
+        start "${@:2}"
+        ;;
+# ----------- stop ------------
+    "stop")
+        stop "${@:2}"
+        ;;
+# ----------- restart ------------
+    "restart")
+        restart "${@:2}"
+        ;;
+# ----------- pull ------------
+    "pull")
+        pull "${@:2}"
+        ;;
+# ----------- logs ------------
+    "logs")
+        logs "${@:2}"
+        ;;
+# ----------- network ------------
+    "network")
+        network
+        ;;
+# ----------- list ------------
+    "list")
+        list
+        ;;
+# ----------- update ------------
+    "update")
+        update
+        ;;
+# ----------- version ------------
+    "version")
+        show_version
+        ;;
+# ----------- All others ------------
+    "help")
+        show_usage
+        ;;
+    "")
+        printf "Missing command, showing help \n"
+        show_usage
+        ;;
+    *)
+        printf "Invalid command %s, showing help \n" "${RED}${1}${NC}"
+        show_usage
+        ;;
+esac
