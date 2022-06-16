@@ -18,14 +18,10 @@ _dc_completions()
     fi
 
     ## Variables
-    if [[ -z "${DC_CMD}" ]]; then
-        export DC_CMD="docker compose"
-    else
-        export DC_CMD="${DC_CMD}"
-    fi
+    export DC_CMD="docker compose"
 
     # Basic/main options that will be completed
-    OPTS="install up down restart-stack-hard restart-stack-soft logs-stack start stop restart pull logs network list help update version"
+    OPTS="install up down restart-stack-hard restart-stack-soft logs-stack start stop restart pull logs network list help update version prune"
 
     # Based on the arguments, we can run functions
     case "$cmd" in
@@ -42,7 +38,6 @@ _dc_completions()
             for STACK in $(find "${DC_DIR}" -name docker-compose.yml -printf '%h\n' | sort -u);
             do
                 ENV="${DC_DIR}/.env"
-                # DC_CMD=`which docker-compose`
                 DC_COMMAND="${DC_CMD} --env-file ${ENV}"
                 TMP_DIR="/tmp/dc_stack_services"
                 STACK_NAME=$(echo "${STACK}" | rev | cut -d / -f 1 | rev)
@@ -73,8 +68,10 @@ _dc_completions()
         install|network|list|help|version)
             return
             ;;
+        prune)
+            ;;
         *)
-        ;;
+            ;;
     esac
 
    COMPREPLY=( $(compgen -W "${OPTS}" -- "${CUR}") )
