@@ -552,11 +552,11 @@ function prune() {
         printf "Pruning containers and images \n"
         docker container prune -f
         docker image prune -a -f
-        printf "Done"
+        printf "Done \n"
     elif [ "$2" == "system" ]; then
-        printf "Pruning system"
+        printf "Pruning system \n"
         docker system prune --volumes -f
-        printf "Done"
+        printf "Done \n"
     else
         printf "Incorrect argument provided, please use %bbasic%b or %bsystem%b \n" "${RED}" "${NC}" "${RED}" "${NC}"
     fi
