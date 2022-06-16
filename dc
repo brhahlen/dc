@@ -612,6 +612,10 @@ case ${1} in
     "network")
         network
         ;;
+# ----------- prune ------------
+    "prune")
+        prune
+        ;;
 # ----------- install ------------
     "install")
         install
