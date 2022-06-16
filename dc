@@ -24,7 +24,9 @@ export NC='\033[0m' # No Color
 # Verbosity
 export VERBOSE=false
 
-###### HELPER FUNCTIONS
+##################################################
+# HELPER FUNCTIONS                               #
+##################################################
 # TMP_DIR STACK SERVICES
 function tmp_dir_stack_files(){
     if [ ! -d "${TMP_DIR}" ]; then
@@ -64,32 +66,58 @@ function tmp_stack_files_age(){
     done
 }
 
-###### MAIN FUNCTIONS
+##################################################
+# USAGE AND LIST                                 #
+##################################################
 # USAGE
 function show_usage (){
     printf "Usage: %s [command] [stacks] \n" "$0"
     printf " \n"
     printf "Commands: \n"
-    printf " %binstall%b              Install dc for the user, needs sudo \n" "${RED}" "${NC}"
+    printf "============================= Stack Commands ============================="
     printf " %bup%b                   Bring up all stacks, a stack, or stacks \n" "${RED}" "${NC}"
     printf " %bdown%b                 Bring down all stacks, a stack or stack(s) \n" "${RED}" "${NC}"
     printf " %brestart-stack-hard%b   Restarts all stacks, a stack or stack(s) \n" "${RED}" "${NC}"
     printf " %brestart-stack-soft%b   Restarts all stacks, a stack or stack(s) \n" "${RED}" "${NC}"
     printf " %blogs-stack%b           Shows logs for a stack or stacks \n" "${RED}" "${NC}"
+    printf "=========================== Container Commands ==========================="
     printf " %bstart%b                Starts one or more services \n" "${RED}" "${NC}"
     printf " %bstop%b                 Stops one or more services \n" "${RED}" "${NC}"
     printf " %brestart%b              Restarts one or more services \n" "${RED}" "${NC}"
     printf " %bpull%b                 Pulls an image of a service \n" "${RED}" "${NC}"
     printf " %blogs%b                 Shows logs for a service or services \n" "${RED}" "${NC}"
+    printf "============================= System Commands ============================="
     printf " %bnetwork%b              Create the MacVLAN network, needs sudo \n" "${RED}" "${NC}"
-    printf " %blist%b                 List stacks and services in the stacks \n" "${RED}" "${NC}"
-    printf " %bhelp%b                 Print help \n" "${RED}" "${NC}"
+    printf " %bprune%b                Prunes images and containers (basic) or the system \n" "${RED}" "${NC}"
+    printf "======================= Install, Update and Version ======================="
+    printf " %binstall%b              Install dc for the user, needs sudo \n" "${RED}" "${NC}"
     printf " %bupdate%b               Updates dc to the latest version \n" "${RED}" "${NC}"
     printf " %bversion%b              Shows the version and checks the latest version \n" "${RED}" "${NC}"
+    printf "============================== Usage Commands =============================="
+    printf " %blist%b                 List stacks and services in the stacks \n" "${RED}" "${NC}"
+    printf " %bhelp%b                 Print help \n" "${RED}" "${NC}"
 
 return 0
 }
 
+# LIST
+function list(){
+    tmp_dir_stack_files
+    printf "Listing Stacks and Services \n"
+    for STACK in $(find "${DC_DIR}" -name docker-compose.yml -printf '%h\n' | sort -u);
+    do
+        STACK_NAME=$(basename "${STACK}")
+        printf "=================================== \n"
+        printf "Stack %b%s%b contains services: \n" "${RED}" "${STACK_NAME}" "${NC}"
+        cd "${STACK}" || { echo "cd failed"; exit 1; }
+        ${DC_COMMAND} config --services | tee ${TMP_DIR}/"${STACK_NAME}"
+        cd - > /dev/null || { echo "cd failed"; exit 1; }
+    done
+    }
+
+##################################################
+# INSTALLATION/UPDATE/VERSION CHECKING STUFF     #
+##################################################
 # INSTALL
 function install(){
     ###### PREREQUISITE CHECKS
@@ -169,6 +197,58 @@ function install(){
     fi
 }
 
+# VERSION
+function show_version(){
+    LATEST_VERSION=$(curl --silent https://api.github.com/repos/brhahlen/dc/releases/latest | grep -Po '"tag_name": "\K.*?(?=")')
+    export LATEST_VERSION
+    if [[ ${DC_VERSION} =~ "dev" ]]; then
+        printf "This is version %b%s%b of %bdc%b \n" "${RED}" "${DC_VERSION}" "${NC}" "${RED}" "${NC}"
+        printf "This is a development version \n"
+        printf "The latest release version is %b%s%b \n" "${BLUE}" "${LATEST_VERSION}" "${NC}"
+    else
+        printf "This is version %b%s%b of %bdc%b \n" "${RED}" "${DC_VERSION}" "${NC}" "${RED}" "${NC}"
+        printf "Release notes can be found at https://github.com/brhahlen/dc/releases/tag/%s \n" "${DC_VERSION}"
+        if [ ! "$(printf '%s\n' "${LATEST_VERSION}" "${DC_VERSION}" | sort -V | head -n1)" = "${LATEST_VERSION}" ]; then
+            printf "#################################### \n"
+            printf "A newer version of %bdc%b is avaiable \n" "${RED}" "${NC}"
+            printf "The latest release version is %b%s%b \n" "${BLUE}" "${LATEST_VERSION}" "${NC}"
+            printf "This can be found at https://github.com/brhahlen/dc/releases/tag/%s \n" "${LATEST_VERSION}"
+        fi
+    fi
+}
+
+function update(){
+    LATEST_VERSION=$(curl --silent https://api.github.com/repos/brhahlen/dc/releases/latest | grep -Po '"tag_name": "\K.*?(?=")')
+    export LATEST_VERSION
+    export UPDATE_TMP=/tmp/dc_update
+    printf "You are on version %s of %bdc%b \n" "${DC_VERSION}" "${RED}" "${NC}"
+        if [ ! "$(printf '%s\n' "${LATEST_VERSION}" "${DC_VERSION}" | sort -V | head -n1)" = "${LATEST_VERSION}" ]; then
+            printf "Version %b%s%b of %bdc%b is available and will be downloaded and installed \n" "${BLUE}" "${LATEST_VERSION}" "${NC}" "${RED}" "${NC}"
+            if [ ! -d ${UPDATE_TMP} ]; then
+                printf "%s does not exist. Creating... \n" "${UPDATE_TMP}"
+                mkdir -p "${UPDATE_TMP}"
+            else
+                printf "Cleanup previous update files... \n"
+                rm -rf "${UPDATE_TMP}"
+                mkdir "${UPDATE_TMP}"
+            fi
+            printf "Downloading... \n"
+            wget -q --show-progress https://github.com/brhahlen/dc/releases/download/"${LATEST_VERSION}"/dc-release.zip -O "${UPDATE_TMP}"/dc-release.zip
+            printf "Extracting... \n"
+            unzip -q "${UPDATE_TMP}"/dc-release.zip -d "${UPDATE_TMP}"
+            printf "Updating... \n"
+            cd "${UPDATE_TMP}" || { echo "cd failed"; exit 1; }
+            bash "${UPDATE_TMP}"/dc install
+            cd - > /dev/null || { echo "cd failed"; exit 1; }
+            printf "Done \n"
+        else
+            printf "This is the latest version, no update needed \n"
+        fi
+}
+
+##################################################
+# STACK COMMANDS                                 #
+##################################################
 # UP
 function up(){
     if [ -z "$1" ]; then
@@ -289,7 +369,7 @@ function restart-stack-soft(){
     fi
     }
 
-# RESTART-STACK
+# LOGS-STACK
 function logs-stack(){
     if [ -z "$1" ]; then
         printf "No argument provided, please provide the name(s) of a stack(s) \n"
@@ -309,6 +389,9 @@ function logs-stack(){
     fi
     }
 
+##################################################
+# CONTAINER COMMANDS                             #
+##################################################
 # # Something to add to start: check if container is exited or not, and then use proper command to start
 # To check if a container is exited
 # docker-compose ps | grep Exit | cut -d " " -f 1
@@ -454,74 +537,13 @@ function logs(){
     fi
     }
 
+##################################################
+# SYSTEM COMMANDS                                #
+##################################################
 # NETWORK
 function network(){
     printf "This function does nothing (yet) \n"
     }
-
-# LIST
-function list(){
-    tmp_dir_stack_files
-    printf "Listing Stacks and Services \n"
-    for STACK in $(find "${DC_DIR}" -name docker-compose.yml -printf '%h\n' | sort -u);
-    do
-        STACK_NAME=$(basename "${STACK}")
-        printf "=================================== \n"
-        printf "Stack %b%s%b contains services: \n" "${RED}" "${STACK_NAME}" "${NC}"
-        cd "${STACK}" || { echo "cd failed"; exit 1; }
-        ${DC_COMMAND} config --services | tee ${TMP_DIR}/"${STACK_NAME}"
-        cd - > /dev/null || { echo "cd failed"; exit 1; }
-    done
-    }
-
-# VERSION
-function show_version(){
-    LATEST_VERSION=$(curl --silent https://api.github.com/repos/brhahlen/dc/releases/latest | grep -Po '"tag_name": "\K.*?(?=")')
-    export LATEST_VERSION
-    if [[ ${DC_VERSION} =~ "dev" ]]; then
-        printf "This is version %b%s%b of %bdc%b \n" "${RED}" "${DC_VERSION}" "${NC}" "${RED}" "${NC}"
-        printf "This is a development version \n"
-        printf "The latest release version is %b%s%b \n" "${BLUE}" "${LATEST_VERSION}" "${NC}"
-    else
-        printf "This is version %b%s%b of %bdc%b \n" "${RED}" "${DC_VERSION}" "${NC}" "${RED}" "${NC}"
-        printf "Release notes can be found at https://github.com/brhahlen/dc/releases/tag/%s \n" "${DC_VERSION}"
-        if [ ! "$(printf '%s\n' "${LATEST_VERSION}" "${DC_VERSION}" | sort -V | head -n1)" = "${LATEST_VERSION}" ]; then
-            printf "#################################### \n"
-            printf "A newer version of %bdc%b is avaiable \n" "${RED}" "${NC}"
-            printf "The latest release version is %b%s%b \n" "${BLUE}" "${LATEST_VERSION}" "${NC}"
-            printf "This can be found at https://github.com/brhahlen/dc/releases/tag/%s \n" "${LATEST_VERSION}"
-        fi
-    fi
-}
-
-function update(){
-    LATEST_VERSION=$(curl --silent https://api.github.com/repos/brhahlen/dc/releases/latest | grep -Po '"tag_name": "\K.*?(?=")')
-    export LATEST_VERSION
-    export UPDATE_TMP=/tmp/dc_update
-    printf "You are on version %s of %bdc%b \n" "${DC_VERSION}" "${RED}" "${NC}"
-        if [ ! "$(printf '%s\n' "${LATEST_VERSION}" "${DC_VERSION}" | sort -V | head -n1)" = "${LATEST_VERSION}" ]; then
-            printf "Version %b%s%b of %bdc%b is available and will be downloaded and installed \n" "${BLUE}" "${LATEST_VERSION}" "${NC}" "${RED}" "${NC}"
-            if [ ! -d ${UPDATE_TMP} ]; then
-                printf "%s does not exist. Creating... \n" "${UPDATE_TMP}"
-                mkdir -p "${UPDATE_TMP}"
-            else
-                printf "Cleanup previous update files... \n"
-                rm -rf "${UPDATE_TMP}"
-                mkdir "${UPDATE_TMP}"
-            fi
-            printf "Downloading... \n"
-            wget -q --show-progress https://github.com/brhahlen/dc/releases/download/"${LATEST_VERSION}"/dc-release.zip -O "${UPDATE_TMP}"/dc-release.zip
-            printf "Extracting... \n"
-            unzip -q "${UPDATE_TMP}"/dc-release.zip -d "${UPDATE_TMP}"
-            printf "Updating... \n"
-            cd "${UPDATE_TMP}" || { echo "cd failed"; exit 1; }
-            bash "${UPDATE_TMP}"/dc install
-            cd - > /dev/null || { echo "cd failed"; exit 1; }
-            printf "Done \n"
-        else
-            printf "This is the latest version, no update needed \n"
-        fi
-}
 
 ###### CASES
 # Verbosity, yes, no?
