@@ -3,7 +3,7 @@
 - Added `prune` to `dc` and `dc-completion` (#45)
 
 ## Improvements / Changes
-- Removed compatibility for `docker-compose` (#46)
+- Removed compatibility for `docker-compose` (#47)
 - Updated documentation (#44)
 - Used linter to optimize/improve code
 - Cleanup
