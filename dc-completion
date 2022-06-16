@@ -54,15 +54,15 @@ _dc_completions()
                     # echo "File exists, checking age"
                     if [ "$(find ${TMP_DIR}/${STACK_NAME} -mmin +30)" ]; then
                         # echo "File is too old, refreshing"
-                        cd ${STACK}
+                        cd ${STACK} || { echo "cd failed"; exit 1; }
                         ${DC_COMMAND} ps --services -a > ${TMP_DIR}/${STACK_NAME}
-                        cd - > /dev/null
+                        cd - > /dev/null || { echo "cd failed"; exit 1; }
                     fi
                 else
                     # echo "File does not exist, creating"
-                    cd ${STACK}
+                    cd ${STACK} || { echo "cd failed"; exit 1; }
                     ${DC_COMMAND} ps --services -a > ${TMP_DIR}/${STACK_NAME}
-                    cd - > /dev/null
+                    cd - > /dev/null || { echo "cd failed"; exit 1; }
                 fi
             done
             # On to the completion
