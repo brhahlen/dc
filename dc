@@ -545,6 +545,10 @@ function network(){
     printf "This function does nothing (yet) \n"
     }
 
+function prune() {
+    true
+    }
+
 ###### CASES
 # Verbosity, yes, no?
 while getopts ":v" opt; do
@@ -564,10 +568,6 @@ while getopts ":v" opt; do
 done
 shift $(( OPTIND - 1 ))
 case ${1} in
-# ----------- install ------------
-    "install")
-        install
-        ;;
 # ----------- up ------------
     "up")
         up "${@:2}"
@@ -612,9 +612,9 @@ case ${1} in
     "network")
         network
         ;;
-# ----------- list ------------
-    "list")
-        list
+# ----------- install ------------
+    "install")
+        install
         ;;
 # ----------- update ------------
     "update")
@@ -623,6 +623,10 @@ case ${1} in
 # ----------- version ------------
     "version")
         show_version
+        ;;
+# ----------- list ------------
+    "list")
+        list
         ;;
 # ----------- All others ------------
     "help")
