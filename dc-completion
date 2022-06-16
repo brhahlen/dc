@@ -34,7 +34,7 @@ _dc_completions()
             if [ ! "$cmd" == "logs-stack" ]; then
                 STACKS="all ${STACKS}"
             fi
-            COMPREPLY=( $(compgen -W "${STACKS}" -- "${CUR}") )
+            COMPREPLY=( "$(compgen -W "${STACKS}" -- "${CUR}")" )
             return 0
             ;;
         start|stop|restart|pull|logs)
