@@ -30,44 +30,44 @@ _dc_completions()
     # Based on the arguments, we can run functions
     case "$cmd" in
         up|down|restart-stack-hard|restart-stack-soft|logs-stack)
-            local STACKS=$(for STACK in `find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -u | rev | cut -d / -f 1 | rev`; do echo ${STACK} ; done )
+            local STACKS=$(for STACK in `find "${DC_DIR}" -name docker-compose.yml -printf '%h\n' | sort -u | rev | cut -d / -f 1 | rev`; do echo "${STACK}" ; done )
             if [ ! "$cmd" == "logs-stack" ]; then
                 STACKS="all ${STACKS}"
             fi
-            COMPREPLY=( $(compgen -W "${STACKS}" -- ${CUR}) )
+            COMPREPLY=( $(compgen -W "${STACKS}" -- "${CUR}") )
             return 0
             ;;
         start|stop|restart|pull|logs)
             # We might need to create the tmp-files, so reusing the command from dc, however, this is duplicating stuff, which is not nice, but for a MVP, it works
-            for STACK in $(find ${DC_DIR} -name docker-compose.yml -printf '%h\n' | sort -u);
+            for STACK in $(find "${DC_DIR}" -name docker-compose.yml -printf '%h\n' | sort -u);
             do
                 ENV="${DC_DIR}/.env"
                 # DC_CMD=`which docker-compose`
                 DC_COMMAND="${DC_CMD} --env-file ${ENV}"
                 TMP_DIR="/tmp/dc_stack_services"
-                STACK_NAME=$(echo ${STACK} | rev | cut -d / -f 1 | rev)
+                STACK_NAME=$(echo "${STACK}" | rev | cut -d / -f 1 | rev)
                 if [ ! -d "${TMP_DIR}" ]; then
                     # echo "${TMP_DIR} not found. Creating..."
                     mkdir -p ${TMP_DIR}
                 fi
-                if [ -f ${TMP_DIR}/${STACK_NAME} ]; then
+                if [ -f ${TMP_DIR}/"${STACK_NAME}" ]; then
                     # echo "File exists, checking age"
-                    if [ "$(find ${TMP_DIR}/${STACK_NAME} -mmin +30)" ]; then
+                    if [ "$(find ${TMP_DIR}/"${STACK_NAME}" -mmin +30)" ]; then
                         # echo "File is too old, refreshing"
-                        cd ${STACK} || { echo "cd failed"; exit 1; }
-                        ${DC_COMMAND} ps --services -a > ${TMP_DIR}/${STACK_NAME}
+                        cd "${STACK}" || { echo "cd failed"; exit 1; }
+                        ${DC_COMMAND} ps --services -a > ${TMP_DIR}/"${STACK_NAME}"
                         cd - > /dev/null || { echo "cd failed"; exit 1; }
                     fi
                 else
                     # echo "File does not exist, creating"
-                    cd ${STACK} || { echo "cd failed"; exit 1; }
-                    ${DC_COMMAND} ps --services -a > ${TMP_DIR}/${STACK_NAME}
+                    cd "${STACK}" || { echo "cd failed"; exit 1; }
+                    ${DC_COMMAND} ps --services -a > ${TMP_DIR}/"${STACK_NAME}"
                     cd - > /dev/null || { echo "cd failed"; exit 1; }
                 fi
             done
             # On to the completion
-            local SERVICES=$(for SERVICE in `cat /tmp/dc_stack_services/*`; do echo ${SERVICE} ; done )
-            COMPREPLY=( $(compgen -W "${SERVICES}" -- ${CUR}) )
+            local SERVICES=$(for SERVICE in `cat /tmp/dc_stack_services/*`; do echo "${SERVICE}" ; done )
+            COMPREPLY=( $(compgen -W "${SERVICES}" -- "${CUR}") )
             return 0
             ;;
         install|network|list|help|version)
@@ -77,7 +77,7 @@ _dc_completions()
         ;;
     esac
 
-   COMPREPLY=($(compgen -W "${OPTS}" -- ${CUR}))
+   COMPREPLY=($(compgen -W "${OPTS}" -- "${CUR}"))
    return 0
 }
 
