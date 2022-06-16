@@ -67,7 +67,8 @@ _dc_completions()
                 fi
             done
             # On to the completion
-            local SERVICES=$(for SERVICE in `cat /tmp/dc_stack_services/*`; do echo ${SERVICE} ; done )
+            SERVICES=$(for SERVICE in `cat /tmp/dc_stack_services/*`; do echo ${SERVICE} ; done )
+            local SERVICES
             COMPREPLY=( $(compgen -W "${SERVICES}" -- ${CUR}) )
             return 0
             ;;
