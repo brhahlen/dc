@@ -69,7 +69,8 @@ _dc_completions()
             return
             ;;
         prune)
-            COMPREPLY=( $compgen -W "basic system")
+            COMPREPLY=( $(compgen -W "basic system") )
+            return 0
             ;;
         *)
             ;;
