@@ -45,7 +45,7 @@ function tmp_stack_files_age(){
             if [ "${VERBOSE}" = true ]; then
                 printf "File exists, checking age \n"
             fi
-            if [ "$(find ${TMP_DIR}/${STACK_NAME} -mmin +30)" ]; then
+            if [ "$(find ${TMP_DIR}/"${STACK_NAME}" -mmin +30)" ]; then
                 if [ "${VERBOSE}" = true ]; then
                     printf "File is too old, refreshing \n"
                 fi
@@ -348,7 +348,7 @@ function stop(){
         for SERVICE in "$@";
         do
             if grep -r -q -x "${SERVICE}" ${TMP_DIR}; then
-                SERVICE_STACK=$(basename "$(grep -r -x ${SERVICE} ${TMP_DIR} | cut -d : -f 1 )")
+                SERVICE_STACK=$(basename "$(grep -r -x "${SERVICE}" ${TMP_DIR} | cut -d : -f 1 )")
                 if [ "${VERBOSE}" = true ]; then
                     printf "%s \n" "${SERVICE_STACK}"
                     printf "Found %s in %s \n" "${SERVICE}" "${SERVICE_STACK}"
@@ -427,7 +427,7 @@ function logs(){
         for SERVICE in "$@";
         do
             if grep -r -q -x "${SERVICE}" "${TMP_DIR}"; then
-                SERVICE_STACK=$(basename "$(grep -r -x ${SERVICE} ${TMP_DIR} | cut -d : -f 1 )")
+                SERVICE_STACK=$(basename "$(grep -r -x "${SERVICE}" ${TMP_DIR} | cut -d : -f 1 )")
                 if [ "${VERBOSE}" = true ]; then
                     printf "%s \n" "${SERVICE_STACK}"
                     printf "Found %s in %s \n" "${SERVICE}" "${SERVICE_STACK}"
