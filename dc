@@ -546,7 +546,20 @@ function network(){
     }
 
 function prune() {
-    true
+    if [ -z "$1" ]; then
+        printf "No argument provided, please use %bbasic%b or %bsystem%b \n" "${RED}" "${NC}" "${RED}" "${NC}"
+    elif [ "$1" == "basic" ]; then
+        printf "Pruning containers and images \n"
+        docker container prune
+        docker image prune -a -f
+        printf "Done"
+    elif [ "$1" == "system" ]; then
+        printf "Pruning system"
+        docker system prune --volumes -f
+        printf "Done"
+    else
+        printf "Incorrect argument provided, please use %bbasic%b or %bsystem%b \n" "${RED}" "${NC}" "${RED}" "${NC}"
+    fi
     }
 
 ###### CASES
@@ -614,7 +627,7 @@ case ${1} in
         ;;
 # ----------- prune ------------
     "prune")
-        prune
+        prune "${@}"
         ;;
 # ----------- install ------------
     "install")
