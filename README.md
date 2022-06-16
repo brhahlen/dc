@@ -8,7 +8,7 @@ It is was created for my own purposes, it is by no means perfect, and there are 
 - You are able to use tab-completion (provided by `dc-completion`)
 
 # Installation
-Installing `dc` can be done by executing `sudo bash ./dc install` from the command line.
+Installing `dc` can be done by executing `bash ./dc install` from the command line.
 
 The following actions will be performed:
 - `dc` is copied to `~/bin` and made executable (directory will be created if it doesn't exist)
@@ -16,7 +16,7 @@ The following actions will be performed:
 - `/bin` is added to your path in `~/.bashrc`
 - You will be asked where your docker-compose stacks are defined, this will be set into a variable, `DC_DIR` and added to your `~/.bashrc`
 
-Updating can be done by running `sudo bash ./dc install` again, it will not perform the additions to `~/.bashrc`
+Updating can be done by running `dc update`
 
 ## Prerequisites
 Prerequisites for `dc` are:
@@ -24,7 +24,7 @@ Prerequisites for `dc` are:
  - `grep` is installed
  - `curl` is installed
  - `wget` is installed
- - `docker compose` plugin is installed or `docker-compose` is installed and the version is 1.25.0 or higher
+ - `docker compose` plugin is installed
  - `bash-completion` is installed
 
 ## Assumptions
@@ -34,7 +34,6 @@ There are a few assumptions:
 
 # Usage
 Provides the following main functions:
-- install              - installs dc for the current user - *ONLY* possible using `sudo`
 - up                   - bring up all stacks, an individual stack, or multiple stacks
 - down                 - brings down all stacks, an individual stack, or multiple stacks
 - restart-stack-hard   - restarts all stacks, an individual stack, or multiple stacks
@@ -46,9 +45,29 @@ Provides the following main functions:
 - pull                 - pulls images
 - logs                 - show and follow the logs for a service, outputs last 100 lines first
 - network              - _NOT IMPLEMENTED YET_ - create the macvlan network that is needed - *ONLY* possible using `sudo`
-- list                 - lists all stacks and services in the stack
+- prune                - prunes either images and containers (using the `basic` flag) or the system, including volumes (using the `system` flag)
+- install              - installs dc for the current user - *ONLY* possible using `sudo`
 - update               - updates `dc` to the latest available version
 - version              - shows the version of `dc` and retrieves the latest version and checks there
+- list                 - lists all stacks and services in the stack
+
+# Examples
+## Used in example
+Let's say we have a `DC_DIR` (/home/myname/docker) with the following directories:
+- 1-backends
+- 2-system
+- 3-frontends
+
+Each directory contains a `docker-compose.yml` file with a number of different services.
+
+## Controlling stacks
+
+Suppose we want to bring up the whole `2-system` stack in one go, we can run `dc up 2-system` and `dc` will run `docker compose up` in the background to bring up the stack.
+
+## Controlling containers
+Let's say the `3-frontends` stack has a `nginx` and a `wordpress` container. We want to restart the `nginx` container, because we made some changes in the configuration.
+
+From within the directory that the confiugration files are, we can now run `dc restart nginx` to restart (stops and removes the container, and starts it again) and `dc logs nginx` to follow the logs.
 
 # Thoughts/To Do's
 Also, some functions can probably be offloaded into dc-completion at some point?

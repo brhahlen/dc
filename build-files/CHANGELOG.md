@@ -1,13 +1,12 @@
-# Version 1.6.0
+# Version 2.0.0
 ## New Features
-- Added `update` to dc-completion
+- Added `prune` to `dc` and `dc-completion` (#45)
 
-## Improvements
-- Step back to previous directory after update
-- Moved `version` to own function `show_version`, for consistency
-- Moved `update` to own function `update`, for consistency
-- Made the unzipping during the update quiet
-- Added version to `dc-completion`
+## Improvements / Changes
+- Removed compatibility for `docker-compose` (#47)
+- Updated documentation (#44)
+- Used linter to optimize/improve code
+- Cleanup
 
 ## Bug fixes
-- Fixed getting containers in stacks, due to #46
+- None
