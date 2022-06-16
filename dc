@@ -238,7 +238,7 @@ function update(){
             unzip -q "${UPDATE_TMP}"/dc-release.zip -d "${UPDATE_TMP}"
             printf "Updating... \n"
             cd "${UPDATE_TMP}" || { echo "cd failed"; exit 1; }
-            bash "${UPDATE_TMP}"/dc install
+            /usr/bin/bash "${UPDATE_TMP}"/dc install
             cd - > /dev/null || { echo "cd failed"; exit 1; }
             printf "Done \n"
         else
