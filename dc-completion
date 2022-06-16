@@ -80,7 +80,7 @@ _dc_completions()
         ;;
     esac
 
-   COMPREPLY=( "$(compgen -W "${OPTS}" -- "${CUR}")" )
+   COMPREPLY=( "$(compgen -W "${OPTS}" -- ${CUR})" )
    return 0
 }
 
