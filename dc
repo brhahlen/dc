@@ -3,7 +3,7 @@
 # Copyright (C) 2022 Ben Hählen
 ##################################
 # VERSION
-export DC_VERSION=v2.0.0
+export DC_VERSION=v2.0.1
 
 ###### VARIABLES
 if [[ -z "${DC_DIR}" ]]; then
