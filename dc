@@ -521,7 +521,7 @@ function logs(){
             do
                 # CHILD_PID=$(ps --ppid $PID -o pid=)
                 pgrep -P ${PID}
-                CHILD_PID=$(pgrep -P ${PID})
+                CHILD_PID=$(pgrep -P "$PID")
                 echo "DEBUG: CHILD_PID is $CHILD_PID"
                 export CHILD_PID
                 if [ "${VERBOSE}" = true ]; then
