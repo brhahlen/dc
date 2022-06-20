@@ -498,11 +498,11 @@ function logs(){
             if [ "${VERBOSE}" = true ]; then
                 printf "\$PID is %s \n" "${PID}"
             fi
-            CHILD_PID=$(ps --ppid "${PID}" -o pid=)
+            CHILD_PID=$(ps --ppid ${PID} -o pid=)
             if [ "${VERBOSE}" = true ]; then
                 printf "CHILD_PID is %s \n" "${CHILD_PID}"
             fi
-            kill "${CHILD_PID}"
+            kill ${CHILD_PID}
         done
         }
         printf "Showing logs for the following service(s): %s \n" "$@"
@@ -533,7 +533,7 @@ function logs(){
             printf "\$WAIT_PIDS contains %s \n" "${WAIT_PIDS}"
         fi
         trap 'trap_kill' SIGHUP SIGINT SIGQUIT SIGTERM
-        wait "${WAIT_PIDS}"
+        wait ${WAIT_PIDS}
     fi
     }
 
