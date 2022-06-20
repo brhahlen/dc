@@ -541,6 +541,8 @@ function logs(){
         }
         if [ "${VERBOSE}" = true ]; then
             printf "\$WAIT_PIDS contains %s \n" "${WAIT_PIDS}"
+            CHILD_PID=$(ps --ppid $WAIT_PIDS -o pid=)
+            echo "DEBUG: CHILD_PID = $CHILD_PID"
         fi
         trap 'trap_kill' SIGHUP SIGINT SIGQUIT SIGTERM
         wait $WAIT_PIDS
