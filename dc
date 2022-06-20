@@ -489,9 +489,9 @@ function pull(){
 
 function logs(){
     # Need this function to ensure that all child process are killed from the logs command
-    if [ -z "$1" ]; then
-        printf "No argument provided, please provide the name of one or more services \n"
-    else
+    # if [ -z "$1" ]; then
+    #     printf "No argument provided, please provide the name of one or more services \n"
+    # else
         trap_kill(){
             for PID in $WAIT_PIDS;
             do
@@ -534,7 +534,7 @@ function logs(){
         fi
         trap 'trap_kill' SIGHUP SIGINT SIGQUIT SIGTERM
         wait $WAIT_PIDS
-    fi
+    # fi
     }
 
 ##################################################
