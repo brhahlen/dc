@@ -2,8 +2,11 @@
 ##################################
 # Copyright (C) 2022 Ben Hählen
 ##################################
+# Enable monitoring
+set -m
+
 # VERSION
-export DC_VERSION=v2.0.1
+export DC_VERSION=v2.0.2
 
 ###### VARIABLES
 if [[ -z "${DC_DIR}" ]]; then
@@ -493,17 +496,15 @@ function logs(){
         printf "No argument provided, please provide the name of one or more services \n"
     else
         trap_kill(){
-        for PID in $WAIT_PIDS;
-        do
-            if [ "${VERBOSE}" = true ]; then
-                printf "\$PID is %s \n" "${PID}"
-            fi
-            CHILD_PID=$(ps --ppid "${PID}" -o pid=)
-            if [ "${VERBOSE}" = true ]; then
-                printf "CHILD_PID is %s \n" "${CHILD_PID}"
-            fi
-            kill "${CHILD_PID}"
-        done
+            for PID in $WAIT_PIDS;
+            do
+                CHILD_PID=$(ps --ppid "$PID" -o pid=)
+                if [ "${VERBOSE}" = true ]; then
+                    printf "\$PID is %s \n" "${PID}"
+                    printf "CHILD_PID is %s \n" "${CHILD_PID}"
+                fi
+                kill "$CHILD_PID"
+            done
         }
         printf "Showing logs for the following service(s): %s \n" "$@"
         tmp_stack_files_age
@@ -533,7 +534,7 @@ function logs(){
             printf "\$WAIT_PIDS contains %s \n" "${WAIT_PIDS}"
         fi
         trap 'trap_kill' SIGHUP SIGINT SIGQUIT SIGTERM
-        wait "${WAIT_PIDS}"
+        wait $WAIT_PIDS
     fi
     }
 
