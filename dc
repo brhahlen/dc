@@ -513,9 +513,9 @@ function logs(){
                         echo "DEBUG: CHILD_PID1 = $CHILD_PID1"
                         CHILD_PID2=`ps --ppid $WAIT_PIDS -o pid=`
                         echo "DEBUG: CHILD_PID2 = $CHILD_PID2"
-                        CHILD_PID3=$(pgrep -P "$PID")
+                        CHILD_PID3=$(pgrep -P "$WAIT_PIDS")
                         echo "DEBUG: CHILD_PID3 = $CHILD_PID3"
-                        CHILD_PID4=`pgrep -P "$PID"`
+                        CHILD_PID4=`pgrep -P "$WAIT_PIDS"`
                         echo "DEBUG: CHILD_PID4 = $CHILD_PID4"
                     else
                         export WAIT_PIDS="$WAIT_PIDS $!"
@@ -525,9 +525,9 @@ function logs(){
                         echo "DEBUG: CHILD_PID = $CHILD_PID1"
                         CHILD_PID2=`ps --ppid $WAIT_PIDS -o pid=`
                         echo "DEBUG: CHILD_PID = $CHILD_PID2"
-                        CHILD_PID3=$(pgrep -P "$PID")
+                        CHILD_PID3=$(pgrep -P "$WAIT_PIDS")
                         echo "DEBUG: CHILD_PID = $CHILD_PID3"
-                        CHILD_PID4=`pgrep -P "$PID"`
+                        CHILD_PID4=`pgrep -P "$WAIT_PIDS"`
                         echo "DEBUG: CHILD_PID = $CHILD_PID4"
                 fi
                 printf "PID=%s \n" "$!"
@@ -546,9 +546,9 @@ function logs(){
                 echo "DEBUG: CHILD_PID1 = $CHILD_PID1"
                 CHILD_PID2=`ps --ppid $WAIT_PIDS -o pid=`
                 echo "DEBUG: CHILD_PID2 = $CHILD_PID2"
-                CHILD_PID3=$(pgrep -P "$PID")
+                CHILD_PID3=$(pgrep -P "$WAIT_PIDS")
                 echo "DEBUG: CHILD_PID3 = $CHILD_PID3"
-                CHILD_PID4=`pgrep -P "$PID"`
+                CHILD_PID4=`pgrep -P "$WAIT_PIDS"`
                 echo "DEBUG: CHILD_PID4 = $CHILD_PID4"
                 # export CHILD_PID
                 if [ "${VERBOSE}" = true ]; then
