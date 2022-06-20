@@ -520,7 +520,7 @@ function logs(){
             for PID in $WAIT_PIDS;
             do
                 # CHILD_PID=$(ps --ppid $PID -o pid=)
-                pgrep -P ${PID}
+                pgrep -P "$PID"
                 CHILD_PID=$(pgrep -P "$PID")
                 echo "DEBUG: CHILD_PID is $CHILD_PID"
                 export CHILD_PID
