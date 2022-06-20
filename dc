@@ -524,6 +524,7 @@ function logs(){
                 # CHILD_PID=$(ps --ppid $PID -o pid=)
                 pgrep -P "$PID"
                 echo "DEBUG TRAP: WAIT_PIDS = $WAIT_PIDS"
+                echo "DEBUG TRAP: PID = $PID"
                 CHILD_PID1=$(ps --ppid $PID -o pid=)
                 echo "DEBUG TRAP: CHILD_PID1 = $CHILD_PID1"
                 CHILD_PID2=`ps --ppid $PID -o pid=`
