@@ -495,6 +495,7 @@ function logs(){
         trap_kill(){
             for PID in $WAIT_PIDS;
             do
+                ps --ppid $PID -o pid=
                 CHILD_PID=`ps --ppid $PID -o pid=`
                 export CHILD_PID
                 if [ "${VERBOSE}" = true ]; then
