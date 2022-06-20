@@ -508,9 +508,13 @@ function logs(){
                     then
                         export WAIT_PIDS="$!"
                         echo "DEBUG: WAIT_PIDS = $WAIT_PIDS"
+                        CHILD_PID=$(ps --ppid $PID -o pid=)
+                        echo "DEBUG: CHILD_PID = $CHILD_PID"
                     else
                         export WAIT_PIDS="$WAIT_PIDS $!"
                         echo "DEBUG: WAIT_PIDS = $WAIT_PIDS"
+                        CHILD_PID=$(ps --ppid $PID -o pid=)
+                        echo "DEBUG: CHILD_PID = $CHILD_PID"
                 fi
                 printf "PID=%s \n" "$!"
                 cd - > /dev/null || { echo "cd failed"; exit 1; }
