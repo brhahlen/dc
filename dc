@@ -499,6 +499,7 @@ function logs(){
                     printf "\$PID is %s \n" "${PID}"
                 fi
                 CHILD_PID=`ps --ppid $PID -o pid=`
+                export CHILD_PID
                 if [ "${VERBOSE}" = true ]; then
                     printf "CHILD_PID is %s \n" "${CHILD_PID}"
                 fi
