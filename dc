@@ -496,6 +496,7 @@ function logs(){
             for PID in $WAIT_PIDS;
             do
                 CHILD_PID=$(ps --ppid $PID -o pid=)
+                echo $CHILD_PID
                 export CHILD_PID
                 if [ "${VERBOSE}" = true ]; then
                     printf "\$PID is %s \n" "${PID}"
