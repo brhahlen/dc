@@ -508,7 +508,7 @@ function logs(){
         }
         printf "Showing logs for the following service(s): %s \n" "$@"
         tmp_stack_files_age
-        for SERVICE in $@;
+        for SERVICE in "$@";
         do
             if grep -r -q -x "${SERVICE}" "${TMP_DIR}"; then
                 SERVICE_STACK=$(basename "$(grep -r -x "${SERVICE}" ${TMP_DIR} | cut -d : -f 1 )")
@@ -521,10 +521,8 @@ function logs(){
                 if [ -z "$WAIT_PIDS" ]
                     then
                         export WAIT_PIDS="$!"
-                        echo "DEBUG: THEN"
                     else
                         export WAIT_PIDS="$WAIT_PIDS $!"
-                        echo "DEBUG: ELSE"
                 fi
                 printf "PID=%s \n" "$!"
                 cd - > /dev/null || { echo "cd failed"; exit 1; }
