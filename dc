@@ -493,21 +493,21 @@ function logs(){
         printf "No argument provided, please provide the name of one or more services \n"
     else
         trap_kill(){
-        for PID in $WAIT_PIDS;
-        do
-            if [ "${VERBOSE}" = true ]; then
-                printf "\$PID is %s \n" "${PID}"
-            fi
-            CHILD_PID=$(ps --ppid $PID -o pid=)
-            if [ "${VERBOSE}" = true ]; then
-                printf "CHILD_PID is %s \n" "${CHILD_PID}"
-            fi
-            kill $CHILD_PID
-        done
+            for PID in $WAIT_PIDS;
+            do
+                if [ "${VERBOSE}" = true ]; then
+                    printf "\$PID is %s \n" "${PID}"
+                fi
+                CHILD_PID=`ps --ppid $PID -o pid=`
+                if [ "${VERBOSE}" = true ]; then
+                    printf "CHILD_PID is %s \n" "${CHILD_PID}"
+                fi
+                kill $CHILD_PID
+            done
         }
         printf "Showing logs for the following service(s): %s \n" "$@"
         tmp_stack_files_age
-        for SERVICE in "$@";
+        for SERVICE in $@;
         do
             if grep -r -q -x "${SERVICE}" "${TMP_DIR}"; then
                 SERVICE_STACK=$(basename "$(grep -r -x "${SERVICE}" ${TMP_DIR} | cut -d : -f 1 )")
