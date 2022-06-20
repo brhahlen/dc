@@ -1,3 +1,3 @@
-# Version 2.0.1
+# Version 2.0.2
 ## Bug fixes
-- Hopefully fixing update
+- Fixing `logs` not exiting cleanly (#51)
