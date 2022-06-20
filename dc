@@ -507,11 +507,13 @@ function logs(){
                 if [ -z "$WAIT_PIDS" ]
                     then
                         export WAIT_PIDS="$!"
+                        echo "DEBUG: THEN"
                         echo "DEBUG: WAIT_PIDS = $WAIT_PIDS"
                         CHILD_PID=$(ps --ppid $WAIT_PIDS -o pid=)
                         echo "DEBUG: CHILD_PID = $CHILD_PID"
                     else
                         export WAIT_PIDS="$WAIT_PIDS $!"
+                        echo "DEBUG: ELSE"
                         echo "DEBUG: WAIT_PIDS = $WAIT_PIDS"
                         CHILD_PID=$(ps --ppid $WAIT_PIDS -o pid=)
                         echo "DEBUG: CHILD_PID = $CHILD_PID"
