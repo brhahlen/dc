@@ -6,7 +6,7 @@
 set -m
 
 # VERSION
-export DC_VERSION=v2.0.2
+export DC_VERSION=v2.0.3
 
 ###### VARIABLES
 if [[ -z "${DC_DIR}" ]]; then
@@ -556,7 +556,7 @@ function prune() {
         printf "Done \n"
     elif [ "$2" == "system" ]; then
         printf "Pruning system \n"
-        docker system prune --volumes -f
+        docker system prune --all --volumes -f
         printf "Done \n"
     else
         printf "Incorrect argument provided, please use %bbasic%b or %bsystem%b \n" "${RED}" "${NC}" "${RED}" "${NC}"
