@@ -1,3 +1,3 @@
-# Version 2.0.2
-## Bug fixes
-- Fixing `logs` not exiting cleanly (#51)
+# Version 2.0.3
+## Enhancement
+- `prune system` will now use `--all` to ensure everything is deleted (#53)
