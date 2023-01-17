@@ -1,3 +1,6 @@
-# Version 2.0.3
-## Enhancement
-- `prune system` will now use `--all` to ensure everything is deleted (#53)
+# Version 2.0.4
+## Bug Fix
+- `help` will now properly render, was missing line breaks
+
+## Other
+- Updated Copyright year
