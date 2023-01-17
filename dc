@@ -1,6 +1,6 @@
 #!/bin/bash
 ##################################
-# Copyright (C) 2022 Ben Hählen
+# Copyright (C) 2022-2023 Ben Hählen
 ##################################
 # Enable monitoring
 set -m
