@@ -25,14 +25,18 @@ export RED='\033[0;31m'
 export BLUE='\033[0;34m'
 export NC='\033[0m' # No Color
 # Verbosity
-export VERBOSE=false
+if [[ ${DC_VERSION} =~ "dev" ]]; then
+    printf "This is a development version, verbosity will be enabled by default \n"
+    export VERBOSE=true
+else
+    export VERBOSE=false
+fi
 
 ##################################################
 # HELPER FUNCTIONS                               #
 ##################################################
 # TMP_DIR STACK SERVICES
 function tmp_dir_stack_files(){
-    printf "VERBOSE is set to %s \n" "${VERBOSE}"
     if [ ! -d "${TMP_DIR}" ]; then
         if [ "${VERBOSE}" = true ]; then
             printf "%s not found. Creating... \n" "${TMP_DIR}"
@@ -43,9 +47,7 @@ function tmp_dir_stack_files(){
 
 # TMP_STACK FILES AGE
 function tmp_stack_files_age(){
-    printf "VERBOSE is set to %s \n" "${VERBOSE}"
     tmp_dir_stack_files
-    printf "VERBOSE is set to %s \n" "${VERBOSE}"
     for STACK in $(find "${DC_DIR}" -name docker-compose.yml -printf '%h \n' | sort -u);
     do
         STACK_NAME=$(basename "${STACK}")
