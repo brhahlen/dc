@@ -123,6 +123,7 @@ return 0
 function list(){
     tmp_stack_files_age
     printf "Listing Stacks and Services \n"
+    printf "=================================== \n"
     for STACK in $(find "${DC_DIR}" -name docker-compose.yml -printf '%h\n' | sort -u);
     do
         STACK_NAME=$(basename "${STACK}")
@@ -131,7 +132,6 @@ function list(){
             printf "STACK_NAME is %s \n" "${STACK_NAME}"
         fi
         DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
-        printf "=================================== \n"
         printf "Stack %b%s%b contains services: \n" "${RED}" "${STACK_NAME}" "${NC}"
         cd "${STACK}" || { echo "cd failed"; exit 1; }
         if [ "${VERBOSE}" = true ]; then
@@ -139,6 +139,7 @@ function list(){
         fi
         ${DC_COMMAND} config --services | tee ${TMP_DIR}/"${STACK_NAME}"
         cd - > /dev/null || { echo "cd failed"; exit 1; }
+        printf "=================================== \n"
     done
     }
 
@@ -286,7 +287,11 @@ function up(){
         do
             printf "\n%s:\n" "${STACK}"
             cd "${STACK}" || { echo "cd failed"; exit 1; }
-            ${DC_COMMAND} up -d
+            DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
+            if [ "${VERBOSE}" = true ]; then
+                printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
+            fi
+            #${DC_COMMAND} up -d
             cd - > /dev/null || { echo "cd failed"; exit 1; }
         done
     else
@@ -296,6 +301,10 @@ function up(){
             if [ -d "${STACK_DIR}" ]; then
                 printf "Bringing up stack %s \n" "${STACK}"
                 cd "${STACK_DIR}" || { echo "cd failed"; exit 1; }
+                DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK_DIR}/${STACK_NAME}.env"
+                if [ "${VERBOSE}" = true ]; then
+                    printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
+                fi
                 ${DC_COMMAND} up -d
                 cd - > /dev/null || { echo "cd failed"; exit 1; }
             else
@@ -315,7 +324,11 @@ function down(){
         do
             printf "\n%s:\n" "${STACK}"
             cd "${STACK}" || { echo "cd failed"; exit 1; }
-            ${DC_COMMAND} down
+            DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
+            if [ "${VERBOSE}" = true ]; then
+                printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
+            fi
+            #${DC_COMMAND} down
             cd - > /dev/null || { echo "cd failed"; exit 1; }
         done
     else
@@ -325,6 +338,10 @@ function down(){
             if [ -d "${STACK_DIR}" ]; then
                 printf "Bringing down stack %s \n" "${STACK}"
                 cd "${STACK_DIR}" || { echo "cd failed"; exit 1; }
+                DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK_DIR}/${STACK_NAME}.env"
+                if [ "${VERBOSE}" = true ]; then
+                    printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
+                fi
                 ${DC_COMMAND} down
                 cd - > /dev/null || { echo "cd failed"; exit 1; }
             else
