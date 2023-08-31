@@ -292,7 +292,7 @@ function up(){
             if [ "${VERBOSE}" = true ]; then
                 printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
             fi
-            #${DC_COMMAND} up -d
+            ${DC_COMMAND} up -d
             cd - > /dev/null || { echo "cd failed"; exit 1; }
         done
     else
@@ -302,11 +302,11 @@ function up(){
             if [ -d "${STACK_DIR}" ]; then
                 printf "Bringing up stack %s \n" "${STACK}"
                 cd "${STACK_DIR}" || { echo "cd failed"; exit 1; }
-                DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK_DIR}/${STACK_NAME}.env"
+                DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK_DIR}/${STACK}.env"
                 if [ "${VERBOSE}" = true ]; then
                     printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
                 fi
-                ${DC_COMMAND} up -d
+                #${DC_COMMAND} up -d
                 cd - > /dev/null || { echo "cd failed"; exit 1; }
             else
                 printf "Stack %s does not exist. Did you type the name correctly? \n" "${STACK}"
@@ -330,7 +330,7 @@ function down(){
             if [ "${VERBOSE}" = true ]; then
                 printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
             fi
-            #${DC_COMMAND} down
+            ${DC_COMMAND} down
             cd - > /dev/null || { echo "cd failed"; exit 1; }
         done
     else
@@ -344,7 +344,7 @@ function down(){
                 if [ "${VERBOSE}" = true ]; then
                     printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
                 fi
-                ${DC_COMMAND} down
+                #${DC_COMMAND} down
                 cd - > /dev/null || { echo "cd failed"; exit 1; }
             else
                 printf "Stack %s does not exist. Did you type the name correctly? \n" "${STACK}"
