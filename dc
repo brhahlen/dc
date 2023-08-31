@@ -109,7 +109,7 @@ return 0
 
 # LIST
 function list(){
-    tmp_dir_stack_files
+    tmp_stack_files_age
     printf "Listing Stacks and Services \n"
     for STACK in $(find "${DC_DIR}" -name docker-compose.yml -printf '%h\n' | sort -u);
     do
