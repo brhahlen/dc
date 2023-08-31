@@ -286,30 +286,30 @@ function up(){
         for STACK in $(find "${DC_DIR}" -name docker-compose.yml -printf '%h\n' | sort -u);
         do
             STACK_NAME=$(basename "${STACK}")
-            printf "\n%s:\n" "${STACK}"
+            printf "\n%s:\n" "${STACK_NAME}"
             cd "${STACK}" || { echo "cd failed"; exit 1; }
             DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
             if [ "${VERBOSE}" = true ]; then
                 printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
             fi
-            ${DC_COMMAND} up -d
+            # ${DC_COMMAND} up -d
             cd - > /dev/null || { echo "cd failed"; exit 1; }
         done
     else
-        for STACK in "$@";
+        for STACK_NAME in "$@";
         do
-            STACK_DIR="${DC_DIR}/${STACK}"
-            if [ -d "${STACK_DIR}" ]; then
-                printf "Bringing up stack %s \n" "${STACK}"
-                cd "${STACK_DIR}" || { echo "cd failed"; exit 1; }
-                DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK_DIR}/${STACK}.env"
+            STACK="${DC_DIR}/${STACK_NAME}"
+            if [ -d "${STACK}" ]; then
+                printf "Bringing up stack %s \n" "${STACK_NAME}"
+                cd "${STACK}" || { echo "cd failed"; exit 1; }
+                DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
                 if [ "${VERBOSE}" = true ]; then
                     printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
                 fi
-                #${DC_COMMAND} up -d
+                # ${DC_COMMAND} up -d
                 cd - > /dev/null || { echo "cd failed"; exit 1; }
             else
-                printf "Stack %s does not exist. Did you type the name correctly? \n" "${STACK}"
+                printf "Stack %s does not exist. Did you type the name correctly? \n" "${STACK_NAME}"
             fi
         done
     fi
@@ -324,30 +324,30 @@ function down(){
         for STACK in $(find "${DC_DIR}" -name docker-compose.yml -printf '%h\n' | sort -ur);
         do
             STACK_NAME=$(basename "${STACK}")
-            printf "\n%s:\n" "${STACK}"
+            printf "\n%s:\n" "${STACK_NAME}"
             cd "${STACK}" || { echo "cd failed"; exit 1; }
             DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
             if [ "${VERBOSE}" = true ]; then
                 printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
             fi
-            ${DC_COMMAND} down
+            # ${DC_COMMAND} down
             cd - > /dev/null || { echo "cd failed"; exit 1; }
         done
     else
-        for STACK in "$@";
+        for STACK_NAME in "$@";
         do
-            STACK_DIR="${DC_DIR}/${STACK}"
-            if [ -d "${STACK_DIR}" ]; then
-                printf "Bringing down stack %s \n" "${STACK}"
-                cd "${STACK_DIR}" || { echo "cd failed"; exit 1; }
-                DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK_DIR}/${STACK}.env"
+            STACK="${DC_DIR}/${STACK_NAME}"
+            if [ -d "${STACK}" ]; then
+                printf "Bringing down stack %s \n" "${STACK_NAME}"
+                cd "${STACK}" || { echo "cd failed"; exit 1; }
+                DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
                 if [ "${VERBOSE}" = true ]; then
                     printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
                 fi
-                #${DC_COMMAND} down
+                # ${DC_COMMAND} down
                 cd - > /dev/null || { echo "cd failed"; exit 1; }
             else
-                printf "Stack %s does not exist. Did you type the name correctly? \n" "${STACK}"
+                printf "Stack %s does not exist. Did you type the name correctly? \n" "${STACK_NAME}"
             fi
         done
     fi
@@ -363,24 +363,42 @@ function restart-stack-hard(){
         printf "Hard Restarting all stacks \n"
         for STACK in $(find "${DC_DIR}" -name docker-compose.yml -printf '%h\n' | sort -u);
         do
-            printf "\n%s:\n" "${STACK}"
+            STACK_NAME=$(basename "${STACK}")
+            if [ "${VERBOSE}" = true ]; then
+                printf "STACK is %s \n" "${STACK}"
+                printf "STACK_NAME is %s \n" "${STACK_NAME}"
+            fi
+            DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
+            if [ "${VERBOSE}" = true ]; then
+                printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
+            fi
+            printf "\n%s:\n" "${STACK_NAME}"
             cd "${STACK}" || { echo "cd failed"; exit 1; }
-            ${DC_COMMAND} down
-            ${DC_COMMAND} up -d
+            # ${DC_COMMAND} down
+            # ${DC_COMMAND} up -d
             cd - > /dev/null || { echo "cd failed"; exit 1; }
         done
     else
-        for STACK in "$@";
+        for STACK_NAME in "$@";
         do
-            STACK_DIR="${DC_DIR}/${STACK}"
-            if [ -d "${STACK_DIR}" ]; then
-                printf "Restarting stack %s \n" "${STACK}"
-                cd "${STACK_DIR}" || { echo "cd failed"; exit 1; }
-                ${DC_COMMAND} down
-                ${DC_COMMAND} up -d
+            STACK="${DC_DIR}/${STACK_NAME}"
+            STACK_NAME=$(basename "${STACK}")
+            if [ "${VERBOSE}" = true ]; then
+                printf "STACK is %s \n" "${STACK}"
+                printf "STACK_NAME is %s \n" "${STACK_NAME}"
+            fi
+            if [ -d "${STACK}" ]; then
+                DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
+                if [ "${VERBOSE}" = true ]; then
+                    printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
+                fi
+                printf "Restarting stack %s \n" "${STACK_NAME}"
+                cd "${STACK}" || { echo "cd failed"; exit 1; }
+                # ${DC_COMMAND} down
+                # ${DC_COMMAND} up -d
                 cd - > /dev/null || { echo "cd failed"; exit 1; }
             else
-                printf "Stack %s does not exist. Did you type the name correctly? \n" "${STACK}"
+                printf "Stack %s does not exist. Did you type the name correctly? \n" "${STACK_NAME}"
             fi
         done
     fi
@@ -394,22 +412,40 @@ function restart-stack-soft(){
         printf "Restarting all stacks \n"
         for STACK in $(find "${DC_DIR}" -name docker-compose.yml -printf '%h\n' | sort -u);
         do
-            printf "\n%s:\n" "${STACK}"
+            STACK_NAME=$(basename "${STACK}")
+            if [ "${VERBOSE}" = true ]; then
+                printf "STACK is %s \n" "${STACK}"
+                printf "STACK_NAME is %s \n" "${STACK_NAME}"
+            fi
+            DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
+            if [ "${VERBOSE}" = true ]; then
+                printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
+            fi
+            printf "\n%s:\n" "${STACK_NAME}"
             cd "${STACK}" || { echo "cd failed"; exit 1; }
-            ${DC_COMMAND} restart
+            # ${DC_COMMAND} restart
             cd - > /dev/null || { echo "cd failed"; exit 1; }
         done
     else
-        for STACK in "$@";
+        for STACK_NAME in "$@";
         do
-            STACK_DIR="${DC_DIR}/${STACK}"
-            if [ -d "${STACK_DIR}" ]; then
-                printf "Restarting stack %s \n" "${STACK}"
-                cd "${STACK_DIR}" || { echo "cd failed"; exit 1; }
-                ${DC_COMMAND} restart
+            STACK="${DC_DIR}/${STACK_NAME}"
+            STACK_NAME=$(basename "${STACK}")
+            if [ "${VERBOSE}" = true ]; then
+                printf "STACK is %s \n" "${STACK}"
+                printf "STACK_NAME is %s \n" "${STACK_NAME}"
+            fi
+            if [ -d "${STACK}" ]; then
+                DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
+                if [ "${VERBOSE}" = true ]; then
+                    printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
+                fi
+                printf "Restarting stack %s \n" "${STACK_NAME}"
+                cd "${STACK}" || { echo "cd failed"; exit 1; }
+                # ${DC_COMMAND} restart
                 cd - > /dev/null || { echo "cd failed"; exit 1; }
             else
-                printf "Stack %s does not exist. Did you type the name correctly? \n" "${STACK}"
+                printf "Stack %s does not exist. Did you type the name correctly? \n" "${STACK_NAME}"
             fi
         done
     fi
@@ -420,12 +456,21 @@ function logs-stack(){
     if [ -z "$1" ]; then
         printf "No argument provided, please provide the name(s) of a stack(s) \n"
     else
-        for STACK in "$@";
+        for STACK_NAME in "$@";
         do
-            STACK_DIR="${DC_DIR}/${STACK}"
-            if [ -d "${STACK_DIR}" ]; then
-                printf "Showing logs for stack %s \n" "${STACK}"
-                cd "${STACK_DIR}" || { echo "cd failed"; exit 1; }
+            STACK="${DC_DIR}/${STACK_NAME}"
+            STACK_NAME=$(basename "${STACK}")
+            if [ "${VERBOSE}" = true ]; then
+                printf "STACK is %s \n" "${STACK}"
+                printf "STACK_NAME is %s \n" "${STACK_NAME}"
+            fi
+            if [ -d "${STACK}" ]; then
+                printf "Showing logs for stack %s \n" "${STACK_NAME}"
+                cd "${STACK}" || { echo "cd failed"; exit 1; }
+                DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
+                if [ "${VERBOSE}" = true ]; then
+                    printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
+                fi
                 ${DC_COMMAND} logs --tail=100 -f
                 cd - > /dev/null || { echo "cd failed"; exit 1; }
             else
