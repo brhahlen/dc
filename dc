@@ -291,6 +291,7 @@ function up(){
             DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
             if [ "${VERBOSE}" = true ]; then
                 printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
+                printf "Full command is %s up -d \n" "${DC_COMMAND}"
             fi
             ${DC_COMMAND} up -d
             cd - > /dev/null || { echo "cd failed"; exit 1; }
@@ -305,6 +306,7 @@ function up(){
                 DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
                 if [ "${VERBOSE}" = true ]; then
                     printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
+                    printf "Full command is %s up -d \n" "${DC_COMMAND}"
                 fi
                 ${DC_COMMAND} up -d
                 cd - > /dev/null || { echo "cd failed"; exit 1; }
@@ -329,6 +331,7 @@ function down(){
             DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
             if [ "${VERBOSE}" = true ]; then
                 printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
+                printf "Full command is %s down \n" "${DC_COMMAND}"
             fi
             ${DC_COMMAND} down
             cd - > /dev/null || { echo "cd failed"; exit 1; }
@@ -343,6 +346,7 @@ function down(){
                 DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
                 if [ "${VERBOSE}" = true ]; then
                     printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
+                    printf "Full command is %s down \n" "${DC_COMMAND}"
                 fi
                 ${DC_COMMAND} down
                 cd - > /dev/null || { echo "cd failed"; exit 1; }
@@ -371,6 +375,7 @@ function restart-stack-hard(){
             DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
             if [ "${VERBOSE}" = true ]; then
                 printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
+                printf "Full command is %s down; %s up -d \n" "${DC_COMMAND}" "${DC_COMMAND}" 
             fi
             printf "\n%s:\n" "${STACK_NAME}"
             cd "${STACK}" || { echo "cd failed"; exit 1; }
@@ -391,6 +396,7 @@ function restart-stack-hard(){
                 DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
                 if [ "${VERBOSE}" = true ]; then
                     printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
+                    printf "Full command is %s down; %s up -d \n" "${DC_COMMAND}" "${DC_COMMAND}" 
                 fi
                 printf "Restarting stack %s \n" "${STACK_NAME}"
                 cd "${STACK}" || { echo "cd failed"; exit 1; }
@@ -420,6 +426,7 @@ function restart-stack-soft(){
             DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
             if [ "${VERBOSE}" = true ]; then
                 printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
+                printf "Full command is %s restart \n" "${DC_COMMAND}"
             fi
             printf "\n%s:\n" "${STACK_NAME}"
             cd "${STACK}" || { echo "cd failed"; exit 1; }
@@ -439,6 +446,7 @@ function restart-stack-soft(){
                 DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
                 if [ "${VERBOSE}" = true ]; then
                     printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
+                    printf "Full command is %s restart \n" "${DC_COMMAND}"
                 fi
                 printf "Restarting stack %s \n" "${STACK_NAME}"
                 cd "${STACK}" || { echo "cd failed"; exit 1; }
@@ -470,6 +478,7 @@ function logs-stack(){
                 DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
                 if [ "${VERBOSE}" = true ]; then
                     printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
+                    printf "Full command is %s logs --tail=100 -f \n" "${DC_COMMAND}"
                 fi
                 ${DC_COMMAND} logs --tail=100 -f
                 cd - > /dev/null || { echo "cd failed"; exit 1; }
@@ -496,12 +505,19 @@ function start(){
         for SERVICE in "$@";
         do
             if grep -r -q -x "${SERVICE}" "${TMP_DIR}"; then
-                SERVICE_STACK=$(basename "$(grep -r -x "${SERVICE}" "${TMP_DIR}" | cut -d : -f 1 )")
+                STACK_NAME=$(basename "$(grep -r -x "${SERVICE}" "${TMP_DIR}" | cut -d : -f 1 )")
+                STACK="${DC_DIR}/${STACK_NAME}"
                 if [ "${VERBOSE}" = true ]; then
-                    printf "%s \n" "${SERVICE_STACK}"
-                    printf "Found %s in %s \n" "${SERVICE}" "${SERVICE_STACK}"
+                    printf "STACK is %s \n" "${STACK}"
+                    printf "STACK_NAME is %s \n" "${STACK_NAME}"
+                    printf "Found %s in %s \n" "${SERVICE}" "${STACK}"
                 fi
-                cd "${DC_DIR}"/"${SERVICE_STACK}" || { echo "cd failed"; exit 1; }
+                cd "${STACK}" || { echo "cd failed"; exit 1; }
+                DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
+                if [ "${VERBOSE}" = true ]; then
+                    printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
+                    printf "Full command is %s  up -d %s \n" "${DC_COMMAND}" "${SERVICE}"
+                fi
                 ${DC_COMMAND} up -d "${SERVICE}"
                 cd - > /dev/null || { echo "cd failed"; exit 1; }
             else
