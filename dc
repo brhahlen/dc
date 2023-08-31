@@ -51,7 +51,7 @@ function tmp_stack_files_age(){
     for STACK in $(find "${DC_DIR}" -name docker-compose.yml -printf '%h \n' | sort -u);
     do
         STACK_NAME=$(basename "${STACK}")
-        DC_COMMAND="${DC_COMMAND} --env-file ${STACK}.env"
+        DC_COMMANDO="${DC_COMMAND} --env-file ${STACK}/${STACK}.env"
         if [ -f "${TMP_DIR}"/"${STACK_NAME}" ]; then
             if [ "${VERBOSE}" = true ]; then
                 printf "File %s/%s exists, checking age \n" "${TMP_DIR}" "${STACK_NAME}"
@@ -62,9 +62,9 @@ function tmp_stack_files_age(){
                 fi
                 cd "${STACK}" || { echo "cd failed"; exit 1; }
                 if [ "${VERBOSE}" = true ]; then
-                    printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
+                    printf "DC_COMMANDO is %s \n" "${DC_COMMAND}"
                 fi
-                ${DC_COMMAND} config --services > "${TMP_DIR}"/"${STACK_NAME}"
+                ${DC_COMMANDO} config --services > "${TMP_DIR}"/"${STACK_NAME}"
                 cd - > /dev/null || { echo "cd failed"; exit 1; }
             fi
         else
@@ -73,9 +73,9 @@ function tmp_stack_files_age(){
             fi
             cd "${STACK}" || { echo "cd failed"; exit 1; }
             if [ "${VERBOSE}" = true ]; then
-                printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
+                printf "DC_COMMANDO is %s \n" "${DC_COMMANDO}"
             fi
-            ${DC_COMMAND} config --services > "${TMP_DIR}"/"${STACK_NAME}"
+            ${DC_COMMANDO} config --services > "${TMP_DIR}"/"${STACK_NAME}"
             cd - > /dev/null || { echo "cd failed"; exit 1; }
         fi
         unset DC_COMMAND
