@@ -285,6 +285,7 @@ function up(){
         printf "Bringing up all stacks \n"
         for STACK in $(find "${DC_DIR}" -name docker-compose.yml -printf '%h\n' | sort -u);
         do
+            STACK_NAME=$(basename "${STACK}")
             printf "\n%s:\n" "${STACK}"
             cd "${STACK}" || { echo "cd failed"; exit 1; }
             DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
@@ -322,6 +323,7 @@ function down(){
         printf "Bringing down all stacks \n"
         for STACK in $(find "${DC_DIR}" -name docker-compose.yml -printf '%h\n' | sort -ur);
         do
+            STACK_NAME=$(basename "${STACK}")
             printf "\n%s:\n" "${STACK}"
             cd "${STACK}" || { echo "cd failed"; exit 1; }
             DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
@@ -338,7 +340,7 @@ function down(){
             if [ -d "${STACK_DIR}" ]; then
                 printf "Bringing down stack %s \n" "${STACK}"
                 cd "${STACK_DIR}" || { echo "cd failed"; exit 1; }
-                DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK_DIR}/${STACK_NAME}.env"
+                DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK_DIR}/${STACK}.env"
                 if [ "${VERBOSE}" = true ]; then
                     printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
                 fi
