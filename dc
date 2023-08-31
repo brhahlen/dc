@@ -32,7 +32,7 @@ export VERBOSE=false
 ##################################################
 # TMP_DIR STACK SERVICES
 function tmp_dir_stack_files(){
-    printf "VERBOSE is set to %s" "${VERBOSE}"
+    printf "VERBOSE is set to %s" "${VERBOSE} \n"
     if [ ! -d "${TMP_DIR}" ]; then
         if [ "${VERBOSE}" = true ]; then
             printf "%s not found. Creating... \n" "${TMP_DIR}"
@@ -44,6 +44,7 @@ function tmp_dir_stack_files(){
 # TMP_STACK FILES AGE
 function tmp_stack_files_age(){
     tmp_dir_stack_files
+    printf "VERBOSE is set to %s" "${VERBOSE} \n"
     for STACK in $(find "${DC_DIR}" -name docker-compose.yml -printf '%h \n' | sort -u);
     do
         STACK_NAME=$(basename "${STACK}")
