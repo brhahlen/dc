@@ -61,6 +61,9 @@ function tmp_stack_files_age(){
                     printf "File is too old, refreshing \n"
                 fi
                 cd "${STACK}" || { echo "cd failed"; exit 1; }
+                if [ "${VERBOSE}" = true ]; then
+                    printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
+                fi
                 ${DC_COMMAND} config --services > "${TMP_DIR}"/"${STACK_NAME}"
                 cd - > /dev/null || { echo "cd failed"; exit 1; }
             fi
@@ -69,6 +72,9 @@ function tmp_stack_files_age(){
                 printf "File does not exist, creating \n"
             fi
             cd "${STACK}" || { echo "cd failed"; exit 1; }
+            if [ "${VERBOSE}" = true ]; then
+                printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
+            fi
             ${DC_COMMAND} config --services > "${TMP_DIR}"/"${STACK_NAME}"
             cd - > /dev/null || { echo "cd failed"; exit 1; }
         fi
