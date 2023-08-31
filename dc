@@ -6,7 +6,7 @@
 set -m
 
 # VERSION
-export DC_VERSION=v2.0.4
+export DC_VERSION=v3.0.0-dev
 
 ###### VARIABLES
 if [[ -z "${DC_DIR}" ]]; then
@@ -32,6 +32,7 @@ export VERBOSE=false
 ##################################################
 # TMP_DIR STACK SERVICES
 function tmp_dir_stack_files(){
+    printf "VERBOSE is set to %s" "${VERBOSE}"
     if [ ! -d "${TMP_DIR}" ]; then
         if [ "${VERBOSE}" = true ]; then
             printf "%s not found. Creating... \n" "${TMP_DIR}"
@@ -46,6 +47,7 @@ function tmp_stack_files_age(){
     for STACK in $(find "${DC_DIR}" -name docker-compose.yml -printf '%h \n' | sort -u);
     do
         STACK_NAME=$(basename "${STACK}")
+        DC_COMMAND="${DC_COMMAND} --env-file ${STACK}.env"
         if [ -f "${TMP_DIR}"/"${STACK_NAME}" ]; then
             if [ "${VERBOSE}" = true ]; then
                 printf "File %s/%s exists, checking age \n" "${TMP_DIR}" "${STACK_NAME}"
@@ -63,7 +65,7 @@ function tmp_stack_files_age(){
                 printf "File does not exist, creating \n"
             fi
             cd "${STACK}" || { echo "cd failed"; exit 1; }
-           " ${DC_COMMAND}" config --services > "${TMP_DIR}"/"${STACK_NAME}"
+            ${DC_COMMAND} config --services > "${TMP_DIR}"/"${STACK_NAME}"
             cd - > /dev/null || { echo "cd failed"; exit 1; }
         fi
     done
