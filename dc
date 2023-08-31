@@ -292,7 +292,7 @@ function up(){
             if [ "${VERBOSE}" = true ]; then
                 printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
             fi
-            # ${DC_COMMAND} up -d
+            ${DC_COMMAND} up -d
             cd - > /dev/null || { echo "cd failed"; exit 1; }
         done
     else
@@ -306,7 +306,7 @@ function up(){
                 if [ "${VERBOSE}" = true ]; then
                     printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
                 fi
-                # ${DC_COMMAND} up -d
+                ${DC_COMMAND} up -d
                 cd - > /dev/null || { echo "cd failed"; exit 1; }
             else
                 printf "Stack %s does not exist. Did you type the name correctly? \n" "${STACK_NAME}"
@@ -330,7 +330,7 @@ function down(){
             if [ "${VERBOSE}" = true ]; then
                 printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
             fi
-            # ${DC_COMMAND} down
+            ${DC_COMMAND} down
             cd - > /dev/null || { echo "cd failed"; exit 1; }
         done
     else
@@ -344,7 +344,7 @@ function down(){
                 if [ "${VERBOSE}" = true ]; then
                     printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
                 fi
-                # ${DC_COMMAND} down
+                ${DC_COMMAND} down
                 cd - > /dev/null || { echo "cd failed"; exit 1; }
             else
                 printf "Stack %s does not exist. Did you type the name correctly? \n" "${STACK_NAME}"
@@ -374,8 +374,8 @@ function restart-stack-hard(){
             fi
             printf "\n%s:\n" "${STACK_NAME}"
             cd "${STACK}" || { echo "cd failed"; exit 1; }
-            # ${DC_COMMAND} down
-            # ${DC_COMMAND} up -d
+            ${DC_COMMAND} down
+            ${DC_COMMAND} up -d
             cd - > /dev/null || { echo "cd failed"; exit 1; }
         done
     else
@@ -394,8 +394,8 @@ function restart-stack-hard(){
                 fi
                 printf "Restarting stack %s \n" "${STACK_NAME}"
                 cd "${STACK}" || { echo "cd failed"; exit 1; }
-                # ${DC_COMMAND} down
-                # ${DC_COMMAND} up -d
+                ${DC_COMMAND} down
+                ${DC_COMMAND} up -d
                 cd - > /dev/null || { echo "cd failed"; exit 1; }
             else
                 printf "Stack %s does not exist. Did you type the name correctly? \n" "${STACK_NAME}"
@@ -423,7 +423,7 @@ function restart-stack-soft(){
             fi
             printf "\n%s:\n" "${STACK_NAME}"
             cd "${STACK}" || { echo "cd failed"; exit 1; }
-            # ${DC_COMMAND} restart
+            ${DC_COMMAND} restart
             cd - > /dev/null || { echo "cd failed"; exit 1; }
         done
     else
@@ -442,7 +442,7 @@ function restart-stack-soft(){
                 fi
                 printf "Restarting stack %s \n" "${STACK_NAME}"
                 cd "${STACK}" || { echo "cd failed"; exit 1; }
-                # ${DC_COMMAND} restart
+                ${DC_COMMAND} restart
                 cd - > /dev/null || { echo "cd failed"; exit 1; }
             else
                 printf "Stack %s does not exist. Did you type the name correctly? \n" "${STACK_NAME}"
