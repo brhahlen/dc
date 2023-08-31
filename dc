@@ -51,6 +51,10 @@ function tmp_stack_files_age(){
     for STACK in $(find "${DC_DIR}" -name docker-compose.yml -printf '%h \n' | sort -u);
     do
         STACK_NAME=$(basename "${STACK}")
+        if [ "${VERBOSE}" = true ]; then
+            printf "STACK is %s \n" "${STACK}"
+            printf "STACK_NAME is %s \n" "${STACK_NAME}"
+        fi
         DC_COMMANDO="${DC_COMMAND} --env-file ${STACK}/${STACK}.env"
         if [ -f "${TMP_DIR}"/"${STACK_NAME}" ]; then
             if [ "${VERBOSE}" = true ]; then
