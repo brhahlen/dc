@@ -78,6 +78,7 @@ function tmp_stack_files_age(){
             ${DC_COMMAND} config --services > "${TMP_DIR}"/"${STACK_NAME}"
             cd - > /dev/null || { echo "cd failed"; exit 1; }
         fi
+        unset DC_COMMAND
     done
 }
 
