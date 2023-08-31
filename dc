@@ -127,9 +127,9 @@ function list(){
         printf "Stack %b%s%b contains services: \n" "${RED}" "${STACK_NAME}" "${NC}"
         cd "${STACK}" || { echo "cd failed"; exit 1; }
         if [ "${VERBOSE}" = true ]; then
-            printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
+            printf "DC_COMMANDO is %s \n" "${DC_COMMANDO}"
         fi
-        ${DC_COMMAND} config --services | tee ${TMP_DIR}/"${STACK_NAME}"
+        ${DC_COMMANDO} config --services | tee ${TMP_DIR}/"${STACK_NAME}"
         cd - > /dev/null || { echo "cd failed"; exit 1; }
     done
     }
