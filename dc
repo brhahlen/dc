@@ -85,6 +85,43 @@ function tmp_stack_files_age(){
     done
 }
 
+# CREATE ENV FILES
+function create_env_file() {
+    STACK=$1
+    STACK_NAME=$2
+    if [ "${VERBOSE}" = true ]; then
+        printf "STACK is %s \n" "${STACK}"
+        printf "STACK_NAME is %s \n" "${STACK_NAME}"
+    fi
+    if [ ! -f "${STACK}/${STACK_NAME}.env" ]; then
+        printf "%s.env does not exist, asking to create \n" "${STACK_NAME}"
+        if [ "${ALLOW_ENV_CREATE}" =  true ]; then
+            printf "Creating %s.env" "${STACK_NAME}"
+            touch "${STACK}/${STACK_NAME}.env"
+        else
+            printf "No prior authorization given for creation of .env files \n"
+            while true; do
+                read -r -p "Do you want to proceed? (y/n) " yn
+                case $yn in
+                    [yY] )
+                        printf "Creating %s.env \n" "${STACK_NAME}"
+                        touch "${STACK}/${STACK_NAME}.env"
+                        export ALLOW_ENV_CREATE=true
+                        break
+                        ;;
+                    [nN] )
+                        printf "Not creating .env files, will exit \n"
+                        exit
+                        ;;
+                    * )
+                        printf "Invalid response"
+                        ;;
+                esac
+            done
+        fi
+    fi
+}
+
 ##################################################
 # USAGE AND LIST                                 #
 ##################################################
@@ -288,33 +325,7 @@ function up(){
             STACK_NAME=$(basename "${STACK}")
             printf "\n%s:\n" "${STACK_NAME}"
             cd "${STACK}" || { echo "cd failed"; exit 1; }
-            if [ ! -f "${STACK}/${STACK_NAME}.env" ]; then
-                printf "%s.env does not exist, asking to create \n" "${STACK_NAME}"
-                if [ "${ALLOW_ENV_CREATE}" =  true ]; then
-                    printf "Creating %s.env" "${STACK_NAME}"
-                    touch "${STACK}/${STACK_NAME}.env"
-                else
-                    printf "No prior authorization given for creation of .env files"
-                    while true; do
-                        read -r -p "Do you want to proceed? (y/n) " yn
-                        case $yn in
-                            [yY] )
-                                printf "Creating %s.env" "${STACK_NAME}"
-                                touch "${STACK}/${STACK_NAME}.env"
-                                export ALLOW_ENV_CREATE=true
-                                break
-                                ;;
-                            [nN] )
-                                printf "Not creating .env files, will exit"
-                                exit
-                                ;;
-                            * )
-                                printf "Invalid response"
-                                ;;
-                        esac
-                    done
-                fi
-            fi
+            create_env_file "${STACK}" "${STACK_NAME}"
             DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
             if [ "${VERBOSE}" = true ]; then
                 printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
