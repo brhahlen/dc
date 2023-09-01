@@ -538,14 +538,19 @@ function stop(){
         for SERVICE in "$@";
         do
             if grep -r -q -x "${SERVICE}" ${TMP_DIR}; then
-                SERVICE_STACK=$(basename "$(grep -r -x "${SERVICE}" ${TMP_DIR} | cut -d : -f 1 )")
+                STACK_NAME=$(basename "$(grep -r -x "${SERVICE}" "${TMP_DIR}" | cut -d : -f 1 )")
+                STACK="${DC_DIR}/${STACK_NAME}"
                 if [ "${VERBOSE}" = true ]; then
-                    printf "%s \n" "${SERVICE_STACK}"
-                    printf "Found %s in %s \n" "${SERVICE}" "${SERVICE_STACK}"
-                    printf "%s \n" "${DC_DIR}"
-                    printf "cd %s/%s \n" "${DC_DIR}" "${SERVICE_STACK}"
+                    printf "STACK is %s \n" "${STACK}"
+                    printf "STACK_NAME is %s \n" "${STACK_NAME}"
+                    printf "Found %s in %s \n" "${SERVICE}" "${STACK}"
                 fi
-                cd "${DC_DIR}"/"${SERVICE_STACK}" || { echo "cd failed"; exit 1; }
+                cd "${STACK}" || { echo "cd failed"; exit 1; }
+                DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
+                if [ "${VERBOSE}" = true ]; then
+                    printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
+                    printf "Full command is %s stop %s; %s rm -f %s \n" "${DC_COMMAND}" "${SERVICE}" "${DC_COMMAND}" "${SERVICE}"
+                fi
                 ${DC_COMMAND} stop "${SERVICE}"
                 ${DC_COMMAND} rm -f "${SERVICE}"
                 cd - > /dev/null || { echo "cd failed"; exit 1; }
@@ -578,12 +583,19 @@ function pull(){
         for SERVICE in "$@";
         do
             if grep -r -q -x "${SERVICE}" "${TMP_DIR}"; then
-                SERVICE_STACK=$(basename "$(grep -r -x "${SERVICE}" ${TMP_DIR} | cut -d : -f 1 )")
+                STACK_NAME=$(basename "$(grep -r -x "${SERVICE}" "${TMP_DIR}" | cut -d : -f 1 )")
+                STACK="${DC_DIR}/${STACK_NAME}"
                 if [ "${VERBOSE}" = true ]; then
-                    printf "%s \n" "${SERVICE_STACK}"
-                    printf "Found %s in %s \n" "${SERVICE}" "${SERVICE_STACK}"
+                    printf "STACK is %s \n" "${STACK}"
+                    printf "STACK_NAME is %s \n" "${STACK_NAME}"
+                    printf "Found %s in %s \n" "${SERVICE}" "${STACK}"
                 fi
-                cd "${DC_DIR}"/"${SERVICE_STACK}" || { echo "cd failed"; exit 1; }
+                cd "${STACK}" || { echo "cd failed"; exit 1; }
+                DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
+                if [ "${VERBOSE}" = true ]; then
+                    printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
+                    printf "Full command is %s pull %s \n" "${DC_COMMAND}" "${SERVICE}"
+                fi
                 printf "Running command: %s pull %s \n" "${DC_COMMAND}" "${SERVICE}"
                 ${DC_COMMAND} pull "${SERVICE}"
                 cd - > /dev/null || { echo "cd failed"; exit 1; }
@@ -615,12 +627,19 @@ function logs(){
         for SERVICE in "$@";
         do
             if grep -r -q -x "${SERVICE}" "${TMP_DIR}"; then
-                SERVICE_STACK=$(basename "$(grep -r -x "${SERVICE}" ${TMP_DIR} | cut -d : -f 1 )")
+                STACK_NAME=$(basename "$(grep -r -x "${SERVICE}" "${TMP_DIR}" | cut -d : -f 1 )")
+                STACK="${DC_DIR}/${STACK_NAME}"
                 if [ "${VERBOSE}" = true ]; then
-                    printf "%s \n" "${SERVICE_STACK}"
-                    printf "Found %s in %s \n" "${SERVICE}" "${SERVICE_STACK}"
+                    printf "STACK is %s \n" "${STACK}"
+                    printf "STACK_NAME is %s \n" "${STACK_NAME}"
+                    printf "Found %s in %s \n" "${SERVICE}" "${STACK}"
                 fi
-                cd "${DC_DIR}"/"${SERVICE_STACK}" || { echo "cd failed"; exit 1; }
+                cd "${STACK}" || { echo "cd failed"; exit 1; }
+                DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
+                if [ "${VERBOSE}" = true ]; then
+                    printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
+                    printf "Full command is %s logs --tail=100 -f %s \n" "${DC_COMMAND}" "${SERVICE}"
+                fi
                 ${DC_COMMAND} logs --tail=100 -f "${SERVICE}" &
                 if [ -z "$WAIT_PIDS" ]
                     then
@@ -638,7 +657,7 @@ function logs(){
             printf "\$WAIT_PIDS contains %s \n" "${WAIT_PIDS}"
         fi
         trap 'trap_kill' SIGHUP SIGINT SIGQUIT SIGTERM
-        wait $WAIT_PIDS
+        wait "${WAIT_PIDS}"
     fi
     }
 
