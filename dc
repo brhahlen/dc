@@ -6,7 +6,7 @@
 set -m
 
 # VERSION
-export DC_VERSION=v3.0.0
+export DC_VERSION=v3.0.1-dev
 
 ###### VARIABLES
 if [[ -z "${DC_DIR}" ]]; then
@@ -288,12 +288,39 @@ function up(){
             STACK_NAME=$(basename "${STACK}")
             printf "\n%s:\n" "${STACK_NAME}"
             cd "${STACK}" || { echo "cd failed"; exit 1; }
+            if [ ! -f "${STACK}/${STACK_NAME}.env" ]; then
+                printf "%s.env does not exist, asking to create \n" "${STACK_NAME}"
+                if [ "${ALLOW_ENV_CREATE}" =  true ]; then
+                    printf "Creating %s.env" "${STACK_NAME}"
+                    touch "${STACK}/${STACK_NAME}.env"
+                else
+                    printf "No prior authorization given for creation of .env files"
+                    while true; do
+                        read -r -p "Do you want to proceed? (y/n) " yn
+                        case $yn in
+                            [yY] )
+                                printf "Creating %s.env" "${STACK_NAME}"
+                                touch "${STACK}/${STACK_NAME}.env"
+                                export ALLOW_ENV_CREATE=true
+                                break
+                                ;;
+                            [nN] )
+                                printf "Not creating .env files, will exit"
+                                exit
+                                ;;
+                            * )
+                                printf "Invalid response"
+                                ;;
+                        esac
+                    done
+                fi
+            fi
             DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
             if [ "${VERBOSE}" = true ]; then
                 printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
                 printf "Full command is %s up -d \n" "${DC_COMMAND}"
             fi
-            ${DC_COMMAND} up -d
+            # ${DC_COMMAND} up -d
             cd - > /dev/null || { echo "cd failed"; exit 1; }
         done
     else
