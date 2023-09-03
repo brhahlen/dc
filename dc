@@ -122,6 +122,16 @@ function create_env_file() {
     fi
 }
 
+# Verbosity for stack_names
+function verbose_stack(){
+    STACK=$1
+    STACK_NAME=$2
+    if [ "${VERBOSE}" = true ]; then
+        printf "STACK is %s \n" "${STACK}"
+        printf "STACK_NAME is %s \n" "${STACK_NAME}"
+    fi
+}
+
 ##################################################
 # USAGE AND LIST                                 #
 ##################################################
@@ -164,10 +174,11 @@ function list(){
     for STACK in $(find "${DC_DIR}" -name docker-compose.yml -printf '%h\n' | sort -u);
     do
         STACK_NAME=$(basename "${STACK}")
-        if [ "${VERBOSE}" = true ]; then
-            printf "STACK is %s \n" "${STACK}"
-            printf "STACK_NAME is %s \n" "${STACK_NAME}"
-        fi
+        verbose_stack "${STACK}" "${STACK_NAME}"
+        # if [ "${VERBOSE}" = true ]; then
+        #     printf "STACK is %s \n" "${STACK}"
+        #     printf "STACK_NAME is %s \n" "${STACK_NAME}"
+        # fi
         create_env_file "${STACK}" "${STACK_NAME}"
         DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
         printf "Stack %b%s%b contains services: \n" "${RED}" "${STACK_NAME}" "${NC}"
