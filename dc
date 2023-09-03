@@ -167,7 +167,7 @@ function dc_cmd_create(){
         printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
         printf "Combined command is %s %s \n" "${DC_COMMAND}" "${DC_CMD_PARAM}"
     fi
-    echo ${DC_COMMAND} "${DC_CMD_PARAM}"
+    ${DC_COMMAND} "${DC_CMD_PARAM}"
 }
 
 # LIST
