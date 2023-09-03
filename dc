@@ -160,6 +160,15 @@ function show_usage (){
 return 0
 }
 
+function dc_cmd_create(){
+    DC_CMD_PARAM=$1
+    DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
+    if [ "${VERBOSE}" = true ]; then
+        printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
+        printf "Combined command is %s %s \n" "${DC_COMMAND}" "${DC_CMD_PARAM}"
+    fi
+}
+
 # LIST
 function list(){
     tmp_stack_files_age
@@ -168,15 +177,17 @@ function list(){
     for STACK in $(find "${DC_DIR}" -name docker-compose.yml -printf '%h\n' | sort -u);
     do
         STACK_NAME=$(basename "${STACK}")
+        DC_CMD_PARAM="config --services | tee ${TMP_DIR}/${STACK_NAME}"
         verbose_stack "${STACK}" "${STACK_NAME}"
         create_env_file "${STACK}" "${STACK_NAME}"
-        DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
-        printf "Stack %b%s%b contains services: \n" "${RED}" "${STACK_NAME}" "${NC}"
         cd "${STACK}" || { echo "cd failed"; exit 1; }
-        if [ "${VERBOSE}" = true ]; then
-            printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
-        fi
-        ${DC_COMMAND} config --services | tee ${TMP_DIR}/"${STACK_NAME}"
+        printf "Stack %b%s%b contains services: \n" "${RED}" "${STACK_NAME}" "${NC}"
+        # DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
+        # if [ "${VERBOSE}" = true ]; then
+        #     printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
+        # fi
+        # ${DC_COMMAND} config --services | tee "${TMP_DIR}"/"${STACK_NAME}"
+        dc_cmd_create "${DC_CMD_PARAM}"
         cd - > /dev/null || { echo "cd failed"; exit 1; }
         printf "=================================== \n"
     done
