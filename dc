@@ -163,11 +163,12 @@ return 0
 function dc_cmd_create(){
     DC_CMD_PARAM=$1
     DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
+    DC_CMD_CMB="${DC_COMMAND} ${DC_CMD_PARAM}"
     if [ "${VERBOSE}" = true ]; then
         printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
         printf "Combined command is %s %s \n" "${DC_COMMAND}" "${DC_CMD_PARAM}"
     fi
-    ${DC_COMMAND} "${DC_CMD_PARAM}"
+    ${DC_CMD_CMB}
 }
 
 # LIST
