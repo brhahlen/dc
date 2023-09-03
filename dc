@@ -325,6 +325,7 @@ function up(){
         for STACK in $(find "${DC_DIR}" -name docker-compose.yml -printf '%h\n' | sort -u);
         do
             STACK_NAME=$(basename "${STACK}")
+            verbose_stack "${STACK}" "${STACK_NAME}"
             printf "\n%s:\n" "${STACK_NAME}"
             cd "${STACK}" || { echo "cd failed"; exit 1; }
             create_env_file "${STACK}" "${STACK_NAME}"
@@ -341,6 +342,7 @@ function up(){
         do
             STACK="${DC_DIR}/${STACK_NAME}"
             if [ -d "${STACK}" ]; then
+                verbose_stack "${STACK}" "${STACK_NAME}"
                 printf "Bringing up stack %s \n" "${STACK_NAME}"
                 cd "${STACK}" || { echo "cd failed"; exit 1; }
                 create_env_file "${STACK}" "${STACK_NAME}"
@@ -367,6 +369,7 @@ function down(){
         for STACK in $(find "${DC_DIR}" -name docker-compose.yml -printf '%h\n' | sort -ur);
         do
             STACK_NAME=$(basename "${STACK}")
+            verbose_stack "${STACK}" "${STACK_NAME}"
             printf "\n%s:\n" "${STACK_NAME}"
             cd "${STACK}" || { echo "cd failed"; exit 1; }
             create_env_file "${STACK}" "${STACK_NAME}"
@@ -411,10 +414,7 @@ function restart-stack-hard(){
         for STACK in $(find "${DC_DIR}" -name docker-compose.yml -printf '%h\n' | sort -u);
         do
             STACK_NAME=$(basename "${STACK}")
-            if [ "${VERBOSE}" = true ]; then
-                printf "STACK is %s \n" "${STACK}"
-                printf "STACK_NAME is %s \n" "${STACK_NAME}"
-            fi
+            verbose_stack "${STACK}" "${STACK_NAME}"
             create_env_file "${STACK}" "${STACK_NAME}"
             DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
             if [ "${VERBOSE}" = true ]; then
@@ -432,10 +432,7 @@ function restart-stack-hard(){
         do
             STACK="${DC_DIR}/${STACK_NAME}"
             STACK_NAME=$(basename "${STACK}")
-            if [ "${VERBOSE}" = true ]; then
-                printf "STACK is %s \n" "${STACK}"
-                printf "STACK_NAME is %s \n" "${STACK_NAME}"
-            fi
+            verbose_stack "${STACK}" "${STACK_NAME}"
             if [ -d "${STACK}" ]; then
                 create_env_file "${STACK}" "${STACK_NAME}"
                 DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
@@ -464,10 +461,7 @@ function restart-stack-soft(){
         for STACK in $(find "${DC_DIR}" -name docker-compose.yml -printf '%h\n' | sort -u);
         do
             STACK_NAME=$(basename "${STACK}")
-            if [ "${VERBOSE}" = true ]; then
-                printf "STACK is %s \n" "${STACK}"
-                printf "STACK_NAME is %s \n" "${STACK_NAME}"
-            fi
+            verbose_stack "${STACK}" "${STACK_NAME}"
             create_env_file "${STACK}" "${STACK_NAME}"
             DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
             if [ "${VERBOSE}" = true ]; then
@@ -484,10 +478,7 @@ function restart-stack-soft(){
         do
             STACK="${DC_DIR}/${STACK_NAME}"
             STACK_NAME=$(basename "${STACK}")
-            if [ "${VERBOSE}" = true ]; then
-                printf "STACK is %s \n" "${STACK}"
-                printf "STACK_NAME is %s \n" "${STACK_NAME}"
-            fi
+            verbose_stack "${STACK}" "${STACK_NAME}"
             if [ -d "${STACK}" ]; then
                 create_env_file "${STACK}" "${STACK_NAME}"
                 DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
@@ -515,10 +506,7 @@ function logs-stack(){
         do
             STACK="${DC_DIR}/${STACK_NAME}"
             STACK_NAME=$(basename "${STACK}")
-            if [ "${VERBOSE}" = true ]; then
-                printf "STACK is %s \n" "${STACK}"
-                printf "STACK_NAME is %s \n" "${STACK_NAME}"
-            fi
+            verbose_stack "${STACK}" "${STACK_NAME}"
             if [ -d "${STACK}" ]; then
                 printf "Showing logs for stack %s \n" "${STACK_NAME}"
                 cd "${STACK}" || { echo "cd failed"; exit 1; }
