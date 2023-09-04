@@ -735,7 +735,7 @@ function logs(){
         tmp_stack_files_age
         for SERVICE in "$@";
         do
-            DC_CMD_PARAM="logs --tail=100 -f ${SERVICE} &"
+            DC_CMD_PARAM="logs --tail=100 -f ${SERVICE} \&"
             if grep -r -q -x "${SERVICE}" "${TMP_DIR}"; then
                 STACK_NAME=$(basename "$(grep -r -x "${SERVICE}" "${TMP_DIR}" | cut -d : -f 1 )")
                 STACK="${DC_DIR}/${STACK_NAME}"
