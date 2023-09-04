@@ -51,7 +51,7 @@ function verbose_stack(){
 function verbose_message(){
     MSG=$1
     if [ "${VERBOSE}" = true ]; then
-        printf "%b%s \n %b" "${GREEN}" "${MSG}" "${NC}"
+        printf "%b%s%b \n " "${GREEN}" "${MSG}" "${NC}"
     fi
 }
 
@@ -64,8 +64,8 @@ function dc_cmd_create(){
     DC_CMD_CMB="${DC_COMMAND} ${DC_CMD_PARAM}"
     if [ "${VERBOSE}" = true ]; then
         printf "DC_COMMAND is %b%s%b \n" "${RED}" "${DC_COMMAND}" "${NC}"
-        printf "DC_CMD_PARAM is %s \n" "${DC_CMD_PARAM}"
-        printf "Combined command is %s \n" "${DC_CMD_CMB}"
+        printf "DC_CMD_PARAM is %b%s%b \n" "${RED}" "${DC_CMD_PARAM}" "${NC}"
+        printf "Combined command is %b%s%b \n" "${RED}" "${DC_CMD_CMB}" "${NC}"
     fi
     ${DC_CMD_CMB}
 }
