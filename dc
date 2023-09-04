@@ -65,7 +65,6 @@ function verbose_message(){
 # DC COMMAND CREATION     #
 ###########################
 function dc_cmd_create(){
-    unset DC_CMD_PARAM
     DC_CMD_PARAM=$1
     DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
     DC_CMD_CMB="${DC_COMMAND} ${DC_CMD_PARAM}"
