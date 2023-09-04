@@ -51,7 +51,7 @@ function verbose_stack(){
 function verbose_message(){
     MSG=$1
     if [ "${VERBOSE}" = true ]; then
-        printf "%s \n" "${MSG}"
+        printf "%b%s \n %b" "${GREEN}" "${MSG}" "${NC}"
     fi
 }
 
@@ -63,7 +63,7 @@ function dc_cmd_create(){
     DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
     DC_CMD_CMB="${DC_COMMAND} ${DC_CMD_PARAM}"
     if [ "${VERBOSE}" = true ]; then
-        printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
+        printf "DC_COMMAND is %b%s%b \n" "${RED}" "${DC_COMMAND}" "${NC}"
         printf "DC_CMD_PARAM is %s \n" "${DC_CMD_PARAM}"
         printf "Combined command is %s \n" "${DC_CMD_CMB}"
     fi
