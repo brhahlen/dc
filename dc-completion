@@ -2,7 +2,7 @@
 # Copyright (C) 2022 - 2023 Ben Hählen
 # This is the completion file for `dc`
 ##############
-# Version 3.0.1
+# Version 3.1.0
 ##############
 _dc_completions()
 {
@@ -37,10 +37,12 @@ _dc_completions()
             # We might need to create the tmp-files, so reusing the command from dc, however, this is duplicating stuff, which is not nice, but for a MVP, it works
             for STACK in $(find "${DC_DIR}" -name docker-compose.yml -printf '%h\n' | sort -u);
             do
-                ENV="${DC_DIR}/.env"
-                DC_COMMAND="${DC_CMD} --env-file ${ENV}"
-                TMP_DIR="/tmp/dc_stack_services"
                 STACK_NAME=$(echo "${STACK}" | rev | cut -d / -f 1 | rev)
+                ENV="${DC_DIR}/.env"
+                DC_CMD_INIT="${DC_CMD} --env-file ${ENV}"
+                DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
+                # echo "${DC_COMMAND}"
+                TMP_DIR="/tmp/dc_stack_services"
                 if [ ! -d "${TMP_DIR}" ]; then
                     # echo "${TMP_DIR} not found. Creating..."
                     mkdir -p ${TMP_DIR}
@@ -50,12 +52,14 @@ _dc_completions()
                     if [ "$(find ${TMP_DIR}/"${STACK_NAME}" -mmin +30)" ]; then
                         # echo "File is too old, refreshing"
                         cd "${STACK}" || { echo "cd failed"; exit 1; }
+                        # echo "${DC_COMMAND}"
                         ${DC_COMMAND} config --services > ${TMP_DIR}/"${STACK_NAME}"
                         cd - > /dev/null || { echo "cd failed"; exit 1; }
                     fi
                 else
                     # echo "File does not exist, creating"
                     cd "${STACK}" || { echo "cd failed"; exit 1; }
+                    # echo "${DC_COMMAND}"
                     ${DC_COMMAND} config --services > ${TMP_DIR}/"${STACK_NAME}"
                     cd - > /dev/null || { echo "cd failed"; exit 1; }
                 fi
