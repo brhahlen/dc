@@ -359,6 +359,7 @@ function update(){
 ##################################################
 # UP
 function up(){
+    DC_CMD_PARAM="up -d"
     if [ -z "$1" ]; then
         printf "No argument provided, please use the name of a stack or all \n"
     elif [ "$1" == "all" ]; then
@@ -376,7 +377,6 @@ function up(){
             #     printf "Full command is %s up -d \n" "${DC_COMMAND}"
             # fi
             # ${DC_COMMAND} up -d
-            DC_CMD_PARAM="up -d"
             dc_cmd_create "${DC_CMD_PARAM}"
             cd - > /dev/null || { echo "cd failed"; exit 1; }
         done
@@ -395,7 +395,6 @@ function up(){
                 #     printf "Full command is %s up -d \n" "${DC_COMMAND}"
                 # fi
                 # ${DC_COMMAND} up -d
-                DC_CMD_PARAM="up -d"
                 dc_cmd_create "${DC_CMD_PARAM}"
                 cd - > /dev/null || { echo "cd failed"; exit 1; }
             else
@@ -592,12 +591,12 @@ function logs-stack(){
 # docker-compose ps | grep Exit | cut -d " " -f 1
 # START
 function start(){
-    DC_CMD_PARAM="up -d ${SERVICE}"
     if [ -z "$1" ]; then
         printf "No argument provided, please provide the name of one or more services \n"
     else
         printf "Starting the following service(s): %s \n" "$@"
         tmp_stack_files_age
+        DC_CMD_PARAM="up -d ${SERVICE}"
         for SERVICE in "$@";
         do
             if grep -r -q -x "${SERVICE}" "${TMP_DIR}"; then
