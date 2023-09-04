@@ -44,9 +44,13 @@ fi
 function verbose_stack(){
     STACK=$1
     STACK_NAME=$2
+    SERVICE_NAME=$3
     if [ "${VERBOSE}" = true ]; then
         printf "STACK is %b%s%b \n" "${YELLOW}" "${STACK}" "${NC}"
         printf "STACK_NAME is %b%s%b \n" "${YELLOW}" "${STACK_NAME}" "${NC}"
+        if [ -n "${SERVICE_NAME}" ]; then
+            printf "SERVICE_NAME is %b%s%b \n" "${YELLOW}" "${SERVICE_NAME}" "${NC}"
+        fi
     fi
 }
 
@@ -354,6 +358,7 @@ function update(){
 ##################################################
 # UP
 function up(){
+    DC_CMD_PARAM="up -d"
     if [ -z "$1" ]; then
         printf "No argument provided, please use the name of a stack or all \n"
     elif [ "$1" == "all" ]; then
@@ -365,12 +370,13 @@ function up(){
             printf "\n%s:\n" "${STACK_NAME}"
             cd "${STACK}" || { echo "cd failed"; exit 1; }
             create_env_file "${STACK}" "${STACK_NAME}"
-            DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
-            if [ "${VERBOSE}" = true ]; then
-                printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
-                printf "Full command is %s up -d \n" "${DC_COMMAND}"
-            fi
-            ${DC_COMMAND} up -d
+            # DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
+            # if [ "${VERBOSE}" = true ]; then
+            #     printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
+            #     printf "Full command is %s up -d \n" "${DC_COMMAND}"
+            # fi
+            # ${DC_COMMAND} up -d
+            dc_cmd_create "${DC_CMD_PARAM}"
             cd - > /dev/null || { echo "cd failed"; exit 1; }
         done
     else
@@ -382,12 +388,13 @@ function up(){
                 printf "Bringing up stack %s \n" "${STACK_NAME}"
                 cd "${STACK}" || { echo "cd failed"; exit 1; }
                 create_env_file "${STACK}" "${STACK_NAME}"
-                DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
-                if [ "${VERBOSE}" = true ]; then
-                    printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
-                    printf "Full command is %s up -d \n" "${DC_COMMAND}"
-                fi
-                ${DC_COMMAND} up -d
+                # DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
+                # if [ "${VERBOSE}" = true ]; then
+                #     printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
+                #     printf "Full command is %s up -d \n" "${DC_COMMAND}"
+                # fi
+                # ${DC_COMMAND} up -d
+                dc_cmd_create "${DC_CMD_PARAM}"
                 cd - > /dev/null || { echo "cd failed"; exit 1; }
             else
                 printf "Stack %s does not exist. Did you type the name correctly? \n" "${STACK_NAME}"
@@ -398,6 +405,7 @@ function up(){
 
 # DOWN
 function down(){
+    DC_CMD_PARAM="down"
     if [ -z "$1" ]; then
         printf "No argument provided, please use the name of a stack or all \n"
     elif [ "$1" == "all" ]; then
@@ -409,12 +417,13 @@ function down(){
             printf "\n%s:\n" "${STACK_NAME}"
             cd "${STACK}" || { echo "cd failed"; exit 1; }
             create_env_file "${STACK}" "${STACK_NAME}"
-            DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
-            if [ "${VERBOSE}" = true ]; then
-                printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
-                printf "Full command is %s down \n" "${DC_COMMAND}"
-            fi
-            ${DC_COMMAND} down
+            # DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
+            # if [ "${VERBOSE}" = true ]; then
+            #     printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
+            #     printf "Full command is %s down \n" "${DC_COMMAND}"
+            # fi
+            # ${DC_COMMAND} down
+            dc_cmd_create "${DC_CMD_PARAM}"
             cd - > /dev/null || { echo "cd failed"; exit 1; }
         done
     else
@@ -425,12 +434,13 @@ function down(){
                 printf "Bringing down stack %s \n" "${STACK_NAME}"
                 cd "${STACK}" || { echo "cd failed"; exit 1; }
                 create_env_file "${STACK}" "${STACK_NAME}"
-                DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
-                if [ "${VERBOSE}" = true ]; then
-                    printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
-                    printf "Full command is %s down \n" "${DC_COMMAND}"
-                fi
-                ${DC_COMMAND} down
+                # DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
+                # if [ "${VERBOSE}" = true ]; then
+                #     printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
+                #     printf "Full command is %s down \n" "${DC_COMMAND}"
+                # fi
+                # ${DC_COMMAND} down
+                dc_cmd_create "${DC_CMD_PARAM}"
                 cd - > /dev/null || { echo "cd failed"; exit 1; }
             else
                 printf "Stack %s does not exist. Did you type the name correctly? \n" "${STACK_NAME}"
@@ -439,10 +449,12 @@ function down(){
     fi
     }
 
-# RESTART-STACK
+### RESTART-STACK
 ## HARD
 # RESTART-STACK
 function restart-stack-hard(){
+    DC_CMD_PARAM_DOWN="down"
+    DC_CMD_PARAM_UP="up -d"
     if [ -z "$1" ]; then
         printf "No argument provided, please use the name of a stack or all \n"
     elif [ "$1" == "all" ]; then
@@ -452,15 +464,17 @@ function restart-stack-hard(){
             STACK_NAME=$(basename "${STACK}")
             verbose_stack "${STACK}" "${STACK_NAME}"
             create_env_file "${STACK}" "${STACK_NAME}"
-            DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
-            if [ "${VERBOSE}" = true ]; then
-                printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
-                printf "Full command is %s down; %s up -d \n" "${DC_COMMAND}" "${DC_COMMAND}"
-            fi
             printf "\n%s:\n" "${STACK_NAME}"
             cd "${STACK}" || { echo "cd failed"; exit 1; }
-            ${DC_COMMAND} down
-            ${DC_COMMAND} up -d
+            # DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
+            # if [ "${VERBOSE}" = true ]; then
+            #     printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
+            #     printf "Full command is %s down; %s up -d \n" "${DC_COMMAND}" "${DC_COMMAND}"
+            # fi
+            # ${DC_COMMAND} down
+            # ${DC_COMMAND} up -d
+            dc_cmd_create "${DC_CMD_PARAM_DOWN}"
+            dc_cmd_create "${DC_CMD_PARAM_UP}"
             cd - > /dev/null || { echo "cd failed"; exit 1; }
         done
     else
@@ -471,15 +485,17 @@ function restart-stack-hard(){
             verbose_stack "${STACK}" "${STACK_NAME}"
             if [ -d "${STACK}" ]; then
                 create_env_file "${STACK}" "${STACK_NAME}"
-                DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
-                if [ "${VERBOSE}" = true ]; then
-                    printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
-                    printf "Full command is %s down; %s up -d \n" "${DC_COMMAND}" "${DC_COMMAND}" 
-                fi
                 printf "Restarting stack %s \n" "${STACK_NAME}"
                 cd "${STACK}" || { echo "cd failed"; exit 1; }
-                ${DC_COMMAND} down
-                ${DC_COMMAND} up -d
+                # DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
+                # if [ "${VERBOSE}" = true ]; then
+                #     printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
+                #     printf "Full command is %s down; %s up -d \n" "${DC_COMMAND}" "${DC_COMMAND}" 
+                # fi
+                # ${DC_COMMAND} down
+                # ${DC_COMMAND} up -d
+                dc_cmd_create "${DC_CMD_PARAM_DOWN}"
+                dc_cmd_create "${DC_CMD_PARAM_UP}"
                 cd - > /dev/null || { echo "cd failed"; exit 1; }
             else
                 printf "Stack %s does not exist. Did you type the name correctly? \n" "${STACK_NAME}"
@@ -490,6 +506,7 @@ function restart-stack-hard(){
 
 ## SOFT
 function restart-stack-soft(){
+    DC_CMD_PARAM="restart"
     if [ -z "$1" ]; then
         printf "No argument provided, please use the name of a stack or all \n"
     elif [ "$1" == "all" ]; then
@@ -499,14 +516,15 @@ function restart-stack-soft(){
             STACK_NAME=$(basename "${STACK}")
             verbose_stack "${STACK}" "${STACK_NAME}"
             create_env_file "${STACK}" "${STACK_NAME}"
-            DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
-            if [ "${VERBOSE}" = true ]; then
-                printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
-                printf "Full command is %s restart \n" "${DC_COMMAND}"
-            fi
             printf "\n%s:\n" "${STACK_NAME}"
             cd "${STACK}" || { echo "cd failed"; exit 1; }
-            ${DC_COMMAND} restart
+            # DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
+            # if [ "${VERBOSE}" = true ]; then
+            #     printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
+            #     printf "Full command is %s restart \n" "${DC_COMMAND}"
+            # fi
+            # ${DC_COMMAND} restart
+            dc_cmd_create "${DC_CMD_PARAM}"
             cd - > /dev/null || { echo "cd failed"; exit 1; }
         done
     else
@@ -517,14 +535,15 @@ function restart-stack-soft(){
             verbose_stack "${STACK}" "${STACK_NAME}"
             if [ -d "${STACK}" ]; then
                 create_env_file "${STACK}" "${STACK_NAME}"
-                DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
-                if [ "${VERBOSE}" = true ]; then
-                    printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
-                    printf "Full command is %s restart \n" "${DC_COMMAND}"
-                fi
                 printf "Restarting stack %s \n" "${STACK_NAME}"
                 cd "${STACK}" || { echo "cd failed"; exit 1; }
-                ${DC_COMMAND} restart
+                # DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
+                # if [ "${VERBOSE}" = true ]; then
+                #     printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
+                #     printf "Full command is %s restart \n" "${DC_COMMAND}"
+                # fi
+                # ${DC_COMMAND} restart
+                dc_cmd_create "${DC_CMD_PARAM}"
                 cd - > /dev/null || { echo "cd failed"; exit 1; }
             else
                 printf "Stack %s does not exist. Did you type the name correctly? \n" "${STACK_NAME}"
@@ -535,6 +554,7 @@ function restart-stack-soft(){
 
 # LOGS-STACK
 function logs-stack(){
+    DC_CMD_PARAM="logs --tail=100 -f"
     if [ -z "$1" ]; then
         printf "No argument provided, please provide the name(s) of a stack(s) \n"
     else
@@ -544,15 +564,16 @@ function logs-stack(){
             STACK_NAME=$(basename "${STACK}")
             verbose_stack "${STACK}" "${STACK_NAME}"
             if [ -d "${STACK}" ]; then
+                create_env_file "${STACK}" "${STACK_NAME}"
                 printf "Showing logs for stack %s \n" "${STACK_NAME}"
                 cd "${STACK}" || { echo "cd failed"; exit 1; }
-                create_env_file "${STACK}" "${STACK_NAME}"
-                DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
-                if [ "${VERBOSE}" = true ]; then
-                    printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
-                    printf "Full command is %s logs --tail=100 -f \n" "${DC_COMMAND}"
-                fi
-                ${DC_COMMAND} logs --tail=100 -f
+                # DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
+                # if [ "${VERBOSE}" = true ]; then
+                #     printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
+                #     printf "Full command is %s logs --tail=100 -f \n" "${DC_COMMAND}"
+                # fi
+                # ${DC_COMMAND} logs --tail=100 -f
+                dc_cmd_create "${DC_CMD_PARAM}"
                 cd - > /dev/null || { echo "cd failed"; exit 1; }
             else
                 printf "Stack %s does not exist. Did you type the name correctly? \n" "${STACK}"
@@ -569,6 +590,7 @@ function logs-stack(){
 # docker-compose ps | grep Exit | cut -d " " -f 1
 # START
 function start(){
+    DC_CMD_PARAM="up -d ${SERVICE}"
     if [ -z "$1" ]; then
         printf "No argument provided, please provide the name of one or more services \n"
     else
@@ -586,12 +608,13 @@ function start(){
                 fi
                 cd "${STACK}" || { echo "cd failed"; exit 1; }
                 create_env_file "${STACK}" "${STACK_NAME}"
-                DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
-                if [ "${VERBOSE}" = true ]; then
-                    printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
-                    printf "Full command is %s  up -d %s \n" "${DC_COMMAND}" "${SERVICE}"
-                fi
-                ${DC_COMMAND} up -d "${SERVICE}"
+                # DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
+                # if [ "${VERBOSE}" = true ]; then
+                #     printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
+                #     printf "Full command is %s  up -d %s \n" "${DC_COMMAND}" "${SERVICE}"
+                # fi
+                # ${DC_COMMAND} up -d "${SERVICE}"
+                dc_cmd_create "${DC_CMD_PARAM}"
                 cd - > /dev/null || { echo "cd failed"; exit 1; }
             else
                 printf "ERROR: Service %s was not found in any of the stacks. Does it show up when you run %bdc list%b? \n" "${SERVICE}" "${RED}" "${NC}"
