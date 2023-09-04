@@ -51,12 +51,14 @@ _dc_completions()
                     if [ "$(find ${TMP_DIR}/"${STACK_NAME}" -mmin +30)" ]; then
                         # echo "File is too old, refreshing"
                         cd "${STACK}" || { echo "cd failed"; exit 1; }
+                        echo "${DC_COMMAND}"
                         ${DC_COMMAND} config --services > ${TMP_DIR}/"${STACK_NAME}"
                         cd - > /dev/null || { echo "cd failed"; exit 1; }
                     fi
                 else
                     # echo "File does not exist, creating"
                     cd "${STACK}" || { echo "cd failed"; exit 1; }
+                    echo "${DC_COMMAND}"
                     ${DC_COMMAND} config --services > ${TMP_DIR}/"${STACK_NAME}"
                     cd - > /dev/null || { echo "cd failed"; exit 1; }
                 fi
