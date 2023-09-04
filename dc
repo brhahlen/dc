@@ -27,7 +27,7 @@ export NC='\033[0m' # No Color
 # Verbosity
 if [[ ${DC_VERSION} =~ "dev" ]]; then
     printf "This is a development version, verbosity will be enabled by default \n"
-    export VERBOSE=false
+    export VERBOSE=true
 else
     export VERBOSE=false
 fi
