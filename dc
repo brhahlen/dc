@@ -35,6 +35,9 @@ fi
 ##################################################
 # HELPER FUNCTIONS                               #
 ##################################################
+###########################
+# VERBOSITY               #
+###########################
 # Verbosity for stack_names
 function verbose_stack(){
     STACK=$1
@@ -45,12 +48,38 @@ function verbose_stack(){
     fi
 }
 
+function verbose_message(){
+    MSG=$1
+    if [ "${VERBOSE}" = true ]; then
+        printf "%s" "${MSG}"
+    fi
+}
+
+###########################
+# DC COMMAND CREATION     #
+###########################
+function dc_cmd_create(){
+    DC_CMD_PARAM=$1
+    DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
+    DC_CMD_CMB="${DC_COMMAND} ${DC_CMD_PARAM}"
+    if [ "${VERBOSE}" = true ]; then
+        printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
+        printf "DC_CMD_PARAM is %s \n" "${DC_CMD_PARAM}"
+        printf "Combined command is %s \n" "${DC_CMD_CMB}"
+    fi
+    ${DC_CMD_CMB}
+}
+
+###########################
+# TMP FILES               #
+###########################
 # TMP_DIR STACK SERVICES
 function tmp_dir_stack_files(){
     if [ ! -d "${TMP_DIR}" ]; then
-        if [ "${VERBOSE}" = true ]; then
-            printf "%s not found. Creating... \n" "${TMP_DIR}"
-        fi
+        verbose_message "${TMP_DIR} not found. Creating... \n"
+        # if [ "${VERBOSE}" = true ]; then
+        #     printf "%s not found. Creating... \n" "${TMP_DIR}"
+        # fi
         mkdir -p ${TMP_DIR}
     fi
 }
@@ -62,7 +91,7 @@ function tmp_stack_files_age(){
     do
         STACK_NAME=$(basename "${STACK}")
         verbose_stack "${STACK}" "${STACK_NAME}"
-        DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
+        # DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
         if [ -f "${TMP_DIR}"/"${STACK_NAME}" ]; then
             if [ "${VERBOSE}" = true ]; then
                 printf "File %s/%s exists, checking age \n" "${TMP_DIR}" "${STACK_NAME}"
@@ -158,17 +187,6 @@ function show_usage (){
     printf " %bhelp%b                 Print help \n" "${RED}" "${NC}"
 
 return 0
-}
-
-function dc_cmd_create(){
-    DC_CMD_PARAM=$1
-    DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
-    DC_CMD_CMB="${DC_COMMAND} ${DC_CMD_PARAM}"
-    if [ "${VERBOSE}" = true ]; then
-        printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
-        printf "Combined command is %s %s \n" "${DC_COMMAND}" "${DC_CMD_PARAM}"
-    fi
-    ${DC_CMD_CMB}
 }
 
 # LIST
