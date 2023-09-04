@@ -628,13 +628,13 @@ function logs(){
                 verbose_stack "${STACK}" "${STACK_NAME}" "${SERVICE}"
                 cd "${STACK}" || { echo "cd failed"; exit 1; }
                 create_env_file "${STACK}" "${STACK_NAME}"
-                DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
-                if [ "${VERBOSE}" = true ]; then
-                    printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
-                    printf "Full command is %s logs --tail=100 -f %s \n" "${DC_COMMAND}" "${SERVICE}"
-                fi
-                ${DC_COMMAND} logs --tail=100 -f "${SERVICE}" &
-                # dc_cmd_create "${DC_CMD_PARAM}"
+                # DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
+                # if [ "${VERBOSE}" = true ]; then
+                #     printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
+                #     printf "Full command is %s logs --tail=100 -f %s \n" "${DC_COMMAND}" "${SERVICE}"
+                # fi
+                # ${DC_COMMAND} logs --tail=100 -f "${SERVICE}" &
+                dc_cmd_create "${DC_CMD_PARAM}" &
                 if [ -z "$WAIT_PIDS" ]
                     then
                         export WAIT_PIDS="$!"
