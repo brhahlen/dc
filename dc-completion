@@ -41,7 +41,7 @@ _dc_completions()
                 ENV="${DC_DIR}/.env"
                 DC_CMD_INIT="${DC_CMD} --env-file ${ENV}"
                 DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
-                echo "${DC_COMMAND}"
+                # echo "${DC_COMMAND}"
                 TMP_DIR="/tmp/dc_stack_services"
                 if [ ! -d "${TMP_DIR}" ]; then
                     # echo "${TMP_DIR} not found. Creating..."
@@ -52,14 +52,14 @@ _dc_completions()
                     if [ "$(find ${TMP_DIR}/"${STACK_NAME}" -mmin +30)" ]; then
                         # echo "File is too old, refreshing"
                         cd "${STACK}" || { echo "cd failed"; exit 1; }
-                        echo "${DC_COMMAND}"
+                        # echo "${DC_COMMAND}"
                         ${DC_COMMAND} config --services > ${TMP_DIR}/"${STACK_NAME}"
                         cd - > /dev/null || { echo "cd failed"; exit 1; }
                     fi
                 else
                     # echo "File does not exist, creating"
                     cd "${STACK}" || { echo "cd failed"; exit 1; }
-                    echo "${DC_COMMAND}"
+                    # echo "${DC_COMMAND}"
                     ${DC_COMMAND} config --services > ${TMP_DIR}/"${STACK_NAME}"
                     cd - > /dev/null || { echo "cd failed"; exit 1; }
                 fi
