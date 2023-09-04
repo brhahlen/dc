@@ -97,35 +97,17 @@ function tmp_stack_files_age(){
         STACK_NAME=$(basename "${STACK}")
         verbose_stack "${STACK}" "${STACK_NAME}"
         DC_CMD_PARAM_TMP="config --services > ${TMP_DIR}/${STACK_NAME}"
-        # DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
         if [ -f "${TMP_DIR}"/"${STACK_NAME}" ]; then
             verbose_message "File ${TMP_DIR}/${STACK_NAME} exists, checking age"
-            # if [ "${VERBOSE}" = true ]; then
-            #     printf "File %s/%s exists, checking age \n" "${TMP_DIR}" "${STACK_NAME}"
-            # fi
             if [ "$(find ${TMP_DIR}/"${STACK_NAME}" -mmin +30)" ]; then
                 verbose_message "File is too old, refreshing"
-                # if [ "${VERBOSE}" = true ]; then
-                #     printf "File is too old, refreshing \n"
-                # fi
                 cd "${STACK}" || { echo "cd failed"; exit 1; }
-                # if [ "${VERBOSE}" = true ]; then
-                #     printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
-                # fi
-                # ${DC_COMMAND} config --services > "${TMP_DIR}"/"${STACK_NAME}"
                 dc_cmd_create "${DC_CMD_PARAM_TMP}" > /dev/null
                 cd - > /dev/null || { echo "cd failed"; exit 1; }
             fi
         else
             verbose_message "File does not exist, creating"
-            # if [ "${VERBOSE}" = true ]; then
-            #     printf "File does not exist, creating \n"
-            # fi
             cd "${STACK}" || { echo "cd failed"; exit 1; }
-            # if [ "${VERBOSE}" = true ]; then
-            #     printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
-            # fi
-            # ${DC_COMMAND} config --services > "${TMP_DIR}"/"${STACK_NAME}"
             dc_cmd_create "${DC_CMD_PARAM}" > /dev/null
             cd - > /dev/null || { echo "cd failed"; exit 1; }
         fi
@@ -213,11 +195,6 @@ function list(){
         create_env_file "${STACK}" "${STACK_NAME}"
         cd "${STACK}" || { echo "cd failed"; exit 1; }
         printf "Stack %b%s%b contains services: \n" "${RED}" "${STACK_NAME}" "${NC}"
-        # DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
-        # if [ "${VERBOSE}" = true ]; then
-        #     printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
-        # fi
-        # ${DC_COMMAND} config --services | tee "${TMP_DIR}"/"${STACK_NAME}"
         dc_cmd_create "${DC_CMD_PARAM}"
         cd - > /dev/null || { echo "cd failed"; exit 1; }
         printf "=================================== \n"
@@ -372,12 +349,6 @@ function up(){
             printf "\n%s:\n" "${STACK_NAME}"
             cd "${STACK}" || { echo "cd failed"; exit 1; }
             create_env_file "${STACK}" "${STACK_NAME}"
-            # DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
-            # if [ "${VERBOSE}" = true ]; then
-            #     printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
-            #     printf "Full command is %s up -d \n" "${DC_COMMAND}"
-            # fi
-            # ${DC_COMMAND} up -d
             dc_cmd_create "${DC_CMD_PARAM}"
             cd - > /dev/null || { echo "cd failed"; exit 1; }
         done
@@ -390,12 +361,6 @@ function up(){
                 printf "Bringing up stack %s \n" "${STACK_NAME}"
                 cd "${STACK}" || { echo "cd failed"; exit 1; }
                 create_env_file "${STACK}" "${STACK_NAME}"
-                # DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
-                # if [ "${VERBOSE}" = true ]; then
-                #     printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
-                #     printf "Full command is %s up -d \n" "${DC_COMMAND}"
-                # fi
-                # ${DC_COMMAND} up -d
                 dc_cmd_create "${DC_CMD_PARAM}"
                 cd - > /dev/null || { echo "cd failed"; exit 1; }
             else
@@ -419,12 +384,6 @@ function down(){
             printf "\n%s:\n" "${STACK_NAME}"
             cd "${STACK}" || { echo "cd failed"; exit 1; }
             create_env_file "${STACK}" "${STACK_NAME}"
-            # DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
-            # if [ "${VERBOSE}" = true ]; then
-            #     printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
-            #     printf "Full command is %s down \n" "${DC_COMMAND}"
-            # fi
-            # ${DC_COMMAND} down
             dc_cmd_create "${DC_CMD_PARAM}"
             cd - > /dev/null || { echo "cd failed"; exit 1; }
         done
@@ -436,12 +395,6 @@ function down(){
                 printf "Bringing down stack %s \n" "${STACK_NAME}"
                 cd "${STACK}" || { echo "cd failed"; exit 1; }
                 create_env_file "${STACK}" "${STACK_NAME}"
-                # DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
-                # if [ "${VERBOSE}" = true ]; then
-                #     printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
-                #     printf "Full command is %s down \n" "${DC_COMMAND}"
-                # fi
-                # ${DC_COMMAND} down
                 dc_cmd_create "${DC_CMD_PARAM}"
                 cd - > /dev/null || { echo "cd failed"; exit 1; }
             else
@@ -468,13 +421,6 @@ function restart-stack-hard(){
             create_env_file "${STACK}" "${STACK_NAME}"
             printf "\n%s:\n" "${STACK_NAME}"
             cd "${STACK}" || { echo "cd failed"; exit 1; }
-            # DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
-            # if [ "${VERBOSE}" = true ]; then
-            #     printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
-            #     printf "Full command is %s down; %s up -d \n" "${DC_COMMAND}" "${DC_COMMAND}"
-            # fi
-            # ${DC_COMMAND} down
-            # ${DC_COMMAND} up -d
             dc_cmd_create "${DC_CMD_PARAM_DOWN}"
             dc_cmd_create "${DC_CMD_PARAM_UP}"
             cd - > /dev/null || { echo "cd failed"; exit 1; }
@@ -489,13 +435,6 @@ function restart-stack-hard(){
                 create_env_file "${STACK}" "${STACK_NAME}"
                 printf "Restarting stack %s \n" "${STACK_NAME}"
                 cd "${STACK}" || { echo "cd failed"; exit 1; }
-                # DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
-                # if [ "${VERBOSE}" = true ]; then
-                #     printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
-                #     printf "Full command is %s down; %s up -d \n" "${DC_COMMAND}" "${DC_COMMAND}" 
-                # fi
-                # ${DC_COMMAND} down
-                # ${DC_COMMAND} up -d
                 dc_cmd_create "${DC_CMD_PARAM_DOWN}"
                 dc_cmd_create "${DC_CMD_PARAM_UP}"
                 cd - > /dev/null || { echo "cd failed"; exit 1; }
@@ -520,12 +459,6 @@ function restart-stack-soft(){
             create_env_file "${STACK}" "${STACK_NAME}"
             printf "\n%s:\n" "${STACK_NAME}"
             cd "${STACK}" || { echo "cd failed"; exit 1; }
-            # DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
-            # if [ "${VERBOSE}" = true ]; then
-            #     printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
-            #     printf "Full command is %s restart \n" "${DC_COMMAND}"
-            # fi
-            # ${DC_COMMAND} restart
             dc_cmd_create "${DC_CMD_PARAM}"
             cd - > /dev/null || { echo "cd failed"; exit 1; }
         done
@@ -539,12 +472,6 @@ function restart-stack-soft(){
                 create_env_file "${STACK}" "${STACK_NAME}"
                 printf "Restarting stack %s \n" "${STACK_NAME}"
                 cd "${STACK}" || { echo "cd failed"; exit 1; }
-                # DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
-                # if [ "${VERBOSE}" = true ]; then
-                #     printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
-                #     printf "Full command is %s restart \n" "${DC_COMMAND}"
-                # fi
-                # ${DC_COMMAND} restart
                 dc_cmd_create "${DC_CMD_PARAM}"
                 cd - > /dev/null || { echo "cd failed"; exit 1; }
             else
@@ -569,12 +496,6 @@ function logs-stack(){
                 create_env_file "${STACK}" "${STACK_NAME}"
                 printf "Showing logs for stack %s \n" "${STACK_NAME}"
                 cd "${STACK}" || { echo "cd failed"; exit 1; }
-                # DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
-                # if [ "${VERBOSE}" = true ]; then
-                #     printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
-                #     printf "Full command is %s logs --tail=100 -f \n" "${DC_COMMAND}"
-                # fi
-                # ${DC_COMMAND} logs --tail=100 -f
                 dc_cmd_create "${DC_CMD_PARAM}"
                 cd - > /dev/null || { echo "cd failed"; exit 1; }
             else
@@ -604,19 +525,8 @@ function start(){
                 STACK_NAME=$(basename "$(grep -r -x "${SERVICE}" "${TMP_DIR}" | cut -d : -f 1 )")
                 STACK="${DC_DIR}/${STACK_NAME}"
                 verbose_stack "${STACK}" "${STACK_NAME}" "${SERVICE}"
-                # if [ "${VERBOSE}" = true ]; then
-                #     printf "STACK is %s \n" "${STACK}"
-                #     printf "STACK_NAME is %s \n" "${STACK_NAME}"
-                #     printf "Found %s in %s \n" "${SERVICE}" "${STACK}"
-                # fi
                 cd "${STACK}" || { echo "cd failed"; exit 1; }
                 create_env_file "${STACK}" "${STACK_NAME}"
-                # DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
-                # if [ "${VERBOSE}" = true ]; then
-                #     printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
-                #     printf "Full command is %s  up -d %s \n" "${DC_COMMAND}" "${SERVICE}"
-                # fi
-                # ${DC_COMMAND} up -d "${SERVICE}"
                 dc_cmd_create "${DC_CMD_PARAM}"
                 cd - > /dev/null || { echo "cd failed"; exit 1; }
             else
@@ -642,20 +552,8 @@ function stop(){
                 STACK_NAME=$(basename "$(grep -r -x "${SERVICE}" "${TMP_DIR}" | cut -d : -f 1 )")
                 STACK="${DC_DIR}/${STACK_NAME}"
                 verbose_stack "${STACK}" "${STACK_NAME}" "${SERVICE}"
-                # if [ "${VERBOSE}" = true ]; then
-                #     printf "STACK is %s \n" "${STACK}"
-                #     printf "STACK_NAME is %s \n" "${STACK_NAME}"
-                #     printf "Found %s in %s \n" "${SERVICE}" "${STACK}"
-                # fi
                 cd "${STACK}" || { echo "cd failed"; exit 1; }
                 create_env_file "${STACK}" "${STACK_NAME}"
-                # DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
-                # if [ "${VERBOSE}" = true ]; then
-                #     printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
-                #     printf "Full command is %s stop %s; %s rm -f %s \n" "${DC_COMMAND}" "${SERVICE}" "${DC_COMMAND}" "${SERVICE}"
-                # fi
-                # ${DC_COMMAND} stop "${SERVICE}"
-                # ${DC_COMMAND} rm -f "${SERVICE}"
                 dc_cmd_create "${DC_CMD_PARAM}"
                 dc_cmd_create "${DC_CMD_PARAM_RM}"
                 cd - > /dev/null || { echo "cd failed"; exit 1; }
@@ -692,20 +590,8 @@ function pull(){
                 STACK_NAME=$(basename "$(grep -r -x "${SERVICE}" "${TMP_DIR}" | cut -d : -f 1 )")
                 STACK="${DC_DIR}/${STACK_NAME}"
                 verbose_stack "${STACK}" "${STACK_NAME}" "${SERVICE}"
-                # if [ "${VERBOSE}" = true ]; then
-                #     printf "STACK is %s \n" "${STACK}"
-                #     printf "STACK_NAME is %s \n" "${STACK_NAME}"
-                #     printf "Found %s in %s \n" "${SERVICE}" "${STACK}"
-                # fi
                 cd "${STACK}" || { echo "cd failed"; exit 1; }
                 create_env_file "${STACK}" "${STACK_NAME}"
-                # DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
-                # if [ "${VERBOSE}" = true ]; then
-                #     printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
-                #     printf "Full command is %s pull %s \n" "${DC_COMMAND}" "${SERVICE}"
-                # fi
-                # printf "Running command: %s pull %s \n" "${DC_COMMAND}" "${SERVICE}"
-                # ${DC_COMMAND} pull "${SERVICE}"
                 dc_cmd_create "${DC_CMD_PARAM}"
                 cd - > /dev/null || { echo "cd failed"; exit 1; }
             else
@@ -740,11 +626,6 @@ function logs(){
                 STACK_NAME=$(basename "$(grep -r -x "${SERVICE}" "${TMP_DIR}" | cut -d : -f 1 )")
                 STACK="${DC_DIR}/${STACK_NAME}"
                 verbose_stack "${STACK}" "${STACK_NAME}" "${SERVICE}"
-                # if [ "${VERBOSE}" = true ]; then
-                #     printf "STACK is %s \n" "${STACK}"
-                #     printf "STACK_NAME is %s \n" "${STACK_NAME}"
-                #     printf "Found %s in %s \n" "${SERVICE}" "${STACK}"
-                # fi
                 cd "${STACK}" || { echo "cd failed"; exit 1; }
                 create_env_file "${STACK}" "${STACK_NAME}"
                 DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
