@@ -21,8 +21,10 @@ export DC_CMD="docker compose"
 export DC_CMD_INIT="${DC_CMD} --env-file ${ENV}"
 export TMP_DIR="/tmp/dc_stack_services"
 # COLORS
-export RED='\033[0;31m'
 export BLUE='\033[0;34m'
+export GREEN='\033[0;32m'
+export RED='\033[0;31m'
+export YELLOW='\033[0;33m'
 export NC='\033[0m' # No Color
 # Verbosity
 if [[ ${DC_VERSION} =~ "dev" ]]; then
@@ -43,8 +45,8 @@ function verbose_stack(){
     STACK=$1
     STACK_NAME=$2
     if [ "${VERBOSE}" = true ]; then
-        printf "STACK is %b%s%b \n" "${ORANGE}" "${STACK}" "${NC}"
-        printf "STACK_NAME is %b%s%b \n" "${ORANGE}" "${STACK_NAME}" "${NC}"
+        printf "STACK is %b%s%b \n" "${YELLOW}" "${STACK}" "${NC}"
+        printf "STACK_NAME is %b%s%b \n" "${YELLOW}" "${STACK_NAME}" "${NC}"
     fi
 }
 
