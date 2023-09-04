@@ -50,6 +50,7 @@ function verbose_stack(){
         printf "STACK_NAME is %b%s%b \n" "${YELLOW}" "${STACK_NAME}" "${NC}"
         if [ -n "${SERVICE_NAME}" ]; then
             printf "SERVICE_NAME is %b%s%b \n" "${YELLOW}" "${SERVICE_NAME}" "${NC}"
+            printf "Found %b%s%b in %b%s%b \n" "${YELLOW}" "${SERVICE}" "${NC}" "${YELLOW}" "${STACK}" "${NC}"
         fi
     fi
 }
@@ -602,11 +603,12 @@ function start(){
             if grep -r -q -x "${SERVICE}" "${TMP_DIR}"; then
                 STACK_NAME=$(basename "$(grep -r -x "${SERVICE}" "${TMP_DIR}" | cut -d : -f 1 )")
                 STACK="${DC_DIR}/${STACK_NAME}"
-                if [ "${VERBOSE}" = true ]; then
-                    printf "STACK is %s \n" "${STACK}"
-                    printf "STACK_NAME is %s \n" "${STACK_NAME}"
-                    printf "Found %s in %s \n" "${SERVICE}" "${STACK}"
-                fi
+                verbose_stack "${STACK}" "${STACK_NAME}" ${SERVICE}
+                # if [ "${VERBOSE}" = true ]; then
+                #     printf "STACK is %s \n" "${STACK}"
+                #     printf "STACK_NAME is %s \n" "${STACK_NAME}"
+                #     printf "Found %s in %s \n" "${SERVICE}" "${STACK}"
+                # fi
                 cd "${STACK}" || { echo "cd failed"; exit 1; }
                 create_env_file "${STACK}" "${STACK_NAME}"
                 # DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
@@ -634,6 +636,8 @@ function stop(){
         tmp_stack_files_age
         for SERVICE in "$@";
         do
+            DC_CMD_PARAM="stop ${SERVICE}"
+            DC_CMD_PARAM_RM="rm -f ${SERVICE}"
             if grep -r -q -x "${SERVICE}" ${TMP_DIR}; then
                 STACK_NAME=$(basename "$(grep -r -x "${SERVICE}" "${TMP_DIR}" | cut -d : -f 1 )")
                 STACK="${DC_DIR}/${STACK_NAME}"
@@ -644,13 +648,15 @@ function stop(){
                 fi
                 cd "${STACK}" || { echo "cd failed"; exit 1; }
                 create_env_file "${STACK}" "${STACK_NAME}"
-                DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
-                if [ "${VERBOSE}" = true ]; then
-                    printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
-                    printf "Full command is %s stop %s; %s rm -f %s \n" "${DC_COMMAND}" "${SERVICE}" "${DC_COMMAND}" "${SERVICE}"
-                fi
-                ${DC_COMMAND} stop "${SERVICE}"
-                ${DC_COMMAND} rm -f "${SERVICE}"
+                # DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
+                # if [ "${VERBOSE}" = true ]; then
+                #     printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
+                #     printf "Full command is %s stop %s; %s rm -f %s \n" "${DC_COMMAND}" "${SERVICE}" "${DC_COMMAND}" "${SERVICE}"
+                # fi
+                # ${DC_COMMAND} stop "${SERVICE}"
+                # ${DC_COMMAND} rm -f "${SERVICE}"
+                dc_cmd_create "${DC_CMD_PARAM}"
+                dc_cmd_create "${DC_CMD_PARAM_RM}"
                 cd - > /dev/null || { echo "cd failed"; exit 1; }
             else
                 printf "ERROR: Service %s was not found in any of the stacks. Does it show up when you run %bdc list%b? \n" "${SERVICE}" "${RED}" "${NC}"
