@@ -735,7 +735,7 @@ function logs(){
         tmp_stack_files_age
         for SERVICE in "$@";
         do
-            DC_CMD_PARAM="logs --tail=100 -f ${SERVICE} \&"
+            DC_CMD_PARAM="logs --tail=100 -f ${SERVICE}"
             if grep -r -q -x "${SERVICE}" "${TMP_DIR}"; then
                 STACK_NAME=$(basename "$(grep -r -x "${SERVICE}" "${TMP_DIR}" | cut -d : -f 1 )")
                 STACK="${DC_DIR}/${STACK_NAME}"
@@ -753,7 +753,7 @@ function logs(){
                 #     printf "Full command is %s logs --tail=100 -f %s \n" "${DC_COMMAND}" "${SERVICE}"
                 # fi
                 # ${DC_COMMAND} logs --tail=100 -f "${SERVICE}" &
-                dc_cmd_create "${DC_CMD_PARAM}"
+                dc_cmd_create "${DC_CMD_PARAM}" 
                 if [ -z "$WAIT_PIDS" ]
                     then
                         export WAIT_PIDS="$!"
