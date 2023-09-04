@@ -596,9 +596,9 @@ function start(){
     else
         printf "Starting the following service(s): %s \n" "$@"
         tmp_stack_files_age
-        DC_CMD_PARAM="up -d ${SERVICE}"
         for SERVICE in "$@";
         do
+            DC_CMD_PARAM="up -d ${SERVICE}"
             if grep -r -q -x "${SERVICE}" "${TMP_DIR}"; then
                 STACK_NAME=$(basename "$(grep -r -x "${SERVICE}" "${TMP_DIR}" | cut -d : -f 1 )")
                 STACK="${DC_DIR}/${STACK_NAME}"
