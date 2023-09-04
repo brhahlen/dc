@@ -51,7 +51,7 @@ function verbose_stack(){
 function verbose_message(){
     MSG=$1
     if [ "${VERBOSE}" = true ]; then
-        printf "%s" "${MSG}"
+        printf "%s \n" "${MSG}"
     fi
 }
 
@@ -76,10 +76,7 @@ function dc_cmd_create(){
 # TMP_DIR STACK SERVICES
 function tmp_dir_stack_files(){
     if [ ! -d "${TMP_DIR}" ]; then
-        verbose_message "${TMP_DIR} not found. Creating... \n"
-        # if [ "${VERBOSE}" = true ]; then
-        #     printf "%s not found. Creating... \n" "${TMP_DIR}"
-        # fi
+        verbose_message "${TMP_DIR} not found. Creating..."
         mkdir -p ${TMP_DIR}
     fi
 }
@@ -91,31 +88,37 @@ function tmp_stack_files_age(){
     do
         STACK_NAME=$(basename "${STACK}")
         verbose_stack "${STACK}" "${STACK_NAME}"
+        DC_CMD_PARAM="config --services > ${TMP_DIR}/${STACK_NAME}"
         # DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
         if [ -f "${TMP_DIR}"/"${STACK_NAME}" ]; then
-            if [ "${VERBOSE}" = true ]; then
-                printf "File %s/%s exists, checking age \n" "${TMP_DIR}" "${STACK_NAME}"
-            fi
+            verbose_message "File ${TMP_DIR}/${STACK_NAME} exists, checking age"
+            # if [ "${VERBOSE}" = true ]; then
+            #     printf "File %s/%s exists, checking age \n" "${TMP_DIR}" "${STACK_NAME}"
+            # fi
             if [ "$(find ${TMP_DIR}/"${STACK_NAME}" -mmin +30)" ]; then
-                if [ "${VERBOSE}" = true ]; then
-                    printf "File is too old, refreshing \n"
-                fi
+                verbose_message "File is too old, refreshing"
+                # if [ "${VERBOSE}" = true ]; then
+                #     printf "File is too old, refreshing \n"
+                # fi
                 cd "${STACK}" || { echo "cd failed"; exit 1; }
-                if [ "${VERBOSE}" = true ]; then
-                    printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
-                fi
-                ${DC_COMMAND} config --services > "${TMP_DIR}"/"${STACK_NAME}"
+                # if [ "${VERBOSE}" = true ]; then
+                #     printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
+                # fi
+                # ${DC_COMMAND} config --services > "${TMP_DIR}"/"${STACK_NAME}"
+                dc_cmd_create "${DC_CMD_PARAM}"
                 cd - > /dev/null || { echo "cd failed"; exit 1; }
             fi
         else
-            if [ "${VERBOSE}" = true ]; then
-                printf "File does not exist, creating \n"
-            fi
+            verbose_message "File does not exist, creating"
+            # if [ "${VERBOSE}" = true ]; then
+            #     printf "File does not exist, creating \n"
+            # fi
             cd "${STACK}" || { echo "cd failed"; exit 1; }
-            if [ "${VERBOSE}" = true ]; then
-                printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
-            fi
-            ${DC_COMMAND} config --services > "${TMP_DIR}"/"${STACK_NAME}"
+            # if [ "${VERBOSE}" = true ]; then
+            #     printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
+            # fi
+            # ${DC_COMMAND} config --services > "${TMP_DIR}"/"${STACK_NAME}"
+            dc_cmd_create "${DC_CMD_PARAM}"
             cd - > /dev/null || { echo "cd failed"; exit 1; }
         fi
     done
