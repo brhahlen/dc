@@ -94,7 +94,7 @@ function tmp_stack_files_age(){
     do
         STACK_NAME=$(basename "${STACK}")
         verbose_stack "${STACK}" "${STACK_NAME}"
-        DC_CMD_PARAM="config --services > ${TMP_DIR}/${STACK_NAME}"
+        DC_CMD_PARAM_TMP="config --services > ${TMP_DIR}/${STACK_NAME}"
         # DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
         if [ -f "${TMP_DIR}"/"${STACK_NAME}" ]; then
             verbose_message "File ${TMP_DIR}/${STACK_NAME} exists, checking age"
@@ -111,7 +111,7 @@ function tmp_stack_files_age(){
                 #     printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
                 # fi
                 # ${DC_COMMAND} config --services > "${TMP_DIR}"/"${STACK_NAME}"
-                dc_cmd_create "${DC_CMD_PARAM}" > /dev/null
+                dc_cmd_create "${DC_CMD_PARAM_TMP}" > /dev/null
                 cd - > /dev/null || { echo "cd failed"; exit 1; }
             fi
         else
