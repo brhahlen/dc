@@ -105,7 +105,7 @@ function tmp_stack_files_age(){
                 #     printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
                 # fi
                 # ${DC_COMMAND} config --services > "${TMP_DIR}"/"${STACK_NAME}"
-                dc_cmd_create "${DC_CMD_PARAM}"
+                dc_cmd_create "${DC_CMD_PARAM}" > /dev/null
                 cd - > /dev/null || { echo "cd failed"; exit 1; }
             fi
         else
@@ -118,7 +118,7 @@ function tmp_stack_files_age(){
             #     printf "DC_COMMAND is %s \n" "${DC_COMMAND}"
             # fi
             # ${DC_COMMAND} config --services > "${TMP_DIR}"/"${STACK_NAME}"
-            dc_cmd_create "${DC_CMD_PARAM}"
+            dc_cmd_create "${DC_CMD_PARAM}" > /dev/null
             cd - > /dev/null || { echo "cd failed"; exit 1; }
         fi
     done
