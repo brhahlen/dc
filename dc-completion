@@ -37,12 +37,12 @@ _dc_completions()
             # We might need to create the tmp-files, so reusing the command from dc, however, this is duplicating stuff, which is not nice, but for a MVP, it works
             for STACK in $(find "${DC_DIR}" -name docker-compose.yml -printf '%h\n' | sort -u);
             do
+                STACK_NAME=$(echo "${STACK}" | rev | cut -d / -f 1 | rev)
                 ENV="${DC_DIR}/.env"
                 DC_CMD_INIT="${DC_CMD} --env-file ${ENV}"
                 DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
                 echo "${DC_COMMAND}"
                 TMP_DIR="/tmp/dc_stack_services"
-                STACK_NAME=$(echo "${STACK}" | rev | cut -d / -f 1 | rev)
                 if [ ! -d "${TMP_DIR}" ]; then
                     # echo "${TMP_DIR} not found. Creating..."
                     mkdir -p ${TMP_DIR}
