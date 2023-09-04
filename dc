@@ -43,8 +43,8 @@ function verbose_stack(){
     STACK=$1
     STACK_NAME=$2
     if [ "${VERBOSE}" = true ]; then
-        printf "STACK is %s \n" "${STACK}"
-        printf "STACK_NAME is %s \n" "${STACK_NAME}"
+        printf "STACK is %b%s%b \n" "${ORANGE}" "${STACK}" "${NC}"
+        printf "STACK_NAME is %b%s%b \n" "${ORANGE}" "${STACK_NAME}" "${NC}"
     fi
 }
 
