@@ -30,7 +30,8 @@ Prerequisites for `dc` are:
 ## Assumptions
 There are a few assumptions:
 - An environment variable DC_DIR has been set, that contains docker-compose files. If the file does not exist, it assumes that the docker-compose files live in (subdirectories of) ~/docker/
-- There is one environment (`.env`) file, which is located in `${DC_DIR}`/.env
+- There is a main environment (`.env`) file, which is located in `${DC_DIR}`/.env
+- Each _stack_ has its own `stackname.env` file, in the `${DC_DIR}/<STACK_NAME>/` directory
 
 # Usage
 Provides the following main functions:
@@ -53,21 +54,24 @@ Provides the following main functions:
 
 # Examples
 ## Used in example
-Let's say we have a `DC_DIR` (/home/myname/docker) with the following directories:
+Let's say we have a `DC_DIR` (/home/myname/docker) with the following directories and files:
 - 1-backends
+  - 1-backends.env
+  - docker-compose.yml
 - 2-system
+  - 2-system.env
+  - docker-compose.yml
 - 3-frontends
+  - 3-frontends.env
+  - docker-compose.yml
 
-Each directory contains a `docker-compose.yml` file with a number of different services.
+Each directory contains a `docker-compose.yml` file with a number of different services.<br/>
+Additionally, each directory has a <STACK_NAME>.env file, which contains the environment variables that are needed.
 
 ## Controlling stacks
-
-Suppose we want to bring up the whole `2-system` stack in one go, we can run `dc up 2-system` and `dc` will run `docker compose up` in the background to bring up the stack.
+Suppose we want to bring up the whole `2-system` stack in one go, we can run `dc up 2-system` and `dc` will run `docker compose up -d` in the background to bring up the stack.
 
 ## Controlling containers
 Let's say the `3-frontends` stack has a `nginx` and a `wordpress` container. We want to restart the `nginx` container, because we made some changes in the configuration.
 
 From within the directory that the confiugration files are, we can now run `dc restart nginx` to restart (stops and removes the container, and starts it again) and `dc logs nginx` to follow the logs.
-
-# Thoughts/To Do's
-Also, some functions can probably be offloaded into dc-completion at some point?
