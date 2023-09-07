@@ -629,7 +629,7 @@ function logs(){
                 cd "${STACK}" || { echo "cd failed"; exit 1; }
                 create_env_file "${STACK}" "${STACK_NAME}"
                 # dc_cmd_create "${DC_CMD_PARAM}" &
-                ${DC_COMMAND} --env-file ${STACK}/${STACK_NAME}.env logs --tail=100 -f "${SERVICE}" &
+                ${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env logs --tail=100 -f "${SERVICE}" &
                 if [ -z "$WAIT_PIDS" ]
                     then
                         export WAIT_PIDS="$!"
