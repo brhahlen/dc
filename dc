@@ -77,9 +77,11 @@ function dc_cmd_create(){
     fi
     LOGS="logs --tail=100 -f"
     if [[ "${DC_CMD_PARAM}" == *"${LOGS}"* ]]; then
-    echo "LOGS CMD FOOUND"
+        echo "LOGS CMD FOUND"
+        ${DC_CMD_CMB} &
+    else
+        ${DC_CMD_CMB}
     fi
-    ${DC_CMD_CMB}
 }
 
 ###########################
