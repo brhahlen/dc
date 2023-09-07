@@ -1,3 +1,3 @@
-# Version 3.1.2
-## Bug fix
-- Change version number
+# Version 3.1.3
+## Bug Fix
+- Fix `logs` command
