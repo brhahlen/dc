@@ -6,7 +6,7 @@
 set -m
 
 # VERSION
-export DC_VERSION=v3.1.2
+export DC_VERSION=v3.1.3-dev
 
 ###### VARIABLES
 if [[ -z "${DC_DIR}" ]]; then
@@ -628,7 +628,8 @@ function logs(){
                 verbose_stack "${STACK}" "${STACK_NAME}" "${SERVICE}"
                 cd "${STACK}" || { echo "cd failed"; exit 1; }
                 create_env_file "${STACK}" "${STACK_NAME}"
-                dc_cmd_create "${DC_CMD_PARAM}" &
+                # dc_cmd_create "${DC_CMD_PARAM}" &
+                ${DC_COMMAND} --env-file ${STACK}/${STACK_NAME}.env logs --tail=100 -f "${SERVICE}" &
                 if [ -z "$WAIT_PIDS" ]
                     then
                         export WAIT_PIDS="$!"
