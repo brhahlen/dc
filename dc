@@ -651,7 +651,7 @@ function logs(){
             printf "\$WAIT_PIDS contains %s \n" "${WAIT_PIDS}"
         fi
         trap 'trap_kill' SIGHUP SIGINT SIGQUIT SIGTERM
-        wait "${WAIT_PIDS}"
+        wait ${WAIT_PIDS}
     fi
     }
 
