@@ -2,7 +2,7 @@
 # Copyright (C) 2022 - 2023 Ben Hählen
 # This is the completion file for `dc`
 ##############
-# Version 3.1.3
+# Version 3.2.0
 ##############
 _dc_completions()
 {
@@ -26,7 +26,7 @@ _dc_completions()
     # Based on the arguments, we can run functions
     case "$cmd" in
         up|down|restart-stack-hard|restart-stack-soft|logs-stack)
-            local STACKS=$(for STACK in $(find "${DC_DIR}" -name docker-compose.yml -printf '%h\n' | sort -u | rev | cut -d / -f 1 | rev); do echo "${STACK}" ; done )
+            local STACKS=$(for STACK in $(find "${DC_DIR}" \( -name compose.yaml -or -name compose.yml -or -name docker-compose.yaml -or -name docker-compose.yml \) -printf '%h\n' | sort -u | rev | cut -d / -f 1 | rev); do echo "${STACK}" ; done )
             if [ ! "$cmd" == "logs-stack" ]; then
                 STACKS="all ${STACKS}"
             fi
@@ -35,7 +35,7 @@ _dc_completions()
             ;;
         start|stop|restart|pull|logs)
             # We might need to create the tmp-files, so reusing the command from dc, however, this is duplicating stuff, which is not nice, but for a MVP, it works
-            for STACK in $(find "${DC_DIR}" -name docker-compose.yml -printf '%h\n' | sort -u);
+            for STACK in $(find "${DC_DIR}" \( -name compose.yaml -or -name compose.yml -or -name docker-compose.yaml -or -name docker-compose.yml \) -printf '%h\n' | sort -u);
             do
                 STACK_NAME=$(echo "${STACK}" | rev | cut -d / -f 1 | rev)
                 ENV="${DC_DIR}/.env"
