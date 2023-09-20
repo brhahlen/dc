@@ -192,7 +192,7 @@ function list(){
     tmp_stack_files_age
     printf "Listing Stacks and Services \n"
     printf "=================================== \n"
-    for STACK in $(find "${DC_DIR}" \(-name compose.yaml -or -name compose.yml -or -name docker-compose.yaml -or -name docker-compose.yml \) -printf '%h\n' | sort -u);
+    for STACK in $(find "${DC_DIR}" \( -name compose.yaml -or -name compose.yml -or -name docker-compose.yaml -or -name docker-compose.yml \) -printf '%h\n' | sort -u);
     do
         STACK_NAME=$(basename "${STACK}")
         DC_CMD_PARAM="config --services | tee ${TMP_DIR}/${STACK_NAME}"
