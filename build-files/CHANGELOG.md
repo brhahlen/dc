@@ -1,3 +1,3 @@
-# Version 3.1.3
+# Version 3.2.1
 ## Bug Fix
-- Fix `logs` command
+- Forgot to push everything

@@ -6,7 +6,7 @@
 set -m
 
 # VERSION
-export DC_VERSION=v3.2.0-dev
+export DC_VERSION=v3.2.1
 
 ###### VARIABLES
 if [[ -z "${DC_DIR}" ]]; then
@@ -97,7 +97,7 @@ function tmp_dir_stack_files(){
 # TMP_STACK FILES AGE
 function tmp_stack_files_age(){
     tmp_dir_stack_files
-    for STACK in $(find "${DC_DIR}" \(-name compose.yaml -or -name compose.yml -or -name docker-compose.yaml -or -name docker-compose.yml \) -printf '%h \n' | sort -u);
+    for STACK in $(find "${DC_DIR}" \( -name compose.yaml -or -name compose.yml -or -name docker-compose.yaml -or -name docker-compose.yml \) -printf '%h \n' | sort -u);
     do
         STACK_NAME=$(basename "${STACK}")
         verbose_stack "${STACK}" "${STACK_NAME}"
@@ -347,7 +347,7 @@ function up(){
         printf "No argument provided, please use the name of a stack or all \n"
     elif [ "$1" == "all" ]; then
         printf "Bringing up all stacks \n"
-        for STACK in $(find "${DC_DIR}" -name docker-compose.yml -printf '%h\n' | sort -u);
+        for STACK in $(find "${DC_DIR}" \( -name compose.yaml -or -name compose.yml -or -name docker-compose.yaml -or -name docker-compose.yml \) -printf '%h\n' | sort -u);
         do
             STACK_NAME=$(basename "${STACK}")
             verbose_stack "${STACK}" "${STACK_NAME}"
@@ -382,7 +382,7 @@ function down(){
         printf "No argument provided, please use the name of a stack or all \n"
     elif [ "$1" == "all" ]; then
         printf "Bringing down all stacks \n"
-        for STACK in $(find "${DC_DIR}" -name docker-compose.yml -printf '%h\n' | sort -ur);
+        for STACK in $(find "${DC_DIR}" \( -name compose.yaml -or -name compose.yml -or -name docker-compose.yaml -or -name docker-compose.yml \) -printf '%h\n' | sort -ur);
         do
             STACK_NAME=$(basename "${STACK}")
             verbose_stack "${STACK}" "${STACK_NAME}"
@@ -419,7 +419,7 @@ function restart-stack-hard(){
         printf "No argument provided, please use the name of a stack or all \n"
     elif [ "$1" == "all" ]; then
         printf "Hard Restarting all stacks \n"
-        for STACK in $(find "${DC_DIR}" -name docker-compose.yml -printf '%h\n' | sort -u);
+        for STACK in $(find "${DC_DIR}" \( -name compose.yaml -or -name compose.yml -or -name docker-compose.yaml -or -name docker-compose.yml \) -printf '%h\n' | sort -u);
         do
             STACK_NAME=$(basename "${STACK}")
             verbose_stack "${STACK}" "${STACK_NAME}"
@@ -457,7 +457,7 @@ function restart-stack-soft(){
         printf "No argument provided, please use the name of a stack or all \n"
     elif [ "$1" == "all" ]; then
         printf "Restarting all stacks \n"
-        for STACK in $(find "${DC_DIR}" -name docker-compose.yml -printf '%h\n' | sort -u);
+        for STACK in $(find "${DC_DIR}" \( -name compose.yaml -or -name compose.yml -or -name docker-compose.yaml -or -name docker-compose.yml \) -printf '%h\n' | sort -u);
         do
             STACK_NAME=$(basename "${STACK}")
             verbose_stack "${STACK}" "${STACK_NAME}"
