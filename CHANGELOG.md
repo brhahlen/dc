@@ -1,3 +1,7 @@
+# Version 3.2.0
+## Enhancement
+- Allow for different compose file names, fixes #60
+
 # Version 3.1.3
 ## Bug Fix
 - Fix `logs` command
