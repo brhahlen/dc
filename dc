@@ -113,7 +113,7 @@ function tmp_stack_files_age(){
         else
             verbose_message "File does not exist, creating"
             cd "${STACK}" || { echo "cd failed"; exit 1; }
-            dc_cmd_create "${DC_CMD_PARAM}" > /dev/null
+            dc_cmd_create "${DC_CMD_PARAM_TMP}" > /dev/null
             cd - > /dev/null || { echo "cd failed"; exit 1; }
         fi
     done
