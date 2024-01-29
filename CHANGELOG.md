@@ -1,6 +1,10 @@
+# Version 3.3.1
+## Bugfix
+- New commands were not showing up in tab completion
+
 # Version 3.3.0
-## New featurs
-- Introduced `clean` command to clean up temporary fils
+## New features
+- Introduced `clean` command to clean up temporary files
 - Introduced `ips` command to show assigned IP's of containers
 
 # Version 3.2.2
