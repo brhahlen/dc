@@ -6,7 +6,7 @@
 set -m
 
 # VERSION
-export DC_VERSION=v3.2.2
+export DC_VERSION=v3.3.0
 
 ###### VARIABLES
 if [[ -z "${DC_DIR}" ]]; then
@@ -154,7 +154,7 @@ function create_env_file() {
 }
 
 ##################################################
-# USAGE AND LIST                                 #
+# USAGE COMMANDS                                 #
 ##################################################
 # USAGE
 function show_usage (){
@@ -174,6 +174,7 @@ function show_usage (){
     printf " %bpull%b                 Pulls an image of a service \n" "${RED}" "${NC}"
     printf " %blogs%b                 Shows logs for a service or services \n" "${RED}" "${NC}"
     printf "============================= System Commands ============================= \n"
+    printf " %bips%b                  Shows assigned IPs of containers \n" "${RED}" "${NC}"
     printf " %bnetwork%b              Create the MacVLAN network, needs sudo \n" "${RED}" "${NC}"
     printf " %bprune%b                Prunes images and containers (basic) or the system \n" "${RED}" "${NC}"
     printf "======================= Install, Update and Version ======================= \n"
@@ -181,11 +182,20 @@ function show_usage (){
     printf " %bupdate%b               Updates dc to the latest version \n" "${RED}" "${NC}"
     printf " %bversion%b              Shows the version and checks the latest version \n" "${RED}" "${NC}"
     printf "============================== Usage Commands ==============================\n"
+    printf " %bclean%b                Cleans temporary files, useful when introducing new containers \n" "${RED}" "${NC}"
     printf " %blist%b                 List stacks and services in the stacks \n" "${RED}" "${NC}"
     printf " %bhelp%b                 Print help \n" "${RED}" "${NC}"
 
 return 0
 }
+
+# CLEAN
+function clean(){
+    printf "Cleaning temporary files \n"
+    printf "=================================== \n"
+    rm -rf ${TMP_DIR}
+    printf "Done \n"
+    }
 
 # LIST
 function list(){
@@ -657,6 +667,12 @@ function logs(){
 ##################################################
 # SYSTEM COMMANDS                                #
 ##################################################
+# IPS
+function ips(){
+    printf "Showing IPs \n"
+    (echo "CONTAINER  IP-ADRESS  MAC-ADDRESS"; docker inspect --format='{{.Name}}  {{range .NetworkSettings.Networks}}{{.IPAddress}}  {{.MacAddress}}{{end}}' $(docker ps -aq)| sort -k 2 -V) | column -t -s '  '
+    }
+
 # NETWORK
 function network(){
     printf "This function does nothing (yet) \n"
@@ -738,6 +754,10 @@ case ${1} in
     "logs")
         logs "${@:2}"
         ;;
+# ----------- ips ------------
+    "ips")
+        ips
+        ;;
 # ----------- network ------------
     "network")
         network
@@ -761,6 +781,10 @@ case ${1} in
 # ----------- list ------------
     "list")
         list
+        ;;
+# ----------- clean ------------
+    "clean")
+        clean
         ;;
 # ----------- All others ------------
     "help")

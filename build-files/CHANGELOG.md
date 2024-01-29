@@ -1,3 +1,4 @@
-# Version 3.2.2
-## Bug Fix
-- Used a wrong environment variable in `list`
+# Version 3.3.0
+## New featurs
+- Introduced `clean` command to clean up temporary fils
+- Introduced `ips` command to show assigned IP's of containers
