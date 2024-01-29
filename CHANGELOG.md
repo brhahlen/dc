@@ -1,3 +1,7 @@
+# Version 3.2.2
+## Bug Fix
+- Used a wrong environment variable in `list`
+
 # Version 3.2.1
 ## Bug Fix
 - Forgot to push everything
