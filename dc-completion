@@ -68,6 +68,10 @@ _dc_completions()
             local SERVICES=$(while IFS= read -r SERVICE; do echo "${SERVICE}"; done < <(cat /tmp/dc_stack_services/*) )
             COMPREPLY=( $(compgen -W "${SERVICES}" -- "${CUR}") )
             return 0
+            ;;`
+        shell)
+            COMPREPLY=( $(compgen -W "${SERVICES}" -- "${CUR}") )
+            return 0
             ;;
         install|ips|clean|list|help|version)
             return
