@@ -665,7 +665,7 @@ function logs(){
     }
 
 function shell(){
-    if [ "$@" -ne 1 ]; then
+    if [ "$#" -ne 1 ]; then
         printf "No or multiple arguments provided, please provide the name of one service \n"
     else
         printf "Accessing shell for the following service: %s \n" "$1"
