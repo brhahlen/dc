@@ -2,7 +2,7 @@
 # Copyright (C) 2022 - 2023 Ben Hählen
 # This is the completion file for `dc`
 ##############
-# Version 3.4.0
+# Version 3.4.1-dev
 ##############
 _dc_completions()
 {

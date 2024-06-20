@@ -6,7 +6,7 @@
 set -m
 
 # VERSION
-export DC_VERSION=v3.4.0
+export DC_VERSION=v3.4.1-dev
 
 ###### VARIABLES
 if [[ -z "${DC_DIR}" ]]; then
@@ -692,7 +692,7 @@ function shell(){
 # IPS
 function ips(){
     printf "Showing IPs \n"
-    (echo "CONTAINER  IP-ADRESS  MAC-ADDRESS"; docker inspect --format='{{.Name}}  {{range .NetworkSettings.Networks}}{{.IPAddress}}  {{.MacAddress}}{{end}}' "$(docker ps -aq)"| sort -k 2 -V) | column -t -s '  '
+    (echo "CONTAINER  IP-ADRESS  MAC-ADDRESS"; docker inspect --format='{{.Name}}  {{range .NetworkSettings.Networks}}{{.IPAddress}}  {{.MacAddress}}  {{end}}' "$(docker ps -aq)"| sort -k 2 -V) | column -t -s '  '
     }
 
 function prune() {
