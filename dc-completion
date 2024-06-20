@@ -70,7 +70,7 @@ _dc_completions()
             return 0
             ;;
         shell)
-            COMPREPLY=( $(compgen -W "${SERVICES}" -- "${CUR}") )
+            COMPREPLY=( $(compgen -W "${SERVICES}" -- "${PREV}") )
             return 0
             ;;
         install|ips|clean|list|help|version)
