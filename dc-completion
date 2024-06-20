@@ -33,7 +33,7 @@ _dc_completions()
             COMPREPLY=( $(compgen -W "${STACKS}" -- "${CUR}") )
             return 0
             ;;
-        start|stop|restart|pull|logs|shell)
+        start|stop|restart|pull|logs)
             # We might need to create the tmp-files, so reusing the command from dc, however, this is duplicating stuff, which is not nice, but for a MVP, it works
             for STACK in $(find "${DC_DIR}" \( -name compose.yaml -or -name compose.yml -or -name docker-compose.yaml -or -name docker-compose.yml \) -printf '%h\n' | sort -u);
             do
@@ -68,7 +68,7 @@ _dc_completions()
             local SERVICES=$(while IFS= read -r SERVICE; do echo "${SERVICE}"; done < <(cat /tmp/dc_stack_services/*) )
             COMPREPLY=( $(compgen -W "${SERVICES}" -- "${CUR}") )
             return 0
-            ;;`
+            ;;
         shell)
             COMPREPLY=( $(compgen -W "${SERVICES}" -- "${CUR}") )
             return 0
