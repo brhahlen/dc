@@ -2,7 +2,7 @@
 # Copyright (C) 2022 - 2023 Ben Hählen
 # This is the completion file for `dc`
 ##############
-# Version 3.3.1
+# Version 3.4.0
 ##############
 _dc_completions()
 {
@@ -21,7 +21,7 @@ _dc_completions()
     export DC_CMD="docker compose"
 
     # Basic/main options that will be completed
-    OPTS="install up down restart-stack-hard restart-stack-soft logs-stack start stop restart pull logs ips network clean list help update version prune"
+    OPTS="install up down restart-stack-hard restart-stack-soft logs-stack start stop restart pull logs ips clean list help update version prune shell"
 
     # Based on the arguments, we can run functions
     case "$cmd" in
@@ -33,7 +33,7 @@ _dc_completions()
             COMPREPLY=( $(compgen -W "${STACKS}" -- "${CUR}") )
             return 0
             ;;
-        start|stop|restart|pull|logs)
+        start|stop|restart|pull|logs|shell)
             # We might need to create the tmp-files, so reusing the command from dc, however, this is duplicating stuff, which is not nice, but for a MVP, it works
             for STACK in $(find "${DC_DIR}" \( -name compose.yaml -or -name compose.yml -or -name docker-compose.yaml -or -name docker-compose.yml \) -printf '%h\n' | sort -u);
             do
@@ -69,7 +69,7 @@ _dc_completions()
             COMPREPLY=( $(compgen -W "${SERVICES}" -- "${CUR}") )
             return 0
             ;;
-        install|ips|network|clean|list|help|version)
+        install|ips|clean|list|help|version)
             return
             ;;
         prune)

@@ -6,7 +6,7 @@
 set -m
 
 # VERSION
-export DC_VERSION=v3.3.1
+export DC_VERSION=v3.4.0
 
 ###### VARIABLES
 if [[ -z "${DC_DIR}" ]]; then
@@ -173,9 +173,9 @@ function show_usage (){
     printf " %brestart%b              Restarts one or more services \n" "${RED}" "${NC}"
     printf " %bpull%b                 Pulls an image of a service \n" "${RED}" "${NC}"
     printf " %blogs%b                 Shows logs for a service or services \n" "${RED}" "${NC}"
+    printf " %shell%b                 Enters the shell of a container (defaults to /bin/sh) \n" "${RED}" "${NC}"
     printf "============================= System Commands ============================= \n"
     printf " %bips%b                  Shows assigned IPs of containers \n" "${RED}" "${NC}"
-    printf " %bnetwork%b              Create the MacVLAN network, needs sudo \n" "${RED}" "${NC}"
     printf " %bprune%b                Prunes images and containers (basic) or the system \n" "${RED}" "${NC}"
     printf "======================= Install, Update and Version ======================= \n"
     printf " %binstall%b              Install dc for the user, needs sudo \n" "${RED}" "${NC}"
@@ -664,18 +664,35 @@ function logs(){
     fi
     }
 
+function shell(){
+    if [ "$#" -ne 1 ]; then
+        printf "No or multiple arguments provided, please provide the name of one service \n"
+    else
+        printf "Accessing shell for the following service: %s \n" "$1"
+        tmp_stack_files_age
+        SERVICE="$1"
+        DC_CMD_PARAM="exec ${SERVICE} /bin/sh"
+        if grep -r -q -x "${SERVICE}" "${TMP_DIR}"; then
+            STACK_NAME=$(basename "$(grep -r -x "${SERVICE}" "${TMP_DIR}" | cut -d : -f 1 )")
+            STACK="${DC_DIR}/${STACK_NAME}"
+            verbose_stack "${STACK}" "${STACK_NAME}" "${SERVICE}"
+            cd "${STACK}" || { echo "cd failed"; exit 1; }
+            create_env_file "${STACK}" "${STACK_NAME}"
+            dc_cmd_create "${DC_CMD_PARAM}"
+            cd - > /dev/null || { echo "cd failed"; exit 1; }
+        else
+            printf "ERROR: Service %s was not found in any of the stacks. Does it show up when you run %bdc list%b? \n" "${SERVICE}" "${RED}" "${NC}"
+        fi
+    fi
+    }
+
 ##################################################
 # SYSTEM COMMANDS                                #
 ##################################################
 # IPS
 function ips(){
     printf "Showing IPs \n"
-    (echo "CONTAINER  IP-ADRESS  MAC-ADDRESS"; docker inspect --format='{{.Name}}  {{range .NetworkSettings.Networks}}{{.IPAddress}}  {{.MacAddress}}{{end}}' $(docker ps -aq)| sort -k 2 -V) | column -t -s '  '
-    }
-
-# NETWORK
-function network(){
-    printf "This function does nothing (yet) \n"
+    (echo "CONTAINER  IP-ADRESS  MAC-ADDRESS"; docker inspect --format='{{.Name}}  {{range .NetworkSettings.Networks}}{{.IPAddress}}  {{.MacAddress}}{{end}}' "$(docker ps -aq)"| sort -k 2 -V) | column -t -s '  '
     }
 
 function prune() {
@@ -754,13 +771,13 @@ case ${1} in
     "logs")
         logs "${@:2}"
         ;;
+# ----------- shell ------------
+    "shell")
+        shell "${@:2}"
+        ;;
 # ----------- ips ------------
     "ips")
         ips
-        ;;
-# ----------- network ------------
-    "network")
-        network
         ;;
 # ----------- prune ------------
     "prune")
