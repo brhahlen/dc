@@ -665,12 +665,12 @@ function logs(){
     }
 
 function shell(){
-    if [ -z "$1" ]; then
-        printf "No argument provided, please provide the name of one service \n"
+    if [ "$#" -ne 1 ]; then
+        printf "No or multiple arguments provided, please provide the name of one service \n"
     else
         printf "Accessing shell for the following service: %s \n" "$1"
         tmp_stack_files_age
-        for SERVICE in "$@";
+        for SERVICE in "$1";
         do
             DC_CMD_PARAM="exec ${SERVICE} /bin/sh"
             if grep -r -q -x "${SERVICE}" "${TMP_DIR}"; then
@@ -775,7 +775,7 @@ case ${1} in
         ;;
 # ----------- shell ------------
     "shell")
-        shell "${@:2}"
+        shell "${1}"
         ;;
 # ----------- ips ------------
     "ips")
