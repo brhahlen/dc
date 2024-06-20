@@ -668,9 +668,9 @@ function shell(){
     if [ "$#" -ne 1 ]; then
         printf "No or multiple arguments provided, please provide the name of one service \n"
     else
-        printf "Accessing shell for the following service: %s \n" "$1"
+        printf "Accessing shell for the following service: %s \n" "$2"
         tmp_stack_files_age
-        for SERVICE in "$1";
+        for SERVICE in "$2";
         do
             DC_CMD_PARAM="exec ${SERVICE} /bin/sh"
             if grep -r -q -x "${SERVICE}" "${TMP_DIR}"; then
