@@ -675,7 +675,7 @@ function shell(){
         printf "Accessing shell for the following service: %s \n" "$1"
         tmp_stack_files_age
         SERVICE="$1"
-        DC_CMD_PARAM="exec ${SERVICE} /bin/bash 2> /dev/null"
+        DC_CMD_PARAM="exec ${SERVICE} /bin/bash"
         if grep -r -q -x "${SERVICE}" "${TMP_DIR}"; then
             STACK_NAME=$(basename "$(grep -r -x "${SERVICE}" "${TMP_DIR}" | cut -d : -f 1 )")
             STACK="${DC_DIR}/${STACK_NAME}"
@@ -686,7 +686,7 @@ function shell(){
             if [ ! $? -eq 0 ]; then
                 echo "/bin/bash not found, falling back to /bin/sh"
                 DC_CMD_PARAM="exec ${SERVICE} /bin/sh"
-                dc_cmd_create "${DC_CMD_PARAM}"
+                dc_cmd_create "${DC_CMD_PARAM}" 2> /dev/null
             fi
             cd - > /dev/null || { echo "cd failed"; exit 1; }
         else
