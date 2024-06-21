@@ -1,3 +1,7 @@
+# Version 3.4.3
+## Improvement
+- `dc update` now checks for version of wget, as `--show-progress` does not exist in wget2 anymore and is replaced by `--force-progress`
+
 # Version 3.4.2
 ## Bugfix
 - `dc help` out put was skewed - #70 - fixed by @mrtnbr in #71
