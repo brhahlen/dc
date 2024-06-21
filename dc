@@ -682,7 +682,7 @@ function shell(){
             verbose_stack "${STACK}" "${STACK_NAME}" "${SERVICE}"
             cd "${STACK}" || { echo "cd failed"; exit 1; }
             create_env_file "${STACK}" "${STACK_NAME}"
-            dc_cmd_create "${DC_CMD_PARAM}" 2>/dev/null
+            dc_cmd_create "${DC_CMD_PARAM} 2>/dev/null"
             if [ ! $? -eq 0 ]; then
                 echo "/bin/bash not found, falling back to /bin/sh"
                 DC_CMD_PARAM="exec ${SERVICE} /bin/sh"
