@@ -675,7 +675,7 @@ function shell(){
         printf "Accessing shell for the following service: %s \n" "$1"
         tmp_stack_files_age
         SERVICE="$1"
-        DC_CMD_PARAM="exec ${SERVICE} /bin/bash 2>/dev/null"
+        DC_CMD_PARAM="exec ${SERVICE} /bin/bash 2> /dev/null"
         if grep -r -q -x "${SERVICE}" "${TMP_DIR}"; then
             STACK_NAME=$(basename "$(grep -r -x "${SERVICE}" "${TMP_DIR}" | cut -d : -f 1 )")
             STACK="${DC_DIR}/${STACK_NAME}"
