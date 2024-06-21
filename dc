@@ -6,7 +6,7 @@
 set -m
 
 # VERSION
-export DC_VERSION=v3.4.3
+export DC_VERSION=v3.4.4
 
 ###### VARIABLES
 if [[ -z "${DC_DIR}" ]]; then
