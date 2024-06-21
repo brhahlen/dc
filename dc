@@ -69,7 +69,7 @@ function dc_cmd_create(){
     unset DC_CMD_PARAM
     DC_CMD_PARAM=$1
     DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
-    DC_CMD_CMB="${DC_COMMAND} ${DC_CMD_PARAM} 2>/dev/null"
+    DC_CMD_CMB="${DC_COMMAND} ${DC_CMD_PARAM}"
     if [ "${VERBOSE}" = true ]; then
         printf "DC_COMMAND is %b%s%b \n" "${RED}" "${DC_COMMAND}" "${NC}"
         printf "DC_CMD_PARAM is %b%s%b \n" "${RED}" "${DC_CMD_PARAM}" "${NC}"
@@ -682,7 +682,7 @@ function shell(){
             verbose_stack "${STACK}" "${STACK_NAME}" "${SERVICE}"
             cd "${STACK}" || { echo "cd failed"; exit 1; }
             create_env_file "${STACK}" "${STACK_NAME}"
-            if ! dc_cmd_create "${DC_CMD_PARAM}" 2>/dev/null; then
+            if ! dc_cmd_create "${DC_CMD_PARAM}"; then
                 echo "/bin/bash not found, falling back to /bin/sh"
                 DC_CMD_PARAM="exec ${SERVICE} /bin/sh"
                 dc_cmd_create "${DC_CMD_PARAM}"
