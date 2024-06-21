@@ -173,7 +173,7 @@ function show_usage (){
     printf " %brestart%b              Restarts one or more services \n" "${RED}" "${NC}"
     printf " %bpull%b                 Pulls an image of a service \n" "${RED}" "${NC}"
     printf " %blogs%b                 Shows logs for a service or services \n" "${RED}" "${NC}"
-    printf " %shell%b                 Enters the shell of a container (defaults to /bin/sh) \n" "${RED}" "${NC}"
+    printf " %bshell%b                Enters the shell of a container (defaults to /bin/sh) \n" "${RED}" "${NC}"
     printf "============================= System Commands ============================= \n"
     printf " %bips%b                  Shows assigned IPs of containers \n" "${RED}" "${NC}"
     printf " %bprune%b                Prunes images and containers (basic) or the system \n" "${RED}" "${NC}"
