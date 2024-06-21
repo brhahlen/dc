@@ -6,7 +6,7 @@
 set -m
 
 # VERSION
-export DC_VERSION=v3.4.2
+export DC_VERSION=v3.4.3-dev
 
 ###### VARIABLES
 if [[ -z "${DC_DIR}" ]]; then
@@ -334,7 +334,11 @@ function update(){
                 mkdir "${UPDATE_TMP}"
             fi
             printf "Downloading... \n"
+            if wget -V | grep -q Wget2 ; then
+            wget -q --force-progress https://github.com/brhahlen/dc/releases/download/"${LATEST_VERSION}"/dc-release.zip -O "${UPDATE_TMP}"/dc-release.zip
+            else
             wget -q --show-progress https://github.com/brhahlen/dc/releases/download/"${LATEST_VERSION}"/dc-release.zip -O "${UPDATE_TMP}"/dc-release.zip
+            fi
             printf "Extracting... \n"
             unzip -q "${UPDATE_TMP}"/dc-release.zip -d "${UPDATE_TMP}"
             printf "Updating... \n"
