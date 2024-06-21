@@ -675,7 +675,7 @@ function shell(){
         printf "Accessing shell for the following service: %s \n" "$1"
         tmp_stack_files_age
         SERVICE="$1"
-        DC_CMD_PARAM="exec ${SERVICE} /bin/sh"
+        DC_CMD_PARAM="exec ${SERVICE} /bin/bash"
         if grep -r -q -x "${SERVICE}" "${TMP_DIR}"; then
             STACK_NAME=$(basename "$(grep -r -x "${SERVICE}" "${TMP_DIR}" | cut -d : -f 1 )")
             STACK="${DC_DIR}/${STACK_NAME}"
@@ -683,6 +683,11 @@ function shell(){
             cd "${STACK}" || { echo "cd failed"; exit 1; }
             create_env_file "${STACK}" "${STACK_NAME}"
             dc_cmd_create "${DC_CMD_PARAM}"
+            if [ ! $? -eq 0 ]; then
+                echo "/bin/bash not found, falling back to /bin/sh"
+                DC_CMD_PARAM="exec ${SERVICE} /bin/sh"
+                dc_cmd_create "${DC_CMD_PARAM}"
+            fi
             cd - > /dev/null || { echo "cd failed"; exit 1; }
         else
             printf "ERROR: Service %s was not found in any of the stacks. Does it show up when you run %bdc list%b? \n" "${SERVICE}" "${RED}" "${NC}"
