@@ -1,3 +1,3 @@
-# Version 3.4.1
-## Improvement
-- `dc ips` supports multiple ips - #68
+# Version 3.4.2
+## Bugfix
+- `dc help` out put was skewed - #70 - fixed by @mrtnbr in #71
