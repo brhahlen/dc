@@ -669,6 +669,7 @@ function logs(){
     }
 
 function shell(){
+    trap - INT
     if [ "$#" -ne 1 ]; then
         printf "No or multiple arguments provided, please provide the name of one service \n"
     else
@@ -682,9 +683,7 @@ function shell(){
             verbose_stack "${STACK}" "${STACK_NAME}" "${SERVICE}"
             cd "${STACK}" || { echo "cd failed"; exit 1; }
             create_env_file "${STACK}" "${STACK_NAME}"
-            if dc_cmd_create "${DC_CMD_PARAM}"; then
-                exit 0
-            else
+            if ! dc_cmd_create "${DC_CMD_PARAM}"; then
                 echo "/bin/bash not found, falling back to /bin/sh"
                 DC_CMD_PARAM="exec ${SERVICE} /bin/sh"
                 dc_cmd_create "${DC_CMD_PARAM}"
