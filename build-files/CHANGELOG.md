@@ -1,3 +1,3 @@
-# Version 3.4.6
+# Version 3.4.7
 ## Bugfix
-- Small change to hopefully fix update issue
+- Updates to hopefully fix update issue
