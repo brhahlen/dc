@@ -87,12 +87,13 @@ function dc_cmd_create_shell(){
     unset DC_CMD_PARAM
     DC_CMD_PARAM=$1
     DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
-    DC_CMD_CMB=$(trap '${DC_COMMAND} ${DC_CMD_PARAM}' SIGINT)
+    DC_CMD_CMB="${DC_COMMAND} ${DC_CMD_PARAM}"
     if [ "${VERBOSE}" = true ]; then
         printf "DC_COMMAND is %b%s%b \n" "${RED}" "${DC_COMMAND}" "${NC}"
         printf "DC_CMD_PARAM is %b%s%b \n" "${RED}" "${DC_CMD_PARAM}" "${NC}"
         printf "Combined command is %b%s%b \n" "${RED}" "${DC_CMD_CMB}" "${NC}"
     fi
+    trap "${DC_CMD_CMB}" SIGINT
 }
 
 ###########################
