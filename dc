@@ -83,6 +83,18 @@ function dc_cmd_create(){
     fi
 }
 
+function dc_cmd_create_shell(){
+    unset DC_CMD_PARAM
+    DC_CMD_PARAM=$1
+    DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
+    DC_CMD_CMB=trap "${DC_COMMAND} ${DC_CMD_PARAM}" SIGINT
+    if [ "${VERBOSE}" = true ]; then
+        printf "DC_COMMAND is %b%s%b \n" "${RED}" "${DC_COMMAND}" "${NC}"
+        printf "DC_CMD_PARAM is %b%s%b \n" "${RED}" "${DC_CMD_PARAM}" "${NC}"
+        printf "Combined command is %b%s%b \n" "${RED}" "${DC_CMD_CMB}" "${NC}"
+    fi
+}
+
 ###########################
 # TMP FILES               #
 ###########################
@@ -683,10 +695,10 @@ function shell(){
             verbose_stack "${STACK}" "${STACK_NAME}" "${SERVICE}"
             cd "${STACK}" || { echo "cd failed"; exit 1; }
             create_env_file "${STACK}" "${STACK_NAME}"
-            if ! trap dc_cmd_create "${DC_CMD_PARAM}" SIGINT; then
+            if ! dc_cmd_create_shell "${DC_CMD_PARAM}"; then
                 echo "/bin/bash not found, falling back to /bin/sh"
                 DC_CMD_PARAM="exec ${SERVICE} /bin/sh"
-                dc_cmd_create "${DC_CMD_PARAM}"
+                dc_cmd_create_shell "${DC_CMD_PARAM}"
             fi
             cd - > /dev/null || { echo "cd failed"; exit 1; }
         else
