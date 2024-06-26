@@ -84,6 +84,7 @@ function dc_cmd_create(){
 }
 
 function dc_cmd_create_shell(){
+    trap '' SIGINT
     unset DC_CMD_PARAM
     DC_CMD_PARAM=$1
     DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
@@ -96,9 +97,8 @@ function dc_cmd_create_shell(){
     shell(){
         ${DC_CMD_CMB}
     }
-    trap '' SIGINT
-    shell
-    trap SIGINT
+    trap shell SIGINT
+    trap - SIGINT
 }
 
 ###########################
