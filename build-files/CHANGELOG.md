@@ -1,3 +1,3 @@
-# Version 3.4.5
+# Version 3.4.6
 ## Bugfix
-- `dc shell` glitches when using CTRL+C - Fixes #72
+- Small change to hopefully fix update issue
