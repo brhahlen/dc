@@ -6,10 +6,9 @@
 ##############
 _dc_completions()
 {
-    local CUR PREV OPTS BASE
+    local CUR OPTS
     COMPREPLY=()
     CUR="${COMP_WORDS[COMP_CWORD]}"
-    PREV="${COMP_WORDS[COMP_CWORD-1]}"
 
     if [ "${COMP_WORDS[1]}" == "-v" ]; then
         cmd="${COMP_WORDS[2]}"
@@ -26,10 +25,12 @@ _dc_completions()
     # Based on the arguments, we can run functions
     case "$cmd" in
         up|down|restart-stack-hard|restart-stack-soft|logs-stack)
+            # shellcheck disable=SC2155
             local STACKS=$(for STACK in $(find "${DC_DIR}" \( -name compose.yaml -or -name compose.yml -or -name docker-compose.yaml -or -name docker-compose.yml \) -printf '%h\n' | sort -u | rev | cut -d / -f 1 | rev); do echo "${STACK}" ; done )
             if [ ! "$cmd" == "logs-stack" ]; then
                 STACKS="all ${STACKS}"
             fi
+            # shellcheck disable=SC2207
             COMPREPLY=( $(compgen -W "${STACKS}" -- "${CUR}") )
             return 0
             ;;
@@ -65,7 +66,9 @@ _dc_completions()
                 fi
             done
             # On to the completion
+            # shellcheck disable=SC2155
             local SERVICES=$(while IFS= read -r SERVICE; do echo "${SERVICE}"; done < <(cat /tmp/dc_stack_services/*) )
+            # shellcheck disable=SC2207
             COMPREPLY=( $(compgen -W "${SERVICES}" -- "${CUR}") )
             return 0
             ;;
@@ -73,6 +76,7 @@ _dc_completions()
             return
             ;;
         prune)
+            # shellcheck disable=SC2207
             COMPREPLY=( $(compgen -W "basic system" -- "${CUR}") )
             return 0
             ;;
@@ -80,6 +84,7 @@ _dc_completions()
             ;;
     esac
 
+   # shellcheck disable=SC2207
    COMPREPLY=( $(compgen -W "${OPTS}" -- "${CUR}") )
    return 0
 }
