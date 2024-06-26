@@ -1,3 +1,3 @@
-# Version 3.4.4
-## Improvement
-- `dc shell` now uses `/bin/bash` as default, and will fall back to `/bin/sh` if that fails
+# Version 3.4.5
+## Bugfix
+- `dc shell` glitches when using CTRL+C - Fixes #72
