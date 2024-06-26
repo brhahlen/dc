@@ -94,10 +94,11 @@ function dc_cmd_create_shell(){
         printf "Combined command is %b%s%b \n" "${RED}" "${DC_CMD_CMB}" "${NC}"
     fi
     shell(){
-        trap '' INT
         ${DC_CMD_CMB}
     }
+    trap '' SIGINT
     shell
+    trap SIGINT
 }
 
 ###########################
