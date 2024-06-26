@@ -96,7 +96,7 @@ function dc_cmd_create_shell(){
     shell(){
         ${DC_CMD_CMB}
     }
-    shell
+    trap shell INT
 }
 
 ###########################
