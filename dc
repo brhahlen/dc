@@ -4,7 +4,7 @@
 ##################################
 # Enable monitoring
 set -m
-trap '' INT
+trap '' SIGINT
 
 # VERSION
 export DC_VERSION=v3.4.5-dev
@@ -670,7 +670,7 @@ function logs(){
     }
 
 function shell(){
-    trap - INT
+    trap - SIGINT
     if [ "$#" -ne 1 ]; then
         printf "No or multiple arguments provided, please provide the name of one service \n"
     else
