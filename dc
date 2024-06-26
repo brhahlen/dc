@@ -6,7 +6,7 @@
 set -m
 
 # VERSION
-export DC_VERSION=v3.4.4
+export DC_VERSION=v3.4.5-dev
 
 ###### VARIABLES
 if [[ -z "${DC_DIR}" ]]; then
@@ -682,7 +682,9 @@ function shell(){
             verbose_stack "${STACK}" "${STACK_NAME}" "${SERVICE}"
             cd "${STACK}" || { echo "cd failed"; exit 1; }
             create_env_file "${STACK}" "${STACK_NAME}"
-            if ! dc_cmd_create "${DC_CMD_PARAM}"; then
+            if dc_cmd_create "${DC_CMD_PARAM}"; then
+                exit 0
+            else
                 echo "/bin/bash not found, falling back to /bin/sh"
                 DC_CMD_PARAM="exec ${SERVICE} /bin/sh"
                 dc_cmd_create "${DC_CMD_PARAM}"
