@@ -78,6 +78,12 @@ function dc_cmd_create(){
     LOGS="logs --tail=100 -f"
     if [[ "${DC_CMD_PARAM}" == *"${LOGS}"* ]]; then
         ${DC_CMD_CMB} &
+    elif [[ "${DC_CMD_PARAM}" == *"exec"*"/bin"* ]]; then
+        {
+            trap '' SIGINT
+            ${DC_CMD_CMB}
+        }
+        trap - SIGINT
     else
         ${DC_CMD_CMB}
     fi
@@ -700,10 +706,10 @@ function shell(){
             verbose_stack "${STACK}" "${STACK_NAME}" "${SERVICE}"
             cd "${STACK}" || { echo "cd failed"; exit 1; }
             create_env_file "${STACK}" "${STACK_NAME}"
-            if ! dc_cmd_create_shell "${DC_CMD_PARAM}"; then
+            if ! dc_cmd_create "${DC_CMD_PARAM}"; then
                 echo "/bin/bash not found, falling back to /bin/sh"
                 DC_CMD_PARAM="exec ${SERVICE} /bin/sh"
-                dc_cmd_create_shell "${DC_CMD_PARAM}"
+                dc_cmd_create "${DC_CMD_PARAM}"
             fi
             cd - > /dev/null || { echo "cd failed"; exit 1; }
         else
