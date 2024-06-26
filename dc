@@ -93,7 +93,10 @@ function dc_cmd_create_shell(){
         printf "DC_CMD_PARAM is %b%s%b \n" "${RED}" "${DC_CMD_PARAM}" "${NC}"
         printf "Combined command is %b%s%b \n" "${RED}" "${DC_CMD_CMB}" "${NC}"
     fi
-    trap '${DC_CMD_CMB}' SIGINT
+    shell(){
+        ${DC_CMD_CMB}
+    }
+    shell
 }
 
 ###########################
