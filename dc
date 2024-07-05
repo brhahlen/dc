@@ -82,8 +82,10 @@ function dc_cmd_create(){
         {
             trap '' SIGINT
             ${DC_CMD_CMB}
+	    EXIT_CODE=$?
+	    return $EXIT_CODE
         }
-        trap - SIGINT
+	trap - SIGINT
     else
         ${DC_CMD_CMB}
     fi
