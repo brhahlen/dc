@@ -1,3 +1,3 @@
-# Version 3.4.7
+# Version 3.4.8
 ## Bugfix
-- Updates to hopefully fix update issue
+- Fix `shell` fallback
