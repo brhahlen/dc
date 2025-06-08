@@ -1,3 +1,6 @@
-# Version 3.4.8
+# Version 3.4.9
+## Improvement
+ - Sort service names in `dc list`
+
 ## Bugfix
-- Fix `shell` fallback
+- Fix issue where `dc` would sometimes not find service
