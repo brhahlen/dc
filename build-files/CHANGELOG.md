@@ -1,6 +1,3 @@
-# Version 3.4.9
+# Version 3.5.0
 ## Improvement
- - Sort service names in `dc list`
-
-## Bugfix
-- Fix issue where `dc` would sometimes not find service
+ - `restart-stack-hard all` now call `down all` and `up all`. This ensures correct order

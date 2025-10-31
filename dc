@@ -6,7 +6,7 @@
 set -m
 
 # VERSION
-export DC_VERSION=v3.4.9
+export DC_VERSION=v3.5.0
 
 ###### VARIABLES
 if [[ -z "${DC_DIR}" ]]; then
@@ -458,17 +458,19 @@ function restart-stack-hard(){
         printf "No argument provided, please use the name of a stack or all \n"
     elif [ "$1" == "all" ]; then
         printf "Hard Restarting all stacks \n"
-        for STACK in $(find "${DC_DIR}" \( -name compose.yaml -or -name compose.yml -or -name docker-compose.yaml -or -name docker-compose.yml \) -printf '%h\n' | sort -u);
-        do
-            STACK_NAME=$(basename "${STACK}")
-            verbose_stack "${STACK}" "${STACK_NAME}"
-            create_env_file "${STACK}" "${STACK_NAME}"
-            printf "\n%s:\n" "${STACK_NAME}"
-            cd "${STACK}" || { echo "cd failed"; exit 1; }
-            dc_cmd_create "${DC_CMD_PARAM_DOWN}"
-            dc_cmd_create "${DC_CMD_PARAM_UP}"
-            cd - > /dev/null || { echo "cd failed"; exit 1; }
-        done
+        down all
+        up all
+        # for STACK in $(find "${DC_DIR}" \( -name compose.yaml -or -name compose.yml -or -name docker-compose.yaml -or -name docker-compose.yml \) -printf '%h\n' | sort -u);
+        # do
+        #     STACK_NAME=$(basename "${STACK}")
+        #     verbose_stack "${STACK}" "${STACK_NAME}"
+        #     create_env_file "${STACK}" "${STACK_NAME}"
+        #     printf "\n%s:\n" "${STACK_NAME}"
+        #     cd "${STACK}" || { echo "cd failed"; exit 1; }
+        #     dc_cmd_create "${DC_CMD_PARAM_DOWN}"
+        #     dc_cmd_create "${DC_CMD_PARAM_UP}"
+        #     cd - > /dev/null || { echo "cd failed"; exit 1; }
+        # done
     else
         for STACK_NAME in "$@";
         do
