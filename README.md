@@ -35,22 +35,24 @@ There are a few assumptions:
 
 # Usage
 Provides the following main functions:
-- up                   - bring up all stacks, an individual stack, or multiple stacks
-- down                 - brings down all stacks, an individual stack, or multiple stacks
-- restart-stack-hard   - restarts all stacks, an individual stack, or multiple stacks
-- restart-stack-soft   - restarts all stacks, an individual stack, or multiple stacks
-- logs-stack           - show and follow the logs for a stack, outputs last 100 lines first
-- start                - start one or more services
-- stop                 - stop one or more services
-- restart              - restart one or more services
-- pull                 - pulls images
-- logs                 - show and follow the logs for a service, outputs last 100 lines first
-- network              - _NOT IMPLEMENTED YET_ - create the macvlan network that is needed - *ONLY* possible using `sudo`
-- prune                - prunes either images and containers (using the `basic` flag) or the system, including volumes (using the `system` flag)
-- install              - installs dc for the current user - *ONLY* possible using `sudo`
-- update               - updates `dc` to the latest available version
-- version              - shows the version of `dc` and retrieves the latest version and checks there
-- list                 - lists all stacks and services in the stack
+- `up`                   - bring up all stacks, an individual stack, or multiple stacks
+- `down`                 - brings down all stacks, an individual stack, or multiple stacks
+- `restart-stack-hard`   - restarts all stacks, an individual stack, or multiple stacks
+- `restart-stack-soft`   - restarts all stacks, an individual stack, or multiple stacks
+- `logs-stack`           - show and follow the logs for a stack, outputs last 100 lines first
+- `start`                - start one or more services
+- `stop`                 - stop one or more services
+- `restart`              - restart one or more services
+- `pull`                 - pulls images
+- `logs`                 - show and follow the logs for a service, outputs last 100 lines first
+- `network`              - _NOT IMPLEMENTED YET_ - create the macvlan network that is needed - *ONLY* possible using `sudo`
+- `prune`                - prunes either images and containers (using the `basic` flag) or the system, including volumes (using the `system` flag)
+- `install`              - installs dc for the current user - *ONLY* possible using `sudo`
+- `update`               - updates `dc` to the latest available version
+- `version`              - shows the version of `dc` and retrieves the latest version and checks there
+- `list`                 - lists all stacks and services in the stack
+- `clean`                - cleans the temporary directory, which is useful when renaming things or introducing new services
+- `help`                 - shows a list of commands
 
 # Examples
 ## Used in example
