@@ -45,7 +45,6 @@ Provides the following main functions:
 - `restart`              - restart one or more services
 - `pull`                 - pulls images
 - `logs`                 - show and follow the logs for a service, outputs last 100 lines first
-- `network`              - _NOT IMPLEMENTED YET_ - create the macvlan network that is needed - *ONLY* possible using `sudo`
 - `prune`                - prunes either images and containers (using the `basic` flag) or the system, including volumes (using the `system` flag)
 - `install`              - installs dc for the current user - *ONLY* possible using `sudo`
 - `update`               - updates `dc` to the latest available version
