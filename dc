@@ -6,26 +6,20 @@
 set -m
 
 # VERSION
-export DC_VERSION=v3.5.0
+export DC_VERSION=dev
 
 ###### VARIABLES
-if [[ -z "${DC_DIR}" ]]; then
-    export DC_DIR="${HOME}/docker"
-else
-    export DC_DIR="${DC_DIR}"
-fi
+export DC_DIR="${DC_DIR:-${HOME}/docker}"
 export ENV="${DC_DIR}/.env"
+export TMP_DIR="${XDG_CACHE_HOME:-${HOME}/.cache}/dc_stack_services"
 
-#######################################
-export DC_CMD="docker compose"
-export DC_CMD_INIT="${DC_CMD} --env-file ${ENV}"
-export TMP_DIR="/tmp/dc_stack_services"
 # COLORS
 export BLUE='\033[0;34m'
 export GREEN='\033[0;32m'
 export RED='\033[0;31m'
 export YELLOW='\033[0;33m'
 export NC='\033[0m' # No Color
+
 # Verbosity
 if [[ ${DC_VERSION} =~ "dev" ]]; then
     printf "This is a development version, verbosity will be enabled by default \n"
@@ -37,123 +31,106 @@ fi
 ##################################################
 # HELPER FUNCTIONS                               #
 ##################################################
-###########################
-# VERBOSITY               #
-###########################
-# Verbosity for stack_names
 function verbose_stack(){
-    STACK=$1
-    STACK_NAME=$2
-    SERVICE_NAME=$3
+    local stack="$1" stack_name="$2" service_name="$3"
     if [ "${VERBOSE}" = true ]; then
-        printf "STACK is %b%s%b \n" "${YELLOW}" "${STACK}" "${NC}"
-        printf "STACK_NAME is %b%s%b \n" "${YELLOW}" "${STACK_NAME}" "${NC}"
-        if [ -n "${SERVICE_NAME}" ]; then
-            printf "SERVICE_NAME is %b%s%b \n" "${YELLOW}" "${SERVICE_NAME}" "${NC}"
-            printf "Found %b%s%b in %b%s%b \n" "${YELLOW}" "${SERVICE}" "${NC}" "${YELLOW}" "${STACK}" "${NC}"
+        printf "STACK is %b%s%b \n" "${YELLOW}" "${stack}" "${NC}"
+        printf "STACK_NAME is %b%s%b \n" "${YELLOW}" "${stack_name}" "${NC}"
+        if [ -n "${service_name}" ]; then
+            printf "SERVICE_NAME is %b%s%b \n" "${YELLOW}" "${service_name}" "${NC}"
+            printf "Found %b%s%b in %b%s%b \n" "${YELLOW}" "${service_name}" "${NC}" "${YELLOW}" "${stack}" "${NC}"
         fi
     fi
 }
 
 function verbose_message(){
-    MSG=$1
+    local msg="$1"
     if [ "${VERBOSE}" = true ]; then
-        printf "%b%s%b \n" "${GREEN}" "${MSG}" "${NC}"
+        printf "%b%s%b \n" "${GREEN}" "${msg}" "${NC}"
     fi
 }
 
-###########################
-# DC COMMAND CREATION     #
-###########################
-function dc_cmd_create(){
-    unset DC_CMD_PARAM
-    DC_CMD_PARAM=$1
-    DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
-    DC_CMD_CMB="${DC_COMMAND} ${DC_CMD_PARAM}"
+# Run docker compose for a stack directory without changing CWD
+function run_compose(){
+    local stack="$1"
+    shift
+    local stack_name="${stack##*/}"
+    local -a cmd=(docker compose --env-file "${ENV}" --env-file "${stack}/${stack_name}.env" --project-directory "${stack}" "$@")
     if [ "${VERBOSE}" = true ]; then
-        printf "DC_COMMAND is %b%s%b \n" "${RED}" "${DC_COMMAND}" "${NC}"
-        printf "DC_CMD_PARAM is %b%s%b \n" "${RED}" "${DC_CMD_PARAM}" "${NC}"
-        printf "Combined command is %b%s%b \n" "${RED}" "${DC_CMD_CMB}" "${NC}"
+        printf "Combined command is %b%s%b \n" "${RED}" "${cmd[*]}" "${NC}"
     fi
-    LOGS="logs --tail=100 -f"
-    if [[ "${DC_CMD_PARAM}" == *"${LOGS}"* ]]; then
-        ${DC_CMD_CMB} &
-    elif [[ "${DC_CMD_PARAM}" == *"exec"*"/bin"* ]]; then
-        {
-            trap '' SIGINT
-            ${DC_CMD_CMB}
-	    EXIT_CODE=$?
-	    return $EXIT_CODE
-        }
-	trap - SIGINT
-    else
-        ${DC_CMD_CMB}
+    "${cmd[@]}"
+}
+
+# Populate _STACKS array with sorted stack directories (pass -r for reverse order)
+function find_stacks(){
+    local sort_flags="-zu"
+    if [ "${1:-}" = "-r" ]; then
+        sort_flags="-zur"
     fi
+    _STACKS=()
+    mapfile -d '' _STACKS < <(find "${DC_DIR}" \( -name compose.yaml -o -name compose.yml -o -name docker-compose.yaml -o -name docker-compose.yml \) -printf '%h\0' | sort "${sort_flags}")
 }
 
 ###########################
 # TMP FILES               #
 ###########################
-# TMP_DIR STACK SERVICES
 function tmp_dir_stack_files(){
     if [ ! -d "${TMP_DIR}" ]; then
         verbose_message "${TMP_DIR} not found. Creating..."
-        mkdir -p ${TMP_DIR}
+        mkdir -p "${TMP_DIR}"
     fi
 }
 
-# TMP_STACK FILES AGE
 function tmp_stack_files_age(){
+    local stack stack_name cache_file
     tmp_dir_stack_files
-    for STACK in $(find "${DC_DIR}" \( -name compose.yaml -or -name compose.yml -or -name docker-compose.yaml -or -name docker-compose.yml \) -printf '%h \n' | sort -u);
-    do
-        STACK_NAME=$(basename "${STACK}")
-        verbose_stack "${STACK}" "${STACK_NAME}"
-        DC_CMD_PARAM_TMP="config --services > ${TMP_DIR}/${STACK_NAME}"
-        if [ -f "${TMP_DIR}"/"${STACK_NAME}" ]; then
-            verbose_message "File ${TMP_DIR}/${STACK_NAME} exists, checking age"
-            if [ "$(find ${TMP_DIR}/"${STACK_NAME}" -mmin +30)" ]; then
+    find_stacks
+    for stack in "${_STACKS[@]}"; do
+        stack_name="${stack##*/}"
+        cache_file="${TMP_DIR}/${stack_name}"
+        verbose_stack "${stack}" "${stack_name}"
+        if [ -f "${cache_file}" ]; then
+            verbose_message "File ${cache_file} exists, checking age"
+            if [ -n "$(find "${cache_file}" -mmin +30)" ]; then
                 verbose_message "File is too old, refreshing"
-                cd "${STACK}" || { echo "cd failed"; exit 1; }
-                dc_cmd_create "${DC_CMD_PARAM_TMP}" > /dev/null
-                cd - > /dev/null || { echo "cd failed"; exit 1; }
+                create_env_file "${stack}" "${stack_name}"
+                run_compose "${stack}" config --services > "${cache_file}"
             fi
         else
             verbose_message "File does not exist, creating"
-            cd "${STACK}" || { echo "cd failed"; exit 1; }
-            dc_cmd_create "${DC_CMD_PARAM_TMP}" > /dev/null
-            cd - > /dev/null || { echo "cd failed"; exit 1; }
+            create_env_file "${stack}" "${stack_name}"
+            run_compose "${stack}" config --services > "${cache_file}"
         fi
     done
 }
 
 # CREATE ENV FILES
 function create_env_file() {
-    STACK=$1
-    STACK_NAME=$2
-    verbose_stack "${STACK}" "${STACK_NAME}"
-    if [ ! -f "${STACK}/${STACK_NAME}.env" ]; then
-        printf "%s.env does not exist \n" "${STACK_NAME}"
-        if [ "${ALLOW_ENV_CREATE}" =  true ]; then
-            printf "Creating %s.env \n" "${STACK_NAME}"
-            touch "${STACK}/${STACK_NAME}.env"
+    local stack="$1" stack_name="$2" yn
+    verbose_stack "${stack}" "${stack_name}"
+    if [ ! -f "${stack}/${stack_name}.env" ]; then
+        printf "%s.env does not exist \n" "${stack_name}"
+        if [ "${ALLOW_ENV_CREATE}" = true ]; then
+            printf "Creating %s.env \n" "${stack_name}"
+            touch "${stack}/${stack_name}.env"
         else
             printf "No prior authorization given for creation of .env files \n"
             while true; do
                 read -r -p "Do you want to proceed? (y/n) " yn
                 case $yn in
                     [yY] )
-                        printf "Creating %s.env \n" "${STACK_NAME}"
-                        touch "${STACK}/${STACK_NAME}.env"
+                        printf "Creating %s.env \n" "${stack_name}"
+                        touch "${stack}/${stack_name}.env"
                         export ALLOW_ENV_CREATE=true
                         break
                         ;;
                     [nN] )
                         printf "Not creating .env files, will exit \n"
-                        exit
+                        exit 1
                         ;;
                     * )
-                        printf "Invalid response"
+                        printf "Invalid response \n"
                         ;;
                 esac
             done
@@ -161,10 +138,40 @@ function create_env_file() {
     fi
 }
 
+# Resolve a service name to a unique stack path in _RESOLVED_STACK
+function resolve_service_stack(){
+    local service="$1"
+    local -a matches=()
+    mapfile -t matches < <(grep -rlx -- "${service}" "${TMP_DIR}" 2>/dev/null || true)
+    if [ "${#matches[@]}" -eq 0 ]; then
+        printf "ERROR: Service %s was not found in any of the stacks. Does it show up when you run %bdc list%b? \n" "${service}" "${RED}" "${NC}"
+        return 1
+    elif [ "${#matches[@]}" -gt 1 ]; then
+        local -a stack_names=("${matches[@]##*/}")
+        printf "ERROR: Service %s exists in multiple stacks (%s). Use a stack command instead. \n" "${service}" "${stack_names[*]}"
+        return 1
+    fi
+    _RESOLVED_STACK="${DC_DIR}/${matches[0]##*/}"
+}
+
+# Wait on background log PIDs and clean them up on signal
+function wait_for_logs(){
+    local -a pids=("$@")
+    trap_kill(){
+        local pid child_pid
+        for pid in "${pids[@]}"; do
+            child_pid=$(ps --ppid "$pid" -o pid= 2>/dev/null)
+            kill ${child_pid} "$pid" 2>/dev/null || true
+        done
+    }
+    trap 'trap_kill' SIGHUP SIGINT SIGQUIT SIGTERM
+    wait "${pids[@]}"
+    trap - SIGHUP SIGINT SIGQUIT SIGTERM
+}
+
 ##################################################
 # USAGE COMMANDS                                 #
 ##################################################
-# USAGE
 function show_usage (){
     printf "Usage: %s [command] [stacks] \n" "$0"
     printf " \n"
@@ -186,7 +193,7 @@ function show_usage (){
     printf " %bips%b                  Shows assigned IPs of containers \n" "${RED}" "${NC}"
     printf " %bprune%b                Prunes images and containers (basic) or the system \n" "${RED}" "${NC}"
     printf "======================= Install, Update and Version ======================= \n"
-    printf " %binstall%b              Install dc for the user, needs sudo \n" "${RED}" "${NC}"
+    printf " %binstall%b              Install dc for the user \n" "${RED}" "${NC}"
     printf " %bupdate%b               Updates dc to the latest version \n" "${RED}" "${NC}"
     printf " %bversion%b              Shows the version and checks the latest version \n" "${RED}" "${NC}"
     printf "============================== Usage Commands ==============================\n"
@@ -194,122 +201,102 @@ function show_usage (){
     printf " %blist%b                 List stacks and services in the stacks \n" "${RED}" "${NC}"
     printf " %bhelp%b                 Print help \n" "${RED}" "${NC}"
 
-return 0
+    return 0
 }
 
-# CLEAN
 function clean(){
     printf "Cleaning temporary files \n"
     printf "=================================== \n"
-    rm -rf ${TMP_DIR}
+    rm -rf "${TMP_DIR}"
     printf "Done \n"
-    }
+}
 
-# LIST
 function list(){
+    local stack stack_name
     tmp_stack_files_age
     printf "Listing Stacks and Services \n"
     printf "=================================== \n"
-    for STACK in $(find "${DC_DIR}" \( -name compose.yaml -or -name compose.yml -or -name docker-compose.yaml -or -name docker-compose.yml \) -printf '%h\n' | sort -u);
-    do
-        STACK_NAME=$(basename "${STACK}")
-        DC_CMD_PARAM="config --services"
-        verbose_stack "${STACK}" "${STACK_NAME}"
-        create_env_file "${STACK}" "${STACK_NAME}"
-        cd "${STACK}" || { echo "cd failed"; exit 1; }
-        printf "Stack %b%s%b contains services: \n" "${RED}" "${STACK_NAME}" "${NC}"
-        dc_cmd_create "${DC_CMD_PARAM}" | sort | tee "${TMP_DIR}/${STACK_NAME}"
-        cd - > /dev/null || { echo "cd failed"; exit 1; }
+    find_stacks
+    for stack in "${_STACKS[@]}"; do
+        stack_name="${stack##*/}"
+        verbose_stack "${stack}" "${stack_name}"
+        printf "Stack %b%s%b contains services: \n" "${RED}" "${stack_name}" "${NC}"
+        sort "${TMP_DIR}/${stack_name}"
         printf "=================================== \n"
     done
-    }
+}
 
 ##################################################
 # INSTALLATION/UPDATE/VERSION CHECKING STUFF     #
 ##################################################
-# INSTALL
 function install(){
-    ###### PREREQUISITE CHECKS
-    # tee
-    if ! command -v tee &> /dev/null ; then
-        printf "tee could not be found, please install it to use dc \n"
-        exit 1
-    fi
-    # curl
-    if ! command -v curl &> /dev/null ; then
-        printf "curl could not be found, please install it to use dc \n"
-        exit 1
-    fi
-    # grep
-    if ! command -v grep &> /dev/null ; then
-        printf "grep could not be found, please install it to use dc \n"
-        exit 1
-    fi
-    # unzip
-    if ! command -v unzip &> /dev/null ; then
-        printf "unzip could not be found, please install it to use dc \n"
-        exit 1
-    fi
-    # wget
-    if ! command -v wget &> /dev/null ; then
-        printf "wget could not be found, please install it to use dc \n"
-        exit 1
-    fi
-    # Checking for docker compose or docker-compose
-    if docker compose &> /dev/null ; then
+    local cmd
+    for cmd in tee curl grep unzip wget; do
+        if ! command -v "${cmd}" &> /dev/null ; then
+            printf "%s could not be found, please install it to use dc \n" "${cmd}"
+            exit 1
+        fi
+    done
+
+    if docker compose version &> /dev/null ; then
         printf "Found %bdocker compose%b \n" "${RED}" "${NC}"
-        export DC_CMD="docker compose"
     else
-        printf "Could not find either %bdocker compose%b. Please install %bdocker compose%b to use %bdc%b \n" "${RED}" "${NC}" "${RED}" "${NC}" "${RED}" "${NC}"
+        printf "Could not find %bdocker compose%b. Please install %bdocker compose%b to use %bdc%b \n" "${RED}" "${NC}" "${RED}" "${NC}" "${RED}" "${NC}"
+        exit 1
     fi
+
     unset DC_DIR
     printf "Home directory is %s \n" "${HOME}"
-    printf "Copying dc binary to%s/bin and making it executable \n" "${HOME}"
-    if [ ! -d "${HOME}"/bin  ]; then
+    printf "Copying dc binary to %s/bin and making it executable \n" "${HOME}"
+    if [ ! -d "${HOME}/bin" ]; then
         printf "%s/bin does not exist. Creating... \n" "${HOME}"
-        mkdir -p "${HOME}"/bin
+        mkdir -p "${HOME}/bin"
     fi
-    cp -f dc "${HOME}"/bin
-    chmod 744 "${HOME}"/bin/dc
-    # Do stuff here
+    cp -f dc "${HOME}/bin"
+    chmod 744 "${HOME}/bin/dc"
+
     printf "Copying dc-completion binary to %s/.bash_completion.d/ and making it executable \n" "${HOME}"
-    # Check for root access
-    if [ ! -d "${HOME}"/.bash_completion.d ] ; then
+    if [ ! -d "${HOME}/.bash_completion.d" ] ; then
         printf "%s/.bash_completion.d does not exist. Creating... \n" "${HOME}"
-        mkdir -p "${HOME}"/.bash_completion.d
+        mkdir -p "${HOME}/.bash_completion.d"
     fi
-    if [ ! -f "${HOME}"/.bash_completion ] ; then
+    if [ ! -f "${HOME}/.bash_completion" ] ; then
         printf "%s/.bash_completion does not exist. Creating... \n" "${HOME}"
-        touch "${HOME}"/.bash_completion
+        touch "${HOME}/.bash_completion"
         printf "Adding bash_completion lines to file \n"
-        echo -e "for bcfile in ~/.bash_completion.d/* ; do\n  . \$bcfile\ndone" >> "${HOME}"/.bash_completion
-        echo "source ${HOME}/.bash_completion" >> "${HOME}"/.bashrc
+        echo -e "for bcfile in ~/.bash_completion.d/* ; do\n  . \$bcfile\ndone" >> "${HOME}/.bash_completion"
+        echo "source ${HOME}/.bash_completion" >> "${HOME}/.bashrc"
     fi
-    cp -f dc-completion "${HOME}"/.bash_completion.d
-    chmod u+x "${HOME}"/.bash_completion.d/dc-completion
-    # Add dc to PATH
-    if ! grep -q "\$HOME/bin" "${HOME}"/.bashrc ; then
+    cp -f dc-completion "${HOME}/.bash_completion.d"
+    chmod u+x "${HOME}/.bash_completion.d/dc-completion"
+
+    if ! grep -q "\$HOME/bin" "${HOME}/.bashrc" ; then
         printf "Adding dc to PATH \n"
-        echo "PATH=\"\$HOME/bin:\$PATH\"" >> "${HOME}"/.bashrc
-        echo "export PATH" >> "${HOME}"/.bashrc
+        echo "PATH=\"\$HOME/bin:\$PATH\"" >> "${HOME}/.bashrc"
+        echo "export PATH" >> "${HOME}/.bashrc"
     fi
-    # Add DC_DIR to bashrc
-    if ! grep -q DC_DIR "${HOME}"/.bashrc ; then
+    if ! grep -q DC_DIR "${HOME}/.bashrc" ; then
         printf "Set DC_DIR variable and add to %s/.bashrc \n" "${HOME}"
         read -r -p "Where are your docker-compose stacks located? " DC_DIR
-        echo "export DC_DIR=${DC_DIR}" >> "${HOME}"/.bashrc
+        echo "export DC_DIR=\"${DC_DIR}\"" >> "${HOME}/.bashrc"
     fi
-    # Remove DC_CMD to bashrc
-    if grep -q DC_CMD "${HOME}"/.bashrc ; then
+    if grep -q DC_CMD "${HOME}/.bashrc" ; then
         printf "Removing DC_CMD variable \n"
-        sed -i '/DC_CMD=/d' "${HOME}"/.bashrc
+        sed -i '/DC_CMD=/d' "${HOME}/.bashrc"
     fi
 }
 
-# VERSION
-function show_version(){
-    LATEST_VERSION=$(curl --silent https://api.github.com/repos/brhahlen/dc/releases/latest | grep -Po '"tag_name": "\K.*?(?=")')
+function get_latest_version(){
+    LATEST_VERSION=$(curl --silent --fail https://api.github.com/repos/brhahlen/dc/releases/latest | grep -Po '"tag_name": "\K.*?(?=")')
+    if [ -z "${LATEST_VERSION}" ]; then
+        printf "ERROR: Could not retrieve latest version from GitHub \n"
+        return 1
+    fi
     export LATEST_VERSION
+}
+
+function show_version(){
+    get_latest_version || return 1
     if [[ ${DC_VERSION} =~ "dev" ]]; then
         printf "This is version %b%s%b of %bdc%b \n" "${RED}" "${DC_VERSION}" "${NC}" "${RED}" "${NC}"
         printf "This is a development version \n"
@@ -327,49 +314,37 @@ function show_version(){
 }
 
 function update(){
-    LATEST_VERSION=$(curl --silent https://api.github.com/repos/brhahlen/dc/releases/latest | grep -Po '"tag_name": "\K.*?(?=")')
-    export LATEST_VERSION
+    get_latest_version || exit 1
     export UPDATE_TMP=/tmp/dc_update
     printf "You are on version %s of %bdc%b \n" "${DC_VERSION}" "${RED}" "${NC}"
 
     if [ ! "$(printf '%s\n' "${LATEST_VERSION}" "${DC_VERSION}" | sort -V | head -n1)" = "${LATEST_VERSION}" ]; then
         printf "Version %b%s%b of %bdc%b is available and will be downloaded and installed \n" "${BLUE}" "${LATEST_VERSION}" "${NC}" "${RED}" "${NC}"
-        if [ ! -d "${UPDATE_TMP}" ]; then
-            printf "%s does not exist. Creating... \n" "${UPDATE_TMP}"
-            mkdir -p "${UPDATE_TMP}"
-        else
-            printf "Cleanup previous update files... \n"
-            rm -rf "${UPDATE_TMP}"
-            mkdir "${UPDATE_TMP}"
-        fi
+        rm -rf "${UPDATE_TMP}"
+        mkdir -p "${UPDATE_TMP}"
 
         printf "Downloading... \n"
         if wget -V | grep -q Wget2 ; then
-            wget -q --force-progress https://github.com/brhahlen/dc/releases/download/"${LATEST_VERSION}"/dc-release.zip -O "${UPDATE_TMP}"/dc-release.zip
+            wget -q --force-progress "https://github.com/brhahlen/dc/releases/download/${LATEST_VERSION}/dc-release.zip" -O "${UPDATE_TMP}/dc-release.zip"
         else
-            wget -q --show-progress https://github.com/brhahlen/dc/releases/download/"${LATEST_VERSION}"/dc-release.zip -O "${UPDATE_TMP}"/dc-release.zip
+            wget -q --show-progress "https://github.com/brhahlen/dc/releases/download/${LATEST_VERSION}/dc-release.zip" -O "${UPDATE_TMP}/dc-release.zip"
         fi
-
         if [ $? -ne 0 ]; then
             echo "Error downloading file"
             exit 1
         fi
 
         printf "Extracting... \n"
-        unzip -q "${UPDATE_TMP}"/dc-release.zip -d "${UPDATE_TMP}"
-        if [ $? -ne 0 ]; then
+        if ! unzip -q "${UPDATE_TMP}/dc-release.zip" -d "${UPDATE_TMP}"; then
             echo "Error extracting file"
             exit 1
         fi
 
         printf "Updating... \n"
-        cd "${UPDATE_TMP}" || { echo "cd failed"; exit 1; }
-        /usr/bin/bash "${UPDATE_TMP}"/dc install
-        if [ $? -ne 0 ]; then
+        if ! (cd "${UPDATE_TMP}" && /usr/bin/bash "${UPDATE_TMP}/dc" install); then
             echo "Update script execution failed"
             exit 1
         fi
-        cd - > /dev/null || { echo "cd failed"; exit 1; }
         printf "Done \n"
     else
         printf "This is the latest version, no update needed \n"
@@ -379,228 +354,148 @@ function update(){
 ##################################################
 # STACK COMMANDS                                 #
 ##################################################
-# UP
+function run_stack_action(){
+    local sort_flag=""
+    if [ "$1" = "down" ]; then
+        sort_flag="-r"
+    fi
+    local -a action_args=()
+    if [ "$1" = "up" ]; then
+        action_args=(up -d)
+    else
+        action_args=("$1")
+    fi
+    shift
+    if [ -z "$1" ]; then
+        printf "No argument provided, please use the name of a stack or all \n"
+        return 0
+    fi
+
+    local stack stack_name
+    if [ "$1" = "all" ]; then
+        find_stacks "${sort_flag}"
+        for stack in "${_STACKS[@]}"; do
+            stack_name="${stack##*/}"
+            verbose_stack "${stack}" "${stack_name}"
+            printf "\n%s:\n" "${stack_name}"
+            create_env_file "${stack}" "${stack_name}"
+            run_compose "${stack}" "${action_args[@]}"
+        done
+    else
+        for stack_name in "$@"; do
+            stack="${DC_DIR}/${stack_name}"
+            if [ -d "${stack}" ]; then
+                verbose_stack "${stack}" "${stack_name}"
+                create_env_file "${stack}" "${stack_name}"
+                run_compose "${stack}" "${action_args[@]}"
+            else
+                printf "Stack %s does not exist. Did you type the name correctly? \n" "${stack_name}"
+            fi
+        done
+    fi
+}
+
 function up(){
-    DC_CMD_PARAM="up -d"
-    if [ -z "$1" ]; then
-        printf "No argument provided, please use the name of a stack or all \n"
-    elif [ "$1" == "all" ]; then
-        printf "Bringing up all stacks \n"
-        for STACK in $(find "${DC_DIR}" \( -name compose.yaml -or -name compose.yml -or -name docker-compose.yaml -or -name docker-compose.yml \) -printf '%h\n' | sort -u);
-        do
-            STACK_NAME=$(basename "${STACK}")
-            verbose_stack "${STACK}" "${STACK_NAME}"
-            printf "\n%s:\n" "${STACK_NAME}"
-            cd "${STACK}" || { echo "cd failed"; exit 1; }
-            create_env_file "${STACK}" "${STACK_NAME}"
-            dc_cmd_create "${DC_CMD_PARAM}"
-            cd - > /dev/null || { echo "cd failed"; exit 1; }
-        done
-    else
-        for STACK_NAME in "$@";
-        do
-            STACK="${DC_DIR}/${STACK_NAME}"
-            if [ -d "${STACK}" ]; then
-                verbose_stack "${STACK}" "${STACK_NAME}"
-                printf "Bringing up stack %s \n" "${STACK_NAME}"
-                cd "${STACK}" || { echo "cd failed"; exit 1; }
-                create_env_file "${STACK}" "${STACK_NAME}"
-                dc_cmd_create "${DC_CMD_PARAM}"
-                cd - > /dev/null || { echo "cd failed"; exit 1; }
-            else
-                printf "Stack %s does not exist. Did you type the name correctly? \n" "${STACK_NAME}"
-            fi
-        done
-    fi
-    }
+    if [ "$1" = "all" ]; then printf "Bringing up all stacks \n"; fi
+    run_stack_action "up" "$@"
+}
 
-# DOWN
 function down(){
-    DC_CMD_PARAM="down"
-    if [ -z "$1" ]; then
-        printf "No argument provided, please use the name of a stack or all \n"
-    elif [ "$1" == "all" ]; then
-        printf "Bringing down all stacks \n"
-        for STACK in $(find "${DC_DIR}" \( -name compose.yaml -or -name compose.yml -or -name docker-compose.yaml -or -name docker-compose.yml \) -printf '%h\n' | sort -ur);
-        do
-            STACK_NAME=$(basename "${STACK}")
-            verbose_stack "${STACK}" "${STACK_NAME}"
-            printf "\n%s:\n" "${STACK_NAME}"
-            cd "${STACK}" || { echo "cd failed"; exit 1; }
-            create_env_file "${STACK}" "${STACK_NAME}"
-            dc_cmd_create "${DC_CMD_PARAM}"
-            cd - > /dev/null || { echo "cd failed"; exit 1; }
-        done
-    else
-        for STACK_NAME in "$@";
-        do
-            STACK="${DC_DIR}/${STACK_NAME}"
-            if [ -d "${STACK}" ]; then
-                printf "Bringing down stack %s \n" "${STACK_NAME}"
-                cd "${STACK}" || { echo "cd failed"; exit 1; }
-                create_env_file "${STACK}" "${STACK_NAME}"
-                dc_cmd_create "${DC_CMD_PARAM}"
-                cd - > /dev/null || { echo "cd failed"; exit 1; }
-            else
-                printf "Stack %s does not exist. Did you type the name correctly? \n" "${STACK_NAME}"
-            fi
-        done
-    fi
-    }
+    if [ "$1" = "all" ]; then printf "Bringing down all stacks \n"; fi
+    run_stack_action "down" "$@"
+}
 
-### RESTART-STACK
-## HARD
-# RESTART-STACK
 function restart-stack-hard(){
-    DC_CMD_PARAM_DOWN="down"
-    DC_CMD_PARAM_UP="up -d"
     if [ -z "$1" ]; then
         printf "No argument provided, please use the name of a stack or all \n"
-    elif [ "$1" == "all" ]; then
+    elif [ "$1" = "all" ]; then
         printf "Hard Restarting all stacks \n"
         down all
         up all
     else
-        for STACK_NAME in "$@";
-        do
-            STACK="${DC_DIR}/${STACK_NAME}"
-            STACK_NAME=$(basename "${STACK}")
-            verbose_stack "${STACK}" "${STACK_NAME}"
-            if [ -d "${STACK}" ]; then
-                create_env_file "${STACK}" "${STACK_NAME}"
-                printf "Restarting stack %s \n" "${STACK_NAME}"
-                cd "${STACK}" || { echo "cd failed"; exit 1; }
-                dc_cmd_create "${DC_CMD_PARAM_DOWN}"
-                dc_cmd_create "${DC_CMD_PARAM_UP}"
-                cd - > /dev/null || { echo "cd failed"; exit 1; }
+        local stack stack_name
+        for stack_name in "$@"; do
+            stack="${DC_DIR}/${stack_name}"
+            verbose_stack "${stack}" "${stack_name}"
+            if [ -d "${stack}" ]; then
+                create_env_file "${stack}" "${stack_name}"
+                printf "Restarting stack %s \n" "${stack_name}"
+                run_compose "${stack}" down
+                run_compose "${stack}" up -d
             else
-                printf "Stack %s does not exist. Did you type the name correctly? \n" "${STACK_NAME}"
+                printf "Stack %s does not exist. Did you type the name correctly? \n" "${stack_name}"
             fi
         done
     fi
-    }
+}
 
-## SOFT
 function restart-stack-soft(){
-    DC_CMD_PARAM="restart"
-    if [ -z "$1" ]; then
-        printf "No argument provided, please use the name of a stack or all \n"
-    elif [ "$1" == "all" ]; then
-        printf "Restarting all stacks \n"
-        for STACK in $(find "${DC_DIR}" \( -name compose.yaml -or -name compose.yml -or -name docker-compose.yaml -or -name docker-compose.yml \) -printf '%h\n' | sort -u);
-        do
-            STACK_NAME=$(basename "${STACK}")
-            verbose_stack "${STACK}" "${STACK_NAME}"
-            create_env_file "${STACK}" "${STACK_NAME}"
-            printf "\n%s:\n" "${STACK_NAME}"
-            cd "${STACK}" || { echo "cd failed"; exit 1; }
-            dc_cmd_create "${DC_CMD_PARAM}"
-            cd - > /dev/null || { echo "cd failed"; exit 1; }
-        done
-    else
-        for STACK_NAME in "$@";
-        do
-            STACK="${DC_DIR}/${STACK_NAME}"
-            STACK_NAME=$(basename "${STACK}")
-            verbose_stack "${STACK}" "${STACK_NAME}"
-            if [ -d "${STACK}" ]; then
-                create_env_file "${STACK}" "${STACK_NAME}"
-                printf "Restarting stack %s \n" "${STACK_NAME}"
-                cd "${STACK}" || { echo "cd failed"; exit 1; }
-                dc_cmd_create "${DC_CMD_PARAM}"
-                cd - > /dev/null || { echo "cd failed"; exit 1; }
-            else
-                printf "Stack %s does not exist. Did you type the name correctly? \n" "${STACK_NAME}"
-            fi
-        done
-    fi
-    }
+    if [ "$1" = "all" ]; then printf "Restarting all stacks \n"; fi
+    run_stack_action "restart" "$@"
+}
 
-# LOGS-STACK
 function logs-stack(){
-    DC_CMD_PARAM="logs --tail=100 -f"
     if [ -z "$1" ]; then
         printf "No argument provided, please provide the name(s) of a stack(s) \n"
-    else
-        for STACK_NAME in "$@";
-        do
-            STACK="${DC_DIR}/${STACK_NAME}"
-            STACK_NAME=$(basename "${STACK}")
-            verbose_stack "${STACK}" "${STACK_NAME}"
-            if [ -d "${STACK}" ]; then
-                create_env_file "${STACK}" "${STACK_NAME}"
-                printf "Showing logs for stack %s \n" "${STACK_NAME}"
-                cd "${STACK}" || { echo "cd failed"; exit 1; }
-                dc_cmd_create "${DC_CMD_PARAM}"
-                cd - > /dev/null || { echo "cd failed"; exit 1; }
-            else
-                printf "Stack %s does not exist. Did you type the name correctly? \n" "${STACK}"
-            fi
-        done
+        return 0
     fi
-    }
+    local stack stack_name
+    local -a pids=()
+    for stack_name in "$@"; do
+        stack="${DC_DIR}/${stack_name}"
+        verbose_stack "${stack}" "${stack_name}"
+        if [ -d "${stack}" ]; then
+            create_env_file "${stack}" "${stack_name}"
+            printf "Showing logs for stack %s \n" "${stack_name}"
+            run_compose "${stack}" logs --tail=100 -f &
+            pids+=("$!")
+        else
+            printf "Stack %s does not exist. Did you type the name correctly? \n" "${stack_name}"
+        fi
+    done
+    if [ "${#pids[@]}" -gt 0 ]; then
+        wait_for_logs "${pids[@]}"
+    fi
+}
 
 ##################################################
 # CONTAINER COMMANDS                             #
 ##################################################
-# # Something to add to start: check if container is exited or not, and then use proper command to start
-# To check if a container is exited
-# docker-compose ps | grep Exit | cut -d " " -f 1
-# START
+function run_for_services(){
+    local verb="$1" action="$2"
+    shift 2
+    if [ -z "$1" ]; then
+        printf "No argument provided, please provide the name of one or more services \n"
+        return 0
+    fi
+    printf "%s the following service(s): %s \n" "${verb}" "$*"
+    tmp_stack_files_age
+    local service stack_name
+    for service in "$@"; do
+        if resolve_service_stack "${service}"; then
+            stack_name="${_RESOLVED_STACK##*/}"
+            verbose_stack "${_RESOLVED_STACK}" "${stack_name}" "${service}"
+            create_env_file "${_RESOLVED_STACK}" "${stack_name}"
+            if [ "${action}" = "stop_rm" ]; then
+                run_compose "${_RESOLVED_STACK}" stop "${service}"
+                run_compose "${_RESOLVED_STACK}" rm -f "${service}"
+            elif [ "${action}" = "up" ]; then
+                run_compose "${_RESOLVED_STACK}" up -d "${service}"
+            else
+                run_compose "${_RESOLVED_STACK}" "${action}" "${service}"
+            fi
+        fi
+    done
+}
+
 function start(){
-    if [ -z "$1" ]; then
-        printf "No argument provided, please provide the name of one or more services \n"
-    else
-        printf "Starting the following service(s): %s \n" "$@"
-        tmp_stack_files_age
-        for SERVICE in "$@";
-        do
-            DC_CMD_PARAM="up -d ${SERVICE}"
-            if grep -r -q -x "${SERVICE}" "${TMP_DIR}"; then
-                STACK_NAME=$(basename "$(grep -r -x "${SERVICE}" "${TMP_DIR}" | cut -d : -f 1 )")
-                STACK="${DC_DIR}/${STACK_NAME}"
-                verbose_stack "${STACK}" "${STACK_NAME}" "${SERVICE}"
-                cd "${STACK}" || { echo "cd failed"; exit 1; }
-                create_env_file "${STACK}" "${STACK_NAME}"
-                dc_cmd_create "${DC_CMD_PARAM}"
-                cd - > /dev/null || { echo "cd failed"; exit 1; }
-            else
-                printf "ERROR: Service %s was not found in any of the stacks. Does it show up when you run %bdc list%b? \n" "${SERVICE}" "${RED}" "${NC}"
-            fi
-        done
-    fi
-    }
+    run_for_services "Starting" "up" "$@"
+}
 
-# STOP
-# Stop also removes the image
 function stop(){
-    if [ -z "$1" ]; then
-        printf "No argument provided, please provide the name of one or more services \n"
-    else
-        printf "Stopping the following service(s): %s \n" "$@"
-        tmp_stack_files_age
-        for SERVICE in "$@";
-        do
-            DC_CMD_PARAM="stop ${SERVICE}"
-            DC_CMD_PARAM_RM="rm -f ${SERVICE}"
-            if grep -r -q -x "${SERVICE}" ${TMP_DIR}; then
-                STACK_NAME=$(basename "$(grep -r -x "${SERVICE}" "${TMP_DIR}" | cut -d : -f 1 )")
-                STACK="${DC_DIR}/${STACK_NAME}"
-                verbose_stack "${STACK}" "${STACK_NAME}" "${SERVICE}"
-                cd "${STACK}" || { echo "cd failed"; exit 1; }
-                create_env_file "${STACK}" "${STACK_NAME}"
-                dc_cmd_create "${DC_CMD_PARAM}"
-                dc_cmd_create "${DC_CMD_PARAM_RM}"
-                cd - > /dev/null || { echo "cd failed"; exit 1; }
-            else
-                printf "ERROR: Service %s was not found in any of the stacks. Does it show up when you run %bdc list%b? \n" "${SERVICE}" "${RED}" "${NC}"
-            fi
-        done
-    fi
-    }
+    run_for_services "Stopping" "stop_rm" "$@"
+}
 
-# RESTART
-# Restart is basically a stop and start in sequence
 function restart(){
     if [ -z "$1" ]; then
         printf "No argument provided, please provide the name of one or more services \n"
@@ -609,137 +504,91 @@ function restart(){
         stop "$@"
         start "$@"
     fi
-    }
+}
 
-# PULL
 function pull(){
-    if [ -z "$1" ]; then
-        printf "No argument provided, please provide the name of one or more services \n"
-    else
-        printf "Pulling images for the following service(s): %s \n" "$@"
-        tmp_stack_files_age
-        for SERVICE in "$@";
-        do
-            DC_CMD_PARAM="pull ${SERVICE}"
-            if grep -r -q -x "${SERVICE}" "${TMP_DIR}"; then
-                STACK_NAME=$(basename "$(grep -r -x "${SERVICE}" "${TMP_DIR}" | cut -d : -f 1 )")
-                STACK="${DC_DIR}/${STACK_NAME}"
-                verbose_stack "${STACK}" "${STACK_NAME}" "${SERVICE}"
-                cd "${STACK}" || { echo "cd failed"; exit 1; }
-                create_env_file "${STACK}" "${STACK_NAME}"
-                dc_cmd_create "${DC_CMD_PARAM}"
-                cd - > /dev/null || { echo "cd failed"; exit 1; }
-            else
-                printf "ERROR: Service %s was not found in any of the stacks. Does it show up when you run %bdc list%b? \n" "${SERVICE}" "${RED}" "${NC}"
-            fi
-        done
-    fi
-    }
+    run_for_services "Pulling images for" "pull" "$@"
+}
 
 function logs(){
-    # Need this function to ensure that all child process are killed from the logs command
     if [ -z "$1" ]; then
         printf "No argument provided, please provide the name of one or more services \n"
-    else
-        trap_kill(){
-            for PID in $WAIT_PIDS;
-            do
-                CHILD_PID=$(ps --ppid "$PID" -o pid=)
-                if [ "${VERBOSE}" = true ]; then
-                    printf "\$PID is %s \n" "${PID}"
-                    printf "CHILD_PID is %s \n" "${CHILD_PID}"
-                fi
-                kill "$CHILD_PID"
-            done
-        }
-        printf "Showing logs for the following service(s): %s \n" "$@"
-        tmp_stack_files_age
-        for SERVICE in "$@";
-        do
-            DC_CMD_PARAM="logs --tail=100 -f ${SERVICE}"
-            if grep -r -q -x "${SERVICE}" "${TMP_DIR}"; then
-                STACK_NAME=$(basename "$(grep -r -x "${SERVICE}" "${TMP_DIR}" | cut -d : -f 1 )")
-                STACK="${DC_DIR}/${STACK_NAME}"
-                verbose_stack "${STACK}" "${STACK_NAME}" "${SERVICE}"
-                cd "${STACK}" || { echo "cd failed"; exit 1; }
-                create_env_file "${STACK}" "${STACK_NAME}"
-                dc_cmd_create "${DC_CMD_PARAM}"
-                if [ -z "$WAIT_PIDS" ]
-                    then
-                        export WAIT_PIDS="$!"
-                    else
-                        export WAIT_PIDS="$WAIT_PIDS $!"
-                fi
-                printf "PID=%s \n" "$!"
-                cd - > /dev/null || { echo "cd failed"; exit 1; }
-            else
-                printf "ERROR: Service %s was not found in any of the stacks. Does it show up when you run %bdc list%b? \n" "${SERVICE}" "${RED}" "${NC}"
-            fi
-        done
-        if [ "${VERBOSE}" = true ]; then
-            printf "\$WAIT_PIDS contains %s \n" "${WAIT_PIDS}"
-        fi
-        trap 'trap_kill' SIGHUP SIGINT SIGQUIT SIGTERM
-        # shellcheck disable=SC2086
-        wait ${WAIT_PIDS}
+        return 0
     fi
-    }
+    printf "Showing logs for the following service(s): %s \n" "$*"
+    tmp_stack_files_age
+    local service stack_name
+    local -a pids=()
+    for service in "$@"; do
+        if resolve_service_stack "${service}"; then
+            stack_name="${_RESOLVED_STACK##*/}"
+            verbose_stack "${_RESOLVED_STACK}" "${stack_name}" "${service}"
+            create_env_file "${_RESOLVED_STACK}" "${stack_name}"
+            run_compose "${_RESOLVED_STACK}" logs --tail=100 -f "${service}" &
+            pids+=("$!")
+            printf "PID=%s \n" "$!"
+        fi
+    done
+    if [ "${#pids[@]}" -gt 0 ]; then
+        wait_for_logs "${pids[@]}"
+    fi
+}
 
 function shell(){
     if [ "$#" -ne 1 ]; then
         printf "No or multiple arguments provided, please provide the name of one service \n"
-    else
-        printf "Accessing shell for the following service: %s \n" "$1"
-        tmp_stack_files_age
-        SERVICE="$1"
-        DC_CMD_PARAM="exec ${SERVICE} /bin/bash"
-        if grep -r -q -x "${SERVICE}" "${TMP_DIR}"; then
-            STACK_NAME=$(basename "$(grep -r -x "${SERVICE}" "${TMP_DIR}" | cut -d : -f 1 )")
-            STACK="${DC_DIR}/${STACK_NAME}"
-            verbose_stack "${STACK}" "${STACK_NAME}" "${SERVICE}"
-            cd "${STACK}" || { echo "cd failed"; exit 1; }
-            create_env_file "${STACK}" "${STACK_NAME}"
-            if ! dc_cmd_create "${DC_CMD_PARAM}"; then
-                echo "/bin/bash not found, falling back to /bin/sh"
-                DC_CMD_PARAM="exec ${SERVICE} /bin/sh"
-                dc_cmd_create "${DC_CMD_PARAM}"
-            fi
-            cd - > /dev/null || { echo "cd failed"; exit 1; }
-        else
-            printf "ERROR: Service %s was not found in any of the stacks. Does it show up when you run %bdc list%b? \n" "${SERVICE}" "${RED}" "${NC}"
-        fi
+        return 0
     fi
-    }
+    printf "Accessing shell for the following service: %s \n" "$1"
+    tmp_stack_files_age
+    local service="$1" stack_name rc
+    if resolve_service_stack "${service}"; then
+        stack_name="${_RESOLVED_STACK##*/}"
+        verbose_stack "${_RESOLVED_STACK}" "${stack_name}" "${service}"
+        create_env_file "${_RESOLVED_STACK}" "${stack_name}"
+        trap '' SIGINT
+        if ! run_compose "${_RESOLVED_STACK}" exec "${service}" /bin/bash; then
+            echo "/bin/bash not found, falling back to /bin/sh"
+            run_compose "${_RESOLVED_STACK}" exec "${service}" /bin/sh
+        fi
+        rc=$?
+        trap - SIGINT
+        return "${rc}"
+    fi
+}
 
 ##################################################
 # SYSTEM COMMANDS                                #
 ##################################################
-# IPS
 function ips(){
     printf "Showing IPs \n"
-    # shellcheck disable=SC2046
-    (echo "CONTAINER IP-ADRESS MAC-ADDRESS"; docker inspect --format='{{.Name}} {{range .NetworkSettings.Networks}}{{.IPAddress}} {{.MacAddress}} | {{end}}' $(docker ps -aq)| sort -k 2 -V) | column -t -s '  '
-    }
+    local -a ids=()
+    mapfile -t ids < <(docker ps -aq)
+    if [ "${#ids[@]}" -eq 0 ]; then
+        printf "No containers found \n"
+        return 0
+    fi
+    (echo "CONTAINER IP-ADRESS MAC-ADDRESS"; docker inspect --format='{{.Name}} {{range .NetworkSettings.Networks}}{{.IPAddress}} {{.MacAddress}} | {{end}}' "${ids[@]}" | sort -k 2 -V) | column -t
+}
 
 function prune() {
     if [ -z "$2" ]; then
         printf "No argument provided, please use %bbasic%b or %bsystem%b \n" "${RED}" "${NC}" "${RED}" "${NC}"
-    elif [ "$2" == "basic" ]; then
+    elif [ "$2" = "basic" ]; then
         printf "Pruning containers and images \n"
         docker container prune -f
         docker image prune -a -f
         printf "Done \n"
-    elif [ "$2" == "system" ]; then
+    elif [ "$2" = "system" ]; then
         printf "Pruning system \n"
         docker system prune --all --volumes -f
         printf "Done \n"
     else
         printf "Incorrect argument provided, please use %bbasic%b or %bsystem%b \n" "${RED}" "${NC}" "${RED}" "${NC}"
     fi
-    }
+}
 
 ###### CASES
-# Verbosity, yes, no?
 while getopts ":v" opt; do
     case $opt in
         v)
@@ -751,88 +600,31 @@ while getopts ":v" opt; do
             printf "Invalid option %b-%s%b provided \n" "${RED}" "${OPTARG}" "${NC}"
             printf "Currently allowed option is: \n"
             printf " %b-v%b        Enables verbosity \n" "${RED}" "${NC}"
-            exit
+            exit 1
             ;;
     esac
 done
 shift $(( OPTIND - 1 ))
 case ${1} in
-# ----------- up ------------
-    "up")
-        up "${@:2}"
-        ;;
-# ----------- down ------------
-    "down")
-        down "${@:2}"
-        ;;
-# ----------- restart-stack-hard ------------
-    "restart-stack-hard")
-        restart-stack-hard "${@:2}"
-        ;;
-# ----------- restart-stack-soft ------------
-    "restart-stack-soft")
-        restart-stack-soft "${@:2}"
-        ;;
-# ----------- logs-stack ------------
-    "logs-stack")
-        logs-stack "${@:2}"
-        ;;
-# ----------- start ------------
-    "start")
-        start "${@:2}"
-        ;;
-# ----------- stop ------------
-    "stop")
-        stop "${@:2}"
-        ;;
-# ----------- restart ------------
-    "restart")
-        restart "${@:2}"
-        ;;
-# ----------- pull ------------
-    "pull")
-        pull "${@:2}"
-        ;;
-# ----------- logs ------------
-    "logs")
-        logs "${@:2}"
-        ;;
-# ----------- shell ------------
-    "shell")
-        shell "${@:2}"
-        ;;
-# ----------- ips ------------
-    "ips")
-        ips
-        ;;
-# ----------- prune ------------
-    "prune")
-        prune "${@}"
-        ;;
-# ----------- install ------------
-    "install")
-        install
-        ;;
-# ----------- update ------------
-    "update")
-        update
-        ;;
-# ----------- version ------------
-    "version")
-        show_version
-        ;;
-# ----------- list ------------
-    "list")
-        list
-        ;;
-# ----------- clean ------------
-    "clean")
-        clean
-        ;;
-# ----------- All others ------------
-    "help")
-        show_usage
-        ;;
+    "up")                 up "${@:2}" ;;
+    "down")               down "${@:2}" ;;
+    "restart-stack-hard") restart-stack-hard "${@:2}" ;;
+    "restart-stack-soft") restart-stack-soft "${@:2}" ;;
+    "logs-stack")         logs-stack "${@:2}" ;;
+    "start")              start "${@:2}" ;;
+    "stop")               stop "${@:2}" ;;
+    "restart")            restart "${@:2}" ;;
+    "pull")               pull "${@:2}" ;;
+    "logs")               logs "${@:2}" ;;
+    "shell")              shell "${@:2}" ;;
+    "ips")                ips ;;
+    "prune")              prune "${@}" ;;
+    "install")            install ;;
+    "update")             update ;;
+    "version")            show_version ;;
+    "list")               list ;;
+    "clean")              clean ;;
+    "help")               show_usage ;;
     "")
         printf "Missing command, showing help \n"
         show_usage

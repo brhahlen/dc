@@ -1,3 +1,25 @@
+# Version 4.0.0
+## Breaking Change
+- Moved the service cache directory from `/tmp/dc_stack_services` to `${XDG_CACHE_HOME:-${HOME}/.cache}/dc_stack_services`
+
+## Bugfix
+- Fixed service cache refresh (`tmp_stack_files_age`) never writing cache files due to redirection inside a variable
+- Fixed `dc-completion` calling `exit 1` on `cd` failure (which closed the interactive shell) and failing when the cache directory is empty
+- Fixed `logs-stack` leaving background `docker compose logs` processes running instead of waiting and cleaning up on signals
+- Fixed service commands crashing when multiple stacks define the same service name, and added `local` variable scoping across functions
+- Fixed `dc ips` failing when no containers exist
+- Fixed `dc version` and `dc update` not handling empty GitHub API responses, and `dc install` continuing when `docker compose` is missing
+- Fixed `SIGINT` trap restoration in `dc shell` and wrong service variable in `verbose_stack`
+- Fixed path quoting and command array handling so `DC_DIR` and stack paths with spaces work
+- Fixed `README.md` completion path (`~/.bash_completion.d/`) and removed incorrect `sudo` requirement for `install`
+
+## Improvement
+- `dc list` now reads the refreshed service cache instead of running `docker compose config --services` twice per stack
+- Replaced `cd`/`cd -` and external `basename`/`rev`/`cut` calls with `--project-directory` and Bash parameter expansion
+- Consolidated duplicated stack discovery and service command loops into shared helpers
+- Added `tools/test.sh` for syntax and regression checks
+- Set `dev` as the default version placeholder on `main` and updated `.github/workflows/release.yml` to stamp versions, run tests, and extract release notes from `CHANGELOG.md`
+
 # Version 3.5.0
 ## Improvement
  - `restart-stack-hard all` now call `down all` and `up all`. This ensures correct order

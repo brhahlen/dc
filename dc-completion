@@ -2,91 +2,72 @@
 # Copyright (C) 2022 - 2023 Ben Hählen
 # This is the completion file for `dc`
 ##############
-# Version 3.5.0
+# Version dev
 ##############
 _dc_completions()
 {
-    local CUR OPTS
+    local cur cmd opts dc_dir tmp_dir env_file stack stack_name cache_file
+    local -a stacks=() stack_names=() services=()
     COMPREPLY=()
-    CUR="${COMP_WORDS[COMP_CWORD]}"
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    dc_dir="${DC_DIR:-${HOME}/docker}"
+    env_file="${dc_dir}/.env"
+    tmp_dir="${XDG_CACHE_HOME:-${HOME}/.cache}/dc_stack_services"
 
-    if [ "${COMP_WORDS[1]}" == "-v" ]; then
+    if [ "${COMP_WORDS[1]}" = "-v" ]; then
         cmd="${COMP_WORDS[2]}"
     else
         cmd="${COMP_WORDS[1]}"
     fi
 
-    ## Variables
-    export DC_CMD="docker compose"
+    opts="install up down restart-stack-hard restart-stack-soft logs-stack start stop restart pull logs ips clean list help update version prune shell"
 
-    # Basic/main options that will be completed
-    OPTS="install up down restart-stack-hard restart-stack-soft logs-stack start stop restart pull logs ips clean list help update version prune shell"
-
-    # Based on the arguments, we can run functions
     case "$cmd" in
         up|down|restart-stack-hard|restart-stack-soft|logs-stack)
-            # shellcheck disable=SC2155
-            local STACKS=$(for STACK in $(find "${DC_DIR}" \( -name compose.yaml -or -name compose.yml -or -name docker-compose.yaml -or -name docker-compose.yml \) -printf '%h\n' | sort -u | rev | cut -d / -f 1 | rev); do echo "${STACK}" ; done )
-            if [ ! "$cmd" == "logs-stack" ]; then
-                STACKS="all ${STACKS}"
+            if [ -d "${dc_dir}" ]; then
+                mapfile -d '' stacks < <(find "${dc_dir}" \( -name compose.yaml -o -name compose.yml -o -name docker-compose.yaml -o -name docker-compose.yml \) -printf '%h\0' | sort -zu)
+                for stack in "${stacks[@]}"; do
+                    stack_names+=("${stack##*/}")
+                done
             fi
-            # shellcheck disable=SC2207
-            COMPREPLY=( $(compgen -W "${STACKS}" -- "${CUR}") )
+            if [ "$cmd" != "logs-stack" ]; then
+                stack_names=("all" "${stack_names[@]}")
+            fi
+            mapfile -t COMPREPLY < <(compgen -W "${stack_names[*]}" -- "${cur}")
             return 0
             ;;
         start|stop|restart|pull|logs|shell)
-            # We might need to create the tmp-files, so reusing the command from dc, however, this is duplicating stuff, which is not nice, but for a MVP, it works
-            for STACK in $(find "${DC_DIR}" \( -name compose.yaml -or -name compose.yml -or -name docker-compose.yaml -or -name docker-compose.yml \) -printf '%h\n' | sort -u);
-            do
-                STACK_NAME=$(echo "${STACK}" | rev | cut -d / -f 1 | rev)
-                ENV="${DC_DIR}/.env"
-                DC_CMD_INIT="${DC_CMD} --env-file ${ENV}"
-                DC_COMMAND="${DC_CMD_INIT} --env-file ${STACK}/${STACK_NAME}.env"
-                # echo "${DC_COMMAND}"
-                TMP_DIR="/tmp/dc_stack_services"
-                if [ ! -d "${TMP_DIR}" ]; then
-                    # echo "${TMP_DIR} not found. Creating..."
-                    mkdir -p ${TMP_DIR}
-                fi
-                if [ -f ${TMP_DIR}/"${STACK_NAME}" ]; then
-                    # echo "File exists, checking age"
-                    if [ "$(find ${TMP_DIR}/"${STACK_NAME}" -mmin +30)" ]; then
-                        # echo "File is too old, refreshing"
-                        cd "${STACK}" || { echo "cd failed"; exit 1; }
-                        # echo "${DC_COMMAND}"
-                        ${DC_COMMAND} config --services > ${TMP_DIR}/"${STACK_NAME}"
-                        cd - > /dev/null || { echo "cd failed"; exit 1; }
-                    fi
-                else
-                    # echo "File does not exist, creating"
-                    cd "${STACK}" || { echo "cd failed"; exit 1; }
-                    # echo "${DC_COMMAND}"
-                    ${DC_COMMAND} config --services > ${TMP_DIR}/"${STACK_NAME}"
-                    cd - > /dev/null || { echo "cd failed"; exit 1; }
+            if [ ! -d "${dc_dir}" ]; then
+                return 0
+            fi
+            mkdir -p "${tmp_dir}"
+            mapfile -d '' stacks < <(find "${dc_dir}" \( -name compose.yaml -o -name compose.yml -o -name docker-compose.yaml -o -name docker-compose.yml \) -printf '%h\0' | sort -zu)
+            for stack in "${stacks[@]}"; do
+                stack_name="${stack##*/}"
+                cache_file="${tmp_dir}/${stack_name}"
+                if [ ! -f "${cache_file}" ] || [ -n "$(find "${cache_file}" -mmin +30)" ]; then
+                    docker compose --env-file "${env_file}" --env-file "${stack}/${stack_name}.env" --project-directory "${stack}" config --services > "${cache_file}" 2>/dev/null || true
                 fi
             done
-            # On to the completion
-            # shellcheck disable=SC2155
-            local SERVICES=$(while IFS= read -r SERVICE; do echo "${SERVICE}"; done < <(cat /tmp/dc_stack_services/*) )
-            # shellcheck disable=SC2207
-            COMPREPLY=( $(compgen -W "${SERVICES}" -- "${CUR}") )
+            if compgen -G "${tmp_dir}/*" > /dev/null; then
+                mapfile -t services < <(cat "${tmp_dir}"/* 2>/dev/null)
+                mapfile -t COMPREPLY < <(compgen -W "${services[*]}" -- "${cur}")
+            fi
             return 0
             ;;
         install|ips|clean|list|help|version)
-            return
+            return 0
             ;;
         prune)
-            # shellcheck disable=SC2207
-            COMPREPLY=( $(compgen -W "basic system" -- "${CUR}") )
+            mapfile -t COMPREPLY < <(compgen -W "basic system" -- "${cur}")
             return 0
             ;;
         *)
             ;;
     esac
 
-   # shellcheck disable=SC2207
-   COMPREPLY=( $(compgen -W "${OPTS}" -- "${CUR}") )
-   return 0
+    mapfile -t COMPREPLY < <(compgen -W "${opts}" -- "${cur}")
+    return 0
 }
 
 complete -F _dc_completions dc

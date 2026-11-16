@@ -2,7 +2,7 @@ on:
   push:
     # Sequence of patterns matched against refs/tags
     tags:
-    - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
 
 name: Create Release and Upload Release Asset
 
@@ -10,30 +10,26 @@ jobs:
   build:
     name: Upload Release Asset
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      - name: Stamp version & run tests
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          sed -i "s/^export DC_VERSION=.*/export DC_VERSION=v${VERSION}/" dc
+          sed -i "s/^# Version .*/# Version ${VERSION}/" dc-completion
+          bash ./tools/test.sh
       - name: Build dc-release
         run: |
           zip --junk-paths dc-release dc-completion dc README.md CHANGELOG.md
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
+      - name: Create Release and Upload Asset
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: ${{ github.ref }}
-          draft: false
-          prerelease: false
-          body_path: build-files/CHANGELOG.md
-      - name: Upload Release Asset
-        id: upload-release-asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./dc-release.zip
-          asset_name: dc-release.zip
-          asset_content_type: application/zip
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          awk '/^# Version /{if (c++) exit} c' CHANGELOG.md > /tmp/release-notes.md
+          gh release create "${GITHUB_REF_NAME}" dc-release.zip \
+            --title "${GITHUB_REF_NAME}" \
+            -F /tmp/release-notes.md \
+            --generate-notes

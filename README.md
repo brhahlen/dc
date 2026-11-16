@@ -12,7 +12,7 @@ Installing `dc` can be done by executing `bash ./dc install` from the command li
 
 The following actions will be performed:
 - `dc` is copied to `~/bin` and made executable (directory will be created if it doesn't exist)
-- `dc-completion` is copied to `$HOME/.bash.completion.d/` (directory will be created if it does not exist)
+- `dc-completion` is copied to `$HOME/.bash_completion.d/` (directory will be created if it does not exist)
 - `/bin` is added to your path in `~/.bashrc`
 - You will be asked where your docker-compose stacks are defined, this will be set into a variable, `DC_DIR` and added to your `~/.bashrc`
 
@@ -46,7 +46,7 @@ Provides the following main functions:
 - `pull`                 - pulls images
 - `logs`                 - show and follow the logs for a service, outputs last 100 lines first
 - `prune`                - prunes either images and containers (using the `basic` flag) or the system, including volumes (using the `system` flag)
-- `install`              - installs dc for the current user - *ONLY* possible using `sudo`
+- `install`              - installs dc for the current user
 - `update`               - updates `dc` to the latest available version
 - `version`              - shows the version of `dc` and retrieves the latest version and checks there
 - `list`                 - lists all stacks and services in the stack
